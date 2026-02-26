@@ -1,0 +1,60 @@
+{
+  "version": 1,
+  "skills": {
+    "academic-researcher": {
+      "source": "Shubhamsaboo/awesome-llm-apps",
+      "sourceType": "github",
+      "computedHash": "16dd0121beefcbb1dba0652f0a37fd5511380c8be7ae69270222913483b00bbc"
+    },
+    "code-reviewer": {
+      "source": "Shubhamsaboo/awesome-llm-apps",
+      "sourceType": "github",
+      "computedHash": "ac45cbe57cf1e5f2110e6a68238c5681f97007904d65b6858daa080dc69d7abc"
+    },
+    "data-analyst": {
+      "source": "Shubhamsaboo/awesome-llm-apps",
+      "sourceType": "github",
+      "computedHash": "4fd5f18349b1eea7d7026e7d8a5d22b7856477ffb6796de9cdc68e374777a8c2"
+    },
+    "debugger": {
+      "source": "Shubhamsaboo/awesome-llm-apps",
+      "sourceType": "github",
+      "computedHash": "609b0b6d79fe21bcb5eb8a01b38f5571b8ae05be826936a312bc04d9c5400193"
+    },
+    "decision-helper": {
+      "source": "Shubhamsaboo/awesome-llm-apps",
+      "sourceType": "github",
+      "computedHash": "ecc452103f3cf850b4d7c9055fc1fe02449fd124ea61f48bd0a1cf83c8538bc0"
+    },
+    "deep-research": {
+      "source": "Shubhamsaboo/awesome-llm-apps",
+      "sourceType": "github",
+      "computedHash": "2d3df26fe507ef612bfbde09ed1c8691e17769b430c91fddd5743cd37f4c5672"
+    },
+    "editor": {
+      "source": "Shubhamsaboo/awesome-llm-apps",
+      "sourceType": "github",
+      "computedHash": "6956636eab9a2a0f102926ba7ac0cdaffa5fdccb8061a428aec1ae0874b8820b"
+    },
+    "fact-checker": {
+      "source": "Shubhamsaboo/awesome-llm-apps",
+      "sourceType": "github",
+      "computedHash": "fb8df7db8d769f67f25a425cb03afe8916da96ac739ba5cf65c5f90faa225531"
+    },
+    "project-planner": {
+      "source": "Shubhamsaboo/awesome-llm-apps",
+      "sourceType": "github",
+      "computedHash": "62897927d02705437bb82e3f6d622c29e3b43593d84967da60a014b623353f1f"
+    },
+    "python-expert": {
+      "source": "Shubhamsaboo/awesome-llm-apps",
+      "sourceType": "github",
+      "computedHash": "7ddc44800aef275b3252ffa65369e214ef2a56603842e3f6721363816eb6b45f"
+    },
+    "visualization-expert": {
+      "source": "Shubhamsaboo/awesome-llm-apps",
+      "sourceType": "github",
+      "computedHash": "cd8f8bc48c6790cb3b25a13e7a7b05dccd6fd5213577ca59d3c232282d1e151a"
+    }
+  }
+}
