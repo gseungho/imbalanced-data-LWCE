@@ -92,6 +92,7 @@ criterion = get_loss_function(loss_name, class_counts, alpha=1.0, beta=0.9999, g
 | 도메인 | 파일 | 모델 | 상태 |
 |--------|------|------|------|
 | 피부 병변 (ISIC 2018) | `Skin_Lesion_ISIC2018.ipynb` | U-Net (ResNet34) | 코드 완성, 실행 대기 |
+| 간/종양 CT (LiTS 2017) | `LiTS_Liver_Tumor.ipynb` | U-Net++ (ResNet50) | 코드 완성, 실행 대기 |
 
 
 
@@ -133,8 +134,20 @@ criterion = get_loss_function(loss_name, class_counts, alpha=1.0, beta=0.9999, g
 
 ### 5-4. 모델 저장 규칙
 - Best Val Dice 기준으로만 저장
-- 파일명: `/tmp/best_{model_name}_{loss_name}.pth`
-- 최종 실험 결과는 JSON으로 저장: `/tmp/{domain}_final_results.json`
+- 학습 중 체크포인트(`.pth`) 및 슬라이스 캐시(`.npz`)는 `/tmp/`에 저장 (대용량 임시 파일)
+- **최종 실험 결과는 `medical_data/results/`에 저장** (아래 파일들)
+  - `{domain}_optuna_results.json` — Optuna alpha 탐색 결과
+  - `{domain}_optuna_search.png` — alpha 탐색 시각화
+  - `{domain}_training_curves.png` — 학습 곡선
+  - `{domain}_prediction_vis.png` — 예측 결과 시각화
+  - `{domain}_final_results.json` — 최종 평가 지표 JSON
+  - `{domain}_final_results.xlsx` — 최종 평가 지표 Excel (Summary + Training_History 시트)
+  - `{domain}_final_metrics.png` — Loss별 최종 지표 바차트
+- 노트북 Cell 0에 반드시 아래 코드 포함:
+  ```python
+  RESULTS_DIR = '/root/imbalanced-data-LWCE/medical_data/results'
+  os.makedirs(RESULTS_DIR, exist_ok=True)
+  ```
 
 ### 5-5. 평가 지표 규칙
 
