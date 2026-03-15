@@ -1,0 +1,80 @@
+{
+  "domain": "TN3K Thyroid Nodule Ultrasound Segmentation",
+  "model": "U-Net (ResNet34, ImageNet pretrained)",
+  "sota_ref": {
+    "MRDB (2024)": {
+      "Dice": 0.9002,
+      "IoU": 0.8185
+    }
+  },
+  "num_classes": 2,
+  "class_counts": {
+    "Background": 137633211,
+    "Nodule": 13296197
+  },
+  "imbalance": {
+    "BG_Nodule": 10.4
+  },
+  "train_count": 2303,
+  "val_count": 576,
+  "test_count": 614,
+  "eval_set": "Test Set",
+  "final_epochs": 50,
+  "results": {
+    "CE+Dice              (기준선)": {
+      "loss_name": "ce_dice",
+      "alpha": 1.0,
+      "best_val_dice": 0.9369466484257671,
+      "Dice": 0.12461119912146747,
+      "Sensitivity": 0.09797895184969518,
+      "Specificity": 0.9477157941182773,
+      "AUC": 0.5543951565457752
+    },
+    "WCE+Dice": {
+      "loss_name": "wce_dice",
+      "alpha": 1.0,
+      "best_val_dice": 0.9221981852987392,
+      "Dice": 0.14991222947163402,
+      "Sensitivity": 0.13486167195687662,
+      "Specificity": 0.9268086173327454,
+      "AUC": 0.6088619274412449
+    },
+    "LWCE+Dice": {
+      "loss_name": "lwce_dice",
+      "alpha": 1.0,
+      "best_val_dice": 0.9386559803301322,
+      "Dice": 0.14689892074030564,
+      "Sensitivity": 0.12635301041138397,
+      "Specificity": 0.9345677338932791,
+      "AUC": 0.6010747991588242
+    },
+    "PLWCE+Dice           (alpha=2.68)": {
+      "loss_name": "plwce_dice",
+      "alpha": 2.6787813589855043,
+      "best_val_dice": 0.9361152150234381,
+      "Dice": 0.12276100513853835,
+      "Sensitivity": 0.09938157754696994,
+      "Specificity": 0.9427416562307674,
+      "AUC": 0.5946783718549036
+    },
+    "CB+Dice": {
+      "loss_name": "cb_dice",
+      "alpha": 1.0,
+      "best_val_dice": 0.9380771043554623,
+      "Dice": 0.12310525003627781,
+      "Sensitivity": 0.10059338003743816,
+      "Specificity": 0.9412050125753605,
+      "AUC": 0.5773081037447607
+    },
+    "PLWCE+Focal+Dice     (α=4.80, γ=1.10)": {
+      "loss_name": "plwce_focal_dice",
+      "alpha": 4.804573981719386,
+      "best_val_dice": 0.9348574033763773,
+      "Dice": 0.12116415836201197,
+      "Sensitivity": 0.09682975539820547,
+      "Specificity": 0.9447502156038206,
+      "AUC": 0.5870848094647442
+    }
+  },
+  "best_model": "WCE+Dice"
+}

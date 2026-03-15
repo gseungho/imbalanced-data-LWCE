@@ -63,6 +63,13 @@ criterion = get_loss_function(loss_name, class_counts, alpha=1.0, beta=0.9999, g
 - **불균형**: BG:FG = **5.4:1** (비교적 완만)
 - **실험 Loss**: `ce_dice`, `wce_dice`, `lwce_dice`, `plwce_dice`, `cb_dice`
 - **핵심 트릭**: `to_2ch_logits(p) = torch.cat([-p, p], dim=1)` — 1채널 sigmoid 출력을 2채널 logit으로 변환
+- **SoTA 참고** (2026년 3월 인터넷 조사 기준):
+  | 방법 | Dice | IoU | 출처 |
+  |------|------|-----|------|
+  | MNet-SAt (2024) | **96.61%** | — | IEEE Access |
+  | ARCUNet (2025) | 95.34% | **93.53%** | arXiv |
+  | PraNet (2021, 원본) | 89.8% | 84.0% | MICCAI'21 |
+  | U-Net baseline | ~79~82% | — | 복수 논문 |
 
 ### 3-2. Retinal Vessel Image (DRIVE)
 - **모델**: IterNet (경량 CNN) — PraNet도 비교 가능
@@ -73,15 +80,31 @@ criterion = get_loss_function(loss_name, class_counts, alpha=1.0, beta=0.9999, g
 - **실험 Loss**: `ce_dice`, `wce_dice`, `lwce_dice`, `plwce_dice`
 - **결과**: `lwce_dice` 최고 (Dice=0.7033)
 - **평가 지표**: Dice, Sensitivity, Specificity, AUC
+- **SoTA 참고** (2026년 3월 인터넷 조사 기준):
+  | 방법 | Dice | AUC | Sensitivity | Specificity | 출처 |
+  |------|------|-----|-------------|-------------|------|
+  | TransUNext (2024) | — | **0.9867** | 0.8208 | 0.9840 | Computers in Biology |
+  | GAN+UNet (2024) | 0.8215 | 0.9772 | 0.8301 | 0.9781 | IEEE JBHI |
+  | LU-RA Transformer (2025) | 0.7871 | — | — | — | Applied Intelligence |
+  | IterNet (원본) | ~0.779 | ~0.979 | — | — | AAAI'20 |
+  | U-Net baseline | ~0.730 | ~0.974 | — | — | 복수 논문 |
 
 ### 3-3. Pancreas / Multi-Organ CT (Synapse)
 - **모델**: TransUNet (R50+ViT-B/16)
 - **태스크**: 9-class segmentation (배경 + 8개 장기)
 - **데이터**: Synapse Multi-organ CT (.npz 슬라이스 / .h5 볼륨)
 - **불균형**: 췌장 등 소수 장기 극심한 불균형
-- **하이퍼파라미터 탐색**: Optuna (alpha 범위 2.5~15.0, 30 trials, subset_ratio=0.15)
+- **하이퍼파라미터 탐색**: Optuna (alpha 범위 2.5~15.0, 30 trials / PLWCE+Focal 60 trials, subset_ratio=0.15)
 - **실험 Loss**: `ce_dice`, `plwce_dice`, `pwce_dice`
 - **평가 지표**: 클래스별 Dice + mDice (background 제외)
+- **SoTA 참고** (2026년 3월 인터넷 조사 기준):
+  | 방법 | mDice (%) | HD95 (mm) | 출처 |
+  |------|-----------|-----------|------|
+  | DS-UNETR++ (2025) | **87.75** | **6.67** | arXiv |
+  | DIN (2025) | 85.49 | 10.74 | Medical Image Analysis |
+  | SwinUNet (2021) | 79.13 | 21.55 | ECCV'22 |
+  | TransUNet (2021, baseline) | 77.48 | 31.69 | arXiv |
+  | U-Net baseline | ~68~74 | ~39 | 복수 논문 |
 
 ---
 
@@ -97,6 +120,23 @@ criterion = get_loss_function(loss_name, class_counts, alpha=1.0, beta=0.9999, g
 | 뇌 백질 병변 MRI (WMH 2017) | `WMH_Brain_Lesion_MRI.ipynb` | MRI (FLAIR+T1) | U-Net (ResNet34) | ~100~600:1 | 코드 완성 |
 | 조직병리 세포핵 (MoNuSeg 2018) | `MoNuSeg_Nuclei_Pathology.ipynb` | H&E Pathology | U-Net (ResNet34) | ~3~8:1 | 코드 완성 |
 
+**피부 병변 (ISIC 2018) SoTA 참고** (2026년 3월 인터넷 조사 기준):
+| 방법 | Dice | IoU | 출처 |
+|------|------|-----|------|
+| ARCUNet (2025) | **95.34%** | **93.53%** | arXiv |
+| Meta-UNet (2025) | 93.14% | 88.21% | Applied Sciences |
+| UNet++ (2019) | ~89.0% | ~83.5% | MICCAI'18 |
+| U-Net baseline | ~85~88% | — | 복수 논문 |
+
+**간/종양 CT (LiTS 2017) SoTA 참고** (2026년 3월 인터넷 조사 기준):
+| 방법 | 간 Dice | 종양 Dice | 출처 |
+|------|---------|-----------|------|
+| ASLseg (2024) | — | **74.28%** | Medical Image Analysis |
+| nnU-Net (2021) | **~98.94%** | ~70~75% | Nature Methods |
+| Swin-UNet (2021) | ~95.6% | ~68.1% | ECCV'22 |
+| U-Net++ baseline | ~95% | ~60~65% | 복수 논문 |
+> ⚠️ LiTS 종양 Dice는 크기·수에 따라 편차 극심 (소형 종양에서 크게 하락)
+
 ---
 
 ### 4-0-A. 갑상선 결절 초음파 (TN3K)
@@ -111,7 +151,14 @@ criterion = get_loss_function(loss_name, class_counts, alpha=1.0, beta=0.9999, g
 - **실험 Loss**: `ce_dice`, `wce_dice`, `lwce_dice`, `plwce_dice`, `cb_dice`
 - **Optuna alpha 범위**: PLWCE 2.5~15.0, PWCE 0.2~2.5
 - **평가 지표**: Dice, Sensitivity, Specificity, AUC
-- **SoTA 참고**: TRFE-Net (Dice≈0.821, IoU≈0.760)
+- **SoTA 참고** (2025년 1월 인터넷 조사 기준):
+  | 방법 | Dice | IoU | Sensitivity | AUC | 출처 |
+  |------|------|-----|-------------|-----|------|
+  | MRDB (Mamba+ResNet, 2024) | **90.02%** | **81.85%** | 89.11% | — | PMC/Bioengineering |
+  | ResUNet (2025) | 84.24% | 75.48% | 88.98% | — | AIMS Medical Science |
+  | DPAM-UNet++ (2024) | 83.10% | 74.51% | 87.02% | 0.9213 | BMC Medical Imaging |
+  | TRFE-Net / TRFE+ (2021/2022) | ~83% | ~71% | — | — | ISBI'21 / CBM'22 |
+  | U-Net (ResNet34) baseline | ~78~82% | — | — | — | 복수 논문 |
 - **데이터 로드**:
   - Google Drive: `MyDrive/imbalanced-data-LWCE/tn3k/` → `/tmp/tn3k_data/` 자동 복사
   - 로컬 fallback: `/root/imbalanced-data-LWCE/Thyroid Dataset/` (이미 존재 시 자동 사용)
@@ -134,7 +181,14 @@ criterion = get_loss_function(loss_name, class_counts, alpha=1.0, beta=0.9999, g
 - **실험 Loss**: `ce_dice`, `wce_dice`, `lwce_dice`, `plwce_dice`, `cb_dice`
 - **Optuna alpha 범위**: PLWCE **2.5~20.0** (극심한 불균형으로 범위 확장), PWCE 0.2~3.0
 - **평가 지표**: Dice, Sensitivity, Specificity, AUC
-- **SoTA 참고**: nnU-Net 3D (Dice≈0.800), 2D U-Net (Dice≈0.750~0.790)
+- **SoTA 참고** (2026년 3월 인터넷 조사 기준):
+  | 방법 | Dice | Sensitivity | Specificity | 출처 |
+  |------|------|-------------|-------------|------|
+  | Robust-WMH-UNet (2026) | **0.768** | — | — | arXiv |
+  | Transformer-based (2025) | 0.720 | — | — | NeuroImage |
+  | nnU-Net 3D (2021) | ~0.800* | — | — | Nature Methods (*Utrecht site) |
+  | 2D U-Net | ~0.750~0.790 | — | — | WMH Challenge |
+  > ⚠️ nnU-Net 0.800은 Utrecht 단일 사이트 기준; 3-site 평균은 낮을 수 있음
 - **데이터 로드**:
   - Google Drive: `MyDrive/imbalanced-data-LWCE/wmh/` → `/tmp/wmh_raw/` 자동 복사
   - 공식 사이트: https://wmh.isi.uu.nl/ (무료 계정 등록 후 다운로드)
@@ -158,7 +212,13 @@ criterion = get_loss_function(loss_name, class_counts, alpha=1.0, beta=0.9999, g
 - **실험 Loss**: `ce_dice`, `wce_dice`, `lwce_dice`, `plwce_dice`, `cb_dice`
 - **Optuna alpha 범위**: PLWCE 2.5~15.0, PWCE 0.2~2.5
 - **평가 지표**: Dice, Sensitivity, Specificity, AUC
-- **SoTA 참고**: HoverNet (Dice≈0.826, AJI≈0.618), U-Net baseline (Dice≈0.790~0.800)
+- **SoTA 참고** (2026년 3월 인터넷 조사 기준):
+  | 방법 | Dice | AJI | 출처 |
+  |------|------|-----|------|
+  | FrGNet (2025) | — | **~0.640+** | arXiv (+2% vs HoverNet) |
+  | FRE-Net | **0.856** | 0.628 | Medical Image Analysis |
+  | HoverNet (2019) | 0.826 | 0.618 | Medical Image Analysis |
+  | U-Net baseline | ~0.790~0.800 | ~0.580 | 복수 논문 |
 - **데이터 로드**:
   - Google Drive: `MyDrive/imbalanced-data-LWCE/monuseg/` → `/tmp/monuseg_raw/` 자동 복사
   - 공식 사이트: https://monuseg.grand-challenge.org/
@@ -167,6 +227,20 @@ criterion = get_loss_function(loss_name, class_counts, alpha=1.0, beta=0.9999, g
 - **연구 의의**: 완전히 새로운 병리 모달리티 추가, 완만한 불균형에서의 LWCE 효과 측정
 
 
+
+### 4-0-D. SoTA 수치 작성 규칙
+
+새로운 도메인을 추가하거나 SoTA 수치를 기재할 때 반드시 아래를 준수:
+
+1. **인터넷 조사 필수**: SoTA 수치는 반드시 논문 검색 또는 Papers With Code, PubMed, arXiv 등을 통해 최신 수치 확인 후 기재
+2. **조사 일자 명시**: `(YYYY년 MM월 인터넷 조사 기준)` 형식으로 조사 시점 표기
+3. **출처 명시**: 방법명, 발표 연도, 출처(저널/학회/URL) 함께 기재
+4. **표 형식 사용**: 단일 수치 대신 복수 방법 비교 표로 작성
+5. **갱신 주기**: 실험 시작 전 6개월 이상 지난 SoTA는 재조사 권장
+
+> ⚠️ 논문이나 GitHub README의 수치를 그대로 복사하지 말 것 — 데이터셋 split, 평가 방식이 다를 수 있음. 가능하면 공식 test set 기준 수치 사용.
+
+---
 
 ### 4-1. 신규 도메인 선택 기준
 새로운 의료 도메인을 추가할 때 반드시 아래 조건을 고려:
@@ -196,8 +270,23 @@ criterion = get_loss_function(loss_name, class_counts, alpha=1.0, beta=0.9999, g
 
 ### 5-2. 데이터 분할 규칙
 - **고정 시드**: `random_state=42` 고정 (재현성 보장)
-- **Val 비율**: 0.1~0.2 (데이터셋 크기에 따라 조정)
-- **Test set**: 가능하면 공식 test split 사용; 없으면 val set으로 평가하되 명시
+- **분할 전략**: 공식 test split이 있으면 우선 사용, 없으면 **8:1:1 (Train/Val/Test)** 3분할
+  - Val: 학습 중 Best Dice 체크포인트 기준 (early stopping)
+  - Test: 학습 완료 후 최종 성능 보고 전용 (학습에 일절 관여 안 함)
+- **단위**: 이미지/케이스/볼륨 단위로 분할 (슬라이스/패치 단위 금지 — data leakage 방지)
+
+#### 도메인별 Test Set 현황
+
+| 도메인 (노트북명) | Test Set 방식 | 비고 |
+|--------|-------------|------|
+| TN3K_Thyroid_Ultrasound | 공식 test split (`tn3k/test-image/`, `tn3k/test-mask/`) | fold JSON으로 train/val, 별도 test |
+| Pancreas_MultiOrgan_CT | 공식 test volumes (`.h5`) | 이미 구현 완료 |
+| MoNuSeg_Nuclei_Pathology | 공식 14개 test 케이스 (`MoNuSegTestData/`) | test 없으면 val fallback |
+| Skin_Lesion_ISIC2018 | 랜덤 8:1:1 분할 | 공식 test GT 비공개 |
+| LiTS_Liver_Tumor | 볼륨 단위 8:1:1 분할 | 공식 test GT 비공개 |
+| WMH_Brain_Lesion_MRI | 케이스 단위 8:1:1 분할 | 공식 test GT 비공개 |
+| Endoscopic_Polyp_Image | 랜덤 8:1:1 분할 | 공식 test split 없음 |
+| Retinal_Image | Val set 사용 | 공식 test에 GT 없음 (불가피) |
 
 ### 5-3. 클래스 비율 계산 규칙
 - 학습 데이터 전체에 대해 픽셀 단위로 계산
@@ -207,7 +296,7 @@ criterion = get_loss_function(loss_name, class_counts, alpha=1.0, beta=0.9999, g
 ### 5-4. 모델 저장 규칙
 - Best Val Dice 기준으로만 저장
 - 학습 중 체크포인트(`.pth`) 및 슬라이스 캐시(`.npz`)는 `/tmp/`에 저장 (대용량 임시 파일)
-- **최종 실험 결과는 `medical_data/results/`에 저장** (아래 파일들)
+- **최종 실험 결과는 `medical_data/results/{도메인}/`에 저장** (도메인별 하위 폴더)
   - `{domain}_optuna_results.json` — Optuna alpha 탐색 결과
   - `{domain}_optuna_search.png` — alpha 탐색 시각화
   - `{domain}_training_curves.png` — 학습 곡선
@@ -215,9 +304,24 @@ criterion = get_loss_function(loss_name, class_counts, alpha=1.0, beta=0.9999, g
   - `{domain}_final_results.json` — 최종 평가 지표 JSON
   - `{domain}_final_results.xlsx` — 최종 평가 지표 Excel (Summary + Training_History 시트)
   - `{domain}_final_metrics.png` — Loss별 최종 지표 바차트
-- 노트북 Cell 0에 반드시 아래 코드 포함:
+
+#### 결과 폴더 구조
+
+```
+medical_data/results/
+  TN3K_Thyroid_Ultrasound/    ← TN3K_Thyroid_Ultrasound.ipynb
+  Skin_Lesion_ISIC2018/       ← Skin_Lesion_ISIC2018.ipynb
+  LiTS_Liver_Tumor/           ← LiTS_Liver_Tumor.ipynb
+  WMH_Brain_Lesion_MRI/       ← WMH_Brain_Lesion_MRI.ipynb
+  MoNuSeg_Nuclei_Pathology/   ← MoNuSeg_Nuclei_Pathology.ipynb
+  Pancreas_MultiOrgan_CT/     ← Pancreas_MultiOrgan_CT.ipynb
+  Retinal_Image/              ← Retinal_Image.ipynb
+  Endoscopic_Polyp_Image/     ← Endoscopic_Polyp_Image.ipynb
+```
+
+- 각 노트북 Cell 0 또는 Cell 1에 아래 형식으로 설정:
   ```python
-  RESULTS_DIR = '/root/imbalanced-data-LWCE/medical_data/results'
+  RESULTS_DIR = '/root/imbalanced-data-LWCE/medical_data/results/{도메인}'
   os.makedirs(RESULTS_DIR, exist_ok=True)
   ```
 
@@ -269,7 +373,9 @@ study = optuna.create_study(
     direction='maximize',
     pruner=optuna.pruners.MedianPruner(n_startup_trials=5, n_warmup_steps=2)
 )
-# proxy 설정: subset_ratio=0.15, epochs=5, n_trials=30
+# proxy 설정: subset_ratio=0.15, epochs=5
+# N_TRIALS     = 20~30   (alpha 단일 파라미터 탐색)
+# N_TRIALS_PF  = N_TRIALS * 2  (PLWCE+Focal: alpha+gamma 2개 파라미터 → 탐색 공간 2배)
 ```
 
 ### 6-5. 시각화 규칙
