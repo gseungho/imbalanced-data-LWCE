@@ -277,15 +277,40 @@ study = optuna.create_study(
 - 학습 곡선 (Loss + Val Metric) 반드시 저장
 - 예측 시각화: Input / GT / Prob Map / Pred 4열 구성
 
-### 6-6. Google Drive 데이터 로딩 패턴 (표준)
+### 6-6. 실험 환경 구조 (VS Code + Colab + Google Drive)
 
-직접 다운로드 불가 데이터셋(공식 사이트 수동 등록 필요)은 아래 표준 패턴 사용.
+#### 환경 구조 이해
 
-#### Cell 0 — Drive 마운트 + 경로 변수
+```
+Google Drive  ←  데이터 영구 보관
+      ↑
+  Colab mount (브라우저에서 인증)
+      ↑
+VS Code Remote Tunnel  ←  코드 편집 클라이언트
+```
+
+- **VS Code**는 단순 편집 클라이언트. 실제 실행은 Colab 서버에서 이루어짐
+- **Drive 마운트는 반드시 Colab에서** 수행 (VS Code에서 직접 마운트 불가)
+- 마운트 후 VS Code로 접속하면 `/content/drive/MyDrive` 경로가 그대로 보임
+
+#### 올바른 작업 순서
+
+```
+1. 브라우저에서 Colab 노트북 열기
+2. 첫 셀 실행 → drive.mount('/content/drive') → 구글 계정 인증
+3. VS Code Remote Tunnel로 연결
+4. 이후 모든 작업은 VS Code에서 진행
+```
+
+#### Google Drive 데이터 로딩 패턴 (표준)
+
+직접 다운로드 불가 데이터셋은 아래 표준 패턴 사용.
+
+**Cell 0 — Drive 마운트 + 경로 변수**
 
 ```python
-# Google Drive 마운트 (Colab 전용)
 GDRIVE_DATA_PATH = '/content/drive/MyDrive/imbalanced-data-LWCE/{domain}'
+
 IS_COLAB = False
 try:
     from google.colab import drive
@@ -296,7 +321,10 @@ except Exception:
     print('Colab 환경 아님 — 로컬/수동 경로 사용')
 ```
 
-#### Cell 1 — Drive → /tmp 복사 (빠른 I/O)
+**Cell 1 — Drive → /tmp 복사 (빠른 I/O)**
+
+Drive는 네트워크 파일시스템(FUSE)이라 파일 I/O마다 네트워크 왕복 발생.
+→ 학습 시작 전 `/tmp`(로컬 SSD)로 한 번만 복사해두면 이후 I/O는 로컬 속도로 동작.
 
 ```python
 DATA_DIR = '/tmp/{domain}_raw'
@@ -307,8 +335,20 @@ if IS_COLAB and os.path.exists(GDRIVE_DATA_PATH):
         shutil.copytree(GDRIVE_DATA_PATH, DATA_DIR, dirs_exist_ok=True)
 else:
     if not os.path.exists(DATA_DIR):
-        print('[데이터 없음] 옵션 A (Colab Drive) / 옵션 B (로컬 직접 배치) 안내')
+        print('[데이터 없음] Drive 경로 확인 또는 /tmp에 직접 배치')
 ```
+
+#### 파일 저장 전략
+
+```
+Google Drive (영구 보관)          /tmp (학습 중 임시)
+  └── results/*.json/xlsx/png      └── {domain}_raw/     ← 원본 데이터 복사본
+                                   └── {domain}_slices/  ← 전처리 캐시
+                                   └── best_*.pth        ← 체크포인트
+```
+
+- 학습 결과(`results/`)는 `RESULTS_DIR = '/root/imbalanced-data-LWCE/medical_data/results'`에 저장
+- Colab 런타임 종료 시 `/tmp` 내용은 모두 삭제됨 → 결과 파일은 반드시 `results/`에 저장
 
 #### Google Drive 업로드 폴더 구조 (전 도메인 통일)
 
