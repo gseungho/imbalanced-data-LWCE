@@ -87,12 +87,84 @@ criterion = get_loss_function(loss_name, class_counts, alpha=1.0, beta=0.9999, g
 
 ## 4. 추가 연구 계획 (신규 도메인)
 
-### 4-0. 완료된 신규 도메인
+### 4-0. 완료된 신규 도메인 (코드 완성, 실행 대기)
 
-| 도메인 | 파일 | 모델 | 상태 |
-|--------|------|------|------|
-| 피부 병변 (ISIC 2018) | `Skin_Lesion_ISIC2018.ipynb` | U-Net (ResNet34) | 코드 완성, 실행 대기 |
-| 간/종양 CT (LiTS 2017) | `LiTS_Liver_Tumor.ipynb` | U-Net++ (ResNet50) | 코드 완성, 실행 대기 |
+| 도메인 | 파일 | 모달리티 | 모델 | 불균형 | 상태 |
+|--------|------|---------|------|--------|------|
+| 피부 병변 (ISIC 2018) | `Skin_Lesion_ISIC2018.ipynb` | Dermoscopy(RGB) | U-Net (ResNet34) | 중간 | 코드 완성 |
+| 간/종양 CT (LiTS 2017) | `LiTS_Liver_Tumor.ipynb` | CT (3-class) | U-Net++ (ResNet50) | BG:Tumor=356:1 | 코드 완성 |
+| 갑상선 결절 초음파 (TN3K) | `TN3K_Thyroid_Ultrasound.ipynb` | Ultrasound | U-Net (ResNet34) | ~20:1 | 코드 완성 |
+| 뇌 백질 병변 MRI (WMH 2017) | `WMH_Brain_Lesion_MRI.ipynb` | MRI (FLAIR+T1) | U-Net (ResNet34) | ~100~600:1 | 코드 완성 |
+| 조직병리 세포핵 (MoNuSeg 2018) | `MoNuSeg_Nuclei_Pathology.ipynb` | H&E Pathology | U-Net (ResNet34) | ~3~8:1 | 코드 완성 |
+
+---
+
+### 4-0-A. 갑상선 결절 초음파 (TN3K)
+
+- **파일**: `TN3K_Thyroid_Ultrasound.ipynb`
+- **모델**: U-Net (ResNet34, ImageNet pretrained)
+- **태스크**: Binary segmentation (결절 vs 배경)
+- **데이터**: TN3K — 3,493장 (Train 80% / Val 20%), 입력 256×256
+- **불균형**: BG:Nodule = **~20:1** (중간 수준, 경계 불명확이 주요 난이도)
+- **모달리티 특이점**: 초음파 특유의 speckle 노이즈, 불명확한 병변 경계
+- **전처리**: BGR→RGB, 마스크 이진화(임계값 128), ImageNet 정규화
+- **실험 Loss**: `ce_dice`, `wce_dice`, `lwce_dice`, `plwce_dice`, `cb_dice`
+- **Optuna alpha 범위**: PLWCE 2.5~15.0, PWCE 0.2~2.5
+- **평가 지표**: Dice, Sensitivity, Specificity, AUC
+- **SoTA 참고**: TRFE-Net (Dice≈0.821, IoU≈0.760)
+- **데이터 로드**:
+  - Google Drive: `MyDrive/imbalanced-data-LWCE/tn3k/` → `/tmp/tn3k_data/` 자동 복사
+  - 로컬 fallback: `/root/imbalanced-data-LWCE/Thyroid Dataset/` (이미 존재 시 자동 사용)
+  - 구조: `tg3k/thyroid-image/*.jpg` + `tn3k/tn3k-trainval-fold0.json`
+- **결과 저장**: `results/tn3k_*.json/xlsx/png`
+
+---
+
+### 4-0-B. 뇌 백질 고강도 병변 MRI (WMH 2017)
+
+- **파일**: `WMH_Brain_Lesion_MRI.ipynb`
+- **모델**: U-Net (ResNet34, ImageNet pretrained)
+- **태스크**: Binary segmentation (WMH 병변 vs 배경)
+- **데이터**: WMH 2017 Challenge — 60개 케이스, 3개 병원(Utrecht/Singapore/Amsterdam)
+- **불균형**: BG:WMH = **~100:1 ~ 600:1** (LiTS Tumor 356:1 초과, 극심한 불균형)
+- **모달리티 특이점**: MRI 멀티채널 (FLAIR primary + T1 auxiliary)
+- **입력 구성**: 3채널 `[FLAIR, T1, FLAIR]` → ImageNet 인코더 3ch 맞춤
+- **전처리**: Percentile 정규화 (1~99th, foreground 기준), 볼륨 단위 Train/Val 분할
+- **BG-only 슬라이스**: WMH 슬라이스 수의 30% 포함 (`BG_ONLY_RATIO=0.3`)
+- **실험 Loss**: `ce_dice`, `wce_dice`, `lwce_dice`, `plwce_dice`, `cb_dice`
+- **Optuna alpha 범위**: PLWCE **2.5~20.0** (극심한 불균형으로 범위 확장), PWCE 0.2~3.0
+- **평가 지표**: Dice, Sensitivity, Specificity, AUC
+- **SoTA 참고**: nnU-Net 3D (Dice≈0.800), 2D U-Net (Dice≈0.750~0.790)
+- **데이터 로드**:
+  - Google Drive: `MyDrive/imbalanced-data-LWCE/wmh/` → `/tmp/wmh_raw/` 자동 복사
+  - 공식 사이트: https://wmh.isi.uu.nl/ (무료 계정 등록 후 다운로드)
+  - 구조: `{SiteName}/{SubjectID}/pre/FLAIR.nii.gz + T1.nii.gz` + `../wmh.nii.gz`
+- **결과 저장**: `results/wmh_*.json/xlsx/png`
+- **연구 의의**: 이 프로젝트에서 가장 극단적인 불균형 → LWCE 계열 효과 검증의 핵심 도메인
+
+---
+
+### 4-0-C. 조직병리 세포핵 분할 (MoNuSeg 2018)
+
+- **파일**: `MoNuSeg_Nuclei_Pathology.ipynb`
+- **모델**: U-Net (ResNet34, ImageNet pretrained)
+- **태스크**: Binary segmentation (세포핵 vs 배경/세포질)
+- **데이터**: MoNuSeg 2018 — 30 train + 14 test (TCGA 다기관 H&E 슬라이드)
+- **불균형**: BG:Nucleus = **~3:1 ~ 8:1** (완만한 불균형, 경계 정밀도가 주요 난이도)
+- **모달리티 특이점**: RGB H&E 병리 슬라이드 (CT/MRI/초음파와 완전히 다른 도메인)
+- **전처리**: 패치 추출 (1000×1000 → 256×256 패치, stride=128, 50% overlap)
+- **어노테이션**: XML polygon → 이진 마스크 자동 변환 (lxml 사용)
+- **증강**: 좌우/상하 flip, 90° 회전, H&E 색상 증강 (밝기/대비 ±15%)
+- **실험 Loss**: `ce_dice`, `wce_dice`, `lwce_dice`, `plwce_dice`, `cb_dice`
+- **Optuna alpha 범위**: PLWCE 2.5~15.0, PWCE 0.2~2.5
+- **평가 지표**: Dice, Sensitivity, Specificity, AUC
+- **SoTA 참고**: HoverNet (Dice≈0.826, AJI≈0.618), U-Net baseline (Dice≈0.790~0.800)
+- **데이터 로드**:
+  - Google Drive: `MyDrive/imbalanced-data-LWCE/monuseg/` → `/tmp/monuseg_raw/` 자동 복사
+  - 공식 사이트: https://monuseg.grand-challenge.org/
+  - 구조: `MoNuSeg Training Data/Tissue Images/*.tif` + `Annotations/*.xml`
+- **결과 저장**: `results/monuseg_*.json/xlsx/png`
+- **연구 의의**: 완전히 새로운 병리 모달리티 추가, 완만한 불균형에서의 LWCE 효과 측정
 
 
 
@@ -204,6 +276,68 @@ study = optuna.create_study(
 - `matplotlib.use('Agg')` 서버 환경에서 필수
 - 학습 곡선 (Loss + Val Metric) 반드시 저장
 - 예측 시각화: Input / GT / Prob Map / Pred 4열 구성
+
+### 6-6. Google Drive 데이터 로딩 패턴 (표준)
+
+직접 다운로드 불가 데이터셋(공식 사이트 수동 등록 필요)은 아래 표준 패턴 사용.
+
+#### Cell 0 — Drive 마운트 + 경로 변수
+
+```python
+# Google Drive 마운트 (Colab 전용)
+GDRIVE_DATA_PATH = '/content/drive/MyDrive/imbalanced-data-LWCE/{domain}'
+IS_COLAB = False
+try:
+    from google.colab import drive
+    drive.mount('/content/drive')
+    IS_COLAB = True
+    print('Google Drive 마운트 완료')
+except Exception:
+    print('Colab 환경 아님 — 로컬/수동 경로 사용')
+```
+
+#### Cell 1 — Drive → /tmp 복사 (빠른 I/O)
+
+```python
+DATA_DIR = '/tmp/{domain}_raw'
+if IS_COLAB and os.path.exists(GDRIVE_DATA_PATH):
+    import shutil
+    if not os.path.exists(os.path.join(DATA_DIR, '{check_subdir}')):
+        print('Google Drive에서 데이터 복사 중...')
+        shutil.copytree(GDRIVE_DATA_PATH, DATA_DIR, dirs_exist_ok=True)
+else:
+    if not os.path.exists(DATA_DIR):
+        print('[데이터 없음] 옵션 A (Colab Drive) / 옵션 B (로컬 직접 배치) 안내')
+```
+
+#### Google Drive 업로드 폴더 구조 (전 도메인 통일)
+
+```
+MyDrive/imbalanced-data-LWCE/
+  synapse/     train_npz/                      ← Pancreas CT (Synapse)
+               test_vol_h5/
+  wmh/         {SiteName}/{SubjectID}/pre/      ← WMH 2017 MRI
+               FLAIR.nii.gz, T1.nii.gz
+               ../wmh.nii.gz
+  monuseg/     MoNuSeg Training Data/           ← MoNuSeg 2018 Pathology
+               Tissue Images/*.tif
+               Annotations/*.xml
+  tn3k/        tg3k/thyroid-image/*.jpg         ← TN3K Thyroid Ultrasound
+               tg3k/thyroid-mask/*.jpg
+               tn3k/test-image/*.jpg
+               tn3k/tn3k-trainval-fold0.json
+```
+
+#### 적용 노트북 현황
+
+| 노트북 | Drive 경로 키 | /tmp 복사 대상 | 상태 |
+|--------|--------------|---------------|------|
+| `Pancreas_MultiOrgan_CT.ipynb` | `synapse` | `/tmp/synapse_data` | ✅ 완료 |
+| `WMH_Brain_Lesion_MRI.ipynb` | `wmh` | `/tmp/wmh_raw` | ✅ 완료 |
+| `MoNuSeg_Nuclei_Pathology.ipynb` | `monuseg` | `/tmp/monuseg_raw` | ✅ 완료 |
+| `TN3K_Thyroid_Ultrasound.ipynb` | `tn3k` | `/tmp/tn3k_data` | ✅ 완료 (로컬 fallback 포함) |
+
+> **TN3K 특이점**: 로컬 환경에서는 `/root/imbalanced-data-LWCE/Thyroid Dataset/`이 이미 존재하므로 Drive 마운트 없이 자동으로 로컬 경로 사용.
 
 ---
 
