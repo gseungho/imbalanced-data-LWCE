@@ -591,16 +591,18 @@ Google Drive (영구 보관)          /tmp (학습 중 임시)
 MyDrive/imbalanced-data-LWCE/
   synapse/     synapse.zip   ← train_npz/ + test_vol_h5/ 압축   (Pancreas CT)
   wmh/         wmh.zip       ← {SiteName}/{SubjectID}/pre/ 압축  (WMH 2017 MRI)
-  monuseg/     monuseg.zip   ← MoNuSeg Training Data/ 압축      (MoNuSeg 2018)
-  tn3k/        tn3k.zip      ← tg3k/ + tn3k/ 압축              (TN3K Thyroid)
+  monuseg/     MoNuSeg Training Data/  ← 폴더 직접 업로드         (MoNuSeg 2018)
+               MoNuSegTestData/
+  tn3k/        tg3k/thyroid-image/*.jpg  ← TN3K Thyroid (폴더 직접 업로드)
+               tg3k/thyroid-mask/*.jpg
+               tn3k/trainval-image/*.jpg
+               tn3k/trainval-mask/*.jpg
+               tn3k/test-image/*.jpg
+               tn3k/test-mask/*.jpg
+               tn3k/tn3k-trainval-fold0.json
   acdc/        acdc.zip      ← training/{patient_id}/ 압축      (ACDC Cardiac)
   refuge/      refuge.zip    ← Training400/ 압축                (REFUGE 2018)
   (BUSI는 kagglehub 자동 다운로드 — Drive 업로드 불필요)
-
-  tn3k/        tg3k/thyroid-image/*.jpg         ← TN3K Thyroid Ultrasound (레거시, zip 이전)
-               tg3k/thyroid-mask/*.jpg
-               tn3k/test-image/*.jpg
-               tn3k/tn3k-trainval-fold0.json
 ```
 
 #### 적용 노트북 현황
@@ -609,13 +611,12 @@ MyDrive/imbalanced-data-LWCE/
 |--------|---------------|-------------------|------|
 | `Pancreas_MultiOrgan_CT.ipynb` | `synapse/synapse.zip` | `/tmp/synapse_data` | ✅ zip 패턴 적용 |
 | `WMH_Brain_Lesion_MRI.ipynb` | `wmh/wmh.zip` | `/tmp/wmh_data` | ✅ zip 패턴 적용 |
-| `MoNuSeg_Nuclei_Pathology.ipynb` | `monuseg/monuseg.zip` | `/tmp/monuseg_data` | ✅ zip 패턴 적용 |
-| `TN3K_Thyroid_Ultrasound.ipynb` | `tn3k/tn3k.zip` | `/tmp/tn3k_data` | ✅ zip 패턴 적용 (로컬 fallback 포함) |
+| `MoNuSeg_Nuclei_Pathology.ipynb` | `monuseg/` 폴더 직접 업로드 | `/tmp/monuseg_raw` | ✅ 폴더 복사 패턴 |
+| `TN3K_Thyroid_Ultrasound.ipynb` | `tn3k/` 폴더 직접 업로드 | `/tmp/tn3k_data` | ✅ 폴더 복사 패턴 |
 | `ACDC_Cardiac_MRI.ipynb` | `acdc/acdc.zip` | `/tmp/acdc_data` | ✅ zip 패턴 적용 |
 | `REFUGE_Optic_Disc_Cup.ipynb` | `refuge/refuge.zip` | `/tmp/refuge_data` | ✅ zip 패턴 적용 |
 | `BUSI_Breast_Ultrasound.ipynb` | kagglehub 자동 | `/tmp/busi_data` (kagglehub 캐시) | ✅ kagglehub 패턴 |
 
-> **TN3K 특이점**: 로컬 환경에서는 `/root/imbalanced-data-LWCE/Thyroid Dataset/`이 이미 존재하므로 Drive 마운트 없이 자동으로 로컬 경로 사용.
 
 ---
 
@@ -811,8 +812,8 @@ GitHub에서 클론 후 각 도메인 데이터를 아래 방법으로 준비한
 | 도메인 | 파일 | 데이터 취득 방법 | Colab 업로드 경로 |
 |--------|------|----------------|-----------------|
 | WMH 2017 MRI | `WMH_Brain_Lesion_MRI.ipynb` | **자동**: `kagglehub.dataset_download("farahmo/wmh-dataset")` — Cell 0 실행 시 자동 다운로드 | 불필요 |
-| TN3K Thyroid | `TN3K_Thyroid_Ultrasound.ipynb` | [TN3K GitHub](https://github.com/haifangong/TRFE-Net-for-thyroid-nodule-segmentation) 또는 직접 다운로드 | `MyDrive/imbalanced-data-LWCE/tn3k/tn3k.zip` |
-| MoNuSeg 2018 | `MoNuSeg_Nuclei_Pathology.ipynb` | [공식 챌린지](https://monuseg.grand-challenge.org/) 계정 등록 후 다운로드 | `MyDrive/imbalanced-data-LWCE/monuseg/monuseg.zip` |
+| TN3K Thyroid | `TN3K_Thyroid_Ultrasound.ipynb` | [TN3K GitHub](https://github.com/haifangong/TRFE-Net-for-thyroid-nodule-segmentation) 또는 직접 다운로드 | `MyDrive/imbalanced-data-LWCE/tn3k/` (폴더 직접 업로드) |
+| MoNuSeg 2018 | `MoNuSeg_Nuclei_Pathology.ipynb` | [공식 챌린지](https://monuseg.grand-challenge.org/) 계정 등록 후 다운로드 | `MyDrive/imbalanced-data-LWCE/monuseg/` (폴더 직접 업로드) |
 | Skin ISIC 2018 | `Skin_Lesion_ISIC2018.ipynb` | `kagglehub.dataset_download(...)` — Cell 0 실행 시 자동 (또는 [ISIC Archive](https://challenge.isic-archive.com/)) | 자동 |
 | Pancreas Synapse | `Pancreas_MultiOrgan_CT.ipynb` | [Synapse Platform](https://www.synapse.org/#!Synapse:syn3193805/wiki/) 계정 등록 → zip 압축 후 업로드 | `MyDrive/imbalanced-data-LWCE/synapse/synapse.zip` |
 | ACDC Cardiac | `ACDC_Cardiac_MRI.ipynb` | https://www.creatis.insa-lyon.fr/Challenge/acdc/ 계정 등록 → zip 압축 후 업로드 | `MyDrive/imbalanced-data-LWCE/acdc/acdc.zip` |
@@ -836,7 +837,8 @@ MyDrive/imbalanced-data-LWCE/
       test-mask/*.jpg        ← TN3K 테스트 마스크
       tn3k-trainval-fold0.json
   monuseg/
-    monuseg.zip              ← MoNuSeg Training Data/ + MoNuSegTestData/ 압축
+    MoNuSeg Training Data/   ← 폴더 직접 업로드 (Tissue Images/, Annotations/)
+    MoNuSegTestData/         ← 폴더 직접 업로드
   wmh/                       ← WMH는 kagglehub 자동 다운로드, Drive 불필요
   acdc/
     acdc.zip                 ← training/{patient_id}/ 전체 압축

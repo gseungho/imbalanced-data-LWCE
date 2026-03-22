@@ -1,0 +1,101 @@
+{
+  "domain": "ACDC Cardiac MRI Segmentation",
+  "model": "U-Net (ResNet34, ImageNet pretrained)",
+  "num_classes": 4,
+  "class_names": [
+    "BG",
+    "RV",
+    "MYO",
+    "LV"
+  ],
+  "class_counts": {
+    "BG": 69945906,
+    "RV": 901123,
+    "MYO": 929717,
+    "LV": 903638
+  },
+  "imbalance": {
+    "BG:RV": 77.6,
+    "BG:MYO": 75.2,
+    "BG:LV": 77.4
+  },
+  "optuna": {
+    "best_alpha_plwce": 2.64688637650881,
+    "best_alpha_pwce": 0.20594799913541703,
+    "best_alpha_pf": 3.8359671868469913,
+    "best_gamma_pf": 1.18294048950129
+  },
+  "results": {
+    "CE+Dice (baseline)": {
+      "loss_name": "ce_dice",
+      "alpha": 1.0,
+      "gamma": 2.0,
+      "best_val_mdice": 0.9084442222144502,
+      "mDice": 0.9020171741145351,
+      "Dice_RV": 0.8806547788339522,
+      "Dice_MYO": 0.8850026813226779,
+      "Dice_LV": 0.9403940621869751
+    },
+    "WCE+Dice": {
+      "loss_name": "wce_dice",
+      "alpha": 1.0,
+      "gamma": 2.0,
+      "best_val_mdice": 0.8968493775392541,
+      "mDice": 0.9011736878427333,
+      "Dice_RV": 0.882116984113797,
+      "Dice_MYO": 0.8762581681316799,
+      "Dice_LV": 0.9451459112827227
+    },
+    "LWCE+Dice": {
+      "loss_name": "lwce_dice",
+      "alpha": 1.0,
+      "gamma": 2.0,
+      "best_val_mdice": 0.9060389316978847,
+      "mDice": 0.9026640064058639,
+      "Dice_RV": 0.8873314002751781,
+      "Dice_MYO": 0.8827819281197511,
+      "Dice_LV": 0.9378786908226622
+    },
+    "PLWCE+Dice (α=2.65)": {
+      "loss_name": "plwce_dice",
+      "alpha": 2.64688637650881,
+      "gamma": 2.0,
+      "best_val_mdice": 0.9065314386452913,
+      "mDice": 0.908479179070922,
+      "Dice_RV": 0.8956616602057544,
+      "Dice_MYO": 0.8875197620465989,
+      "Dice_LV": 0.9422561149604127
+    },
+    "PWCE+Dice (α=0.21)": {
+      "loss_name": "pwce_dice",
+      "alpha": 0.20594799913541703,
+      "gamma": 2.0,
+      "best_val_mdice": 0.9065988693938719,
+      "mDice": 0.899983571187756,
+      "Dice_RV": 0.8634271385890198,
+      "Dice_MYO": 0.8903003127599427,
+      "Dice_LV": 0.9462232622143054
+    },
+    "CB+Dice": {
+      "loss_name": "cb_dice",
+      "alpha": 1.0,
+      "gamma": 2.0,
+      "best_val_mdice": 0.9062655913729677,
+      "mDice": 0.8983163486840081,
+      "Dice_RV": 0.8696162888376578,
+      "Dice_MYO": 0.885156961077988,
+      "Dice_LV": 0.9401757961363784
+    },
+    "PLWCE+Focal+Dice (α=3.84, γ=1.18)": {
+      "loss_name": "plwce_focal_dice",
+      "alpha": 3.8359671868469913,
+      "gamma": 1.18294048950129,
+      "best_val_mdice": 0.9081489696057584,
+      "mDice": 0.9024786018934557,
+      "Dice_RV": 0.8775307957340082,
+      "Dice_MYO": 0.8861199010817774,
+      "Dice_LV": 0.9437851088645814
+    }
+  },
+  "best_model": "PLWCE+Dice (α=2.65)"
+}

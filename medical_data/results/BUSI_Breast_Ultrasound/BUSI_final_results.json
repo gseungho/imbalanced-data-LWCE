@@ -1,0 +1,95 @@
+{
+  "domain": "BUSI Breast Ultrasound Tumor Segmentation",
+  "model": "U-Net (ResNet34, ImageNet pretrained)",
+  "num_classes": 2,
+  "class_names": [
+    "BG",
+    "Tumor"
+  ],
+  "class_counts": {
+    "BG": 30671170,
+    "Tumor": 3210942
+  },
+  "imbalance": {
+    "BG:Tumor": 9.6
+  },
+  "optuna": {
+    "best_alpha_plwce": 3.0939261845912265,
+    "best_alpha_pwce": 0.2086720212059863,
+    "best_alpha_pf": 8.215965877905074,
+    "best_gamma_pf": 3.895849701364535
+  },
+  "results": {
+    "CE+Dice (baseline)": {
+      "loss_name": "ce_dice",
+      "alpha": 1.0,
+      "gamma": 2.0,
+      "best_val_dice": 0.818014415607559,
+      "Dice": 0.8013887169382795,
+      "Sensitivity": 0.800486240294249,
+      "Specificity": 0.9806764866367432,
+      "AUC": 0.974312106360004
+    },
+    "WCE+Dice": {
+      "loss_name": "wce_dice",
+      "alpha": 1.0,
+      "gamma": 2.0,
+      "best_val_dice": 0.8149865066444639,
+      "Dice": 0.7588018255544781,
+      "Sensitivity": 0.7924664328433009,
+      "Specificity": 0.9709782588244003,
+      "AUC": 0.9684443068650015
+    },
+    "LWCE+Dice": {
+      "loss_name": "lwce_dice",
+      "alpha": 1.0,
+      "gamma": 2.0,
+      "best_val_dice": 0.8180309875043724,
+      "Dice": 0.7872047289340187,
+      "Sensitivity": 0.7659731778486822,
+      "Specificity": 0.9823590558333036,
+      "AUC": 0.9655363151180697
+    },
+    "PLWCE+Dice (α=3.09)": {
+      "loss_name": "plwce_dice",
+      "alpha": 3.0939261845912265,
+      "gamma": 2.0,
+      "best_val_dice": 0.8263072963526579,
+      "Dice": 0.7950360493877795,
+      "Sensitivity": 0.8144235500277374,
+      "Specificity": 0.9770435496230304,
+      "AUC": 0.9778580304814581
+    },
+    "PWCE+Dice (α=0.21)": {
+      "loss_name": "pwce_dice",
+      "alpha": 0.2086720212059863,
+      "gamma": 2.0,
+      "best_val_dice": 0.8263887947783112,
+      "Dice": 0.7741822598241939,
+      "Sensitivity": 0.7916455076711565,
+      "Specificity": 0.9751705057579256,
+      "AUC": 0.9785325547343962
+    },
+    "CB+Dice": {
+      "loss_name": "cb_dice",
+      "alpha": 1.0,
+      "gamma": 2.0,
+      "best_val_dice": 0.8189846551055867,
+      "Dice": 0.7621707867847447,
+      "Sensitivity": 0.7233271676239551,
+      "Specificity": 0.9828822812421604,
+      "AUC": 0.9659684540843856
+    },
+    "PLWCE+Focal+Dice (α=8.22, γ=3.90)": {
+      "loss_name": "plwce_focal_dice",
+      "alpha": 8.215965877905074,
+      "gamma": 3.895849701364535,
+      "best_val_dice": 0.8261217421246281,
+      "Dice": 0.7517713346697874,
+      "Sensitivity": 0.7607476733875329,
+      "Specificity": 0.9742238028383536,
+      "AUC": 0.9641596278042832
+    }
+  },
+  "best_model": "CE+Dice (baseline)"
+}
