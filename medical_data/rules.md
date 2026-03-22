@@ -55,6 +55,9 @@ SegmentationLoss (마스터 클래스)
 | WMH_Brain_Lesion_MRI | `ce_dice`, `wce_dice`, `lwce_dice`, `plwce_dice`, `cb_dice`, `plwce_focal_dice` | PLWCE α, PWCE α, PLWCE+Focal α+γ |
 | MoNuSeg_Nuclei_Pathology | `ce_dice`, `wce_dice`, `lwce_dice`, `plwce_dice`, `cb_dice`, `plwce_focal_dice` | PLWCE α, PWCE α, PLWCE+Focal α+γ |
 | Pancreas_MultiOrgan_CT | `ce_dice`, `plwce_dice`, `pwce_dice`, `plwce_focal_dice` | PLWCE α, PWCE α, PLWCE+Focal α+γ |
+| ACDC_Cardiac_MRI | `ce_dice`, `wce_dice`, `lwce_dice`, `plwce_dice`, `cb_dice`, `plwce_focal_dice` | PLWCE α, PWCE α, PLWCE+Focal α+γ |
+| REFUGE_Optic_Disc_Cup | `ce_dice`, `wce_dice`, `lwce_dice`, `plwce_dice`, `cb_dice`, `plwce_focal_dice` | PLWCE α, PWCE α, PLWCE+Focal α+γ |
+| BUSI_Breast_Ultrasound | `ce_dice`, `wce_dice`, `lwce_dice`, `plwce_dice`, `cb_dice`, `plwce_focal_dice` | PLWCE α, PWCE α, PLWCE+Focal α+γ |
 
 > **원칙**: `plwce_focal_dice`는 모든 도메인에 추가. PWCE α 탐색도 함께 진행.
 
@@ -133,6 +136,9 @@ criterion = get_loss_function(loss_name, class_counts, alpha=1.0, beta=0.9999, g
 | 갑상선 결절 초음파 (TN3K) | `TN3K_Thyroid_Ultrasound.ipynb` | Ultrasound | U-Net (ResNet34) | ~20:1 | 코드 완성 |
 | 뇌 백질 병변 MRI (WMH 2017) | `WMH_Brain_Lesion_MRI.ipynb` | MRI (FLAIR+T1) | U-Net (ResNet34) | ~100~600:1 | 코드 완성 |
 | 조직병리 세포핵 (MoNuSeg 2018) | `MoNuSeg_Nuclei_Pathology.ipynb` | H&E Pathology | U-Net (ResNet34) | ~3~8:1 | 코드 완성 |
+| 심장 구조 MRI (ACDC) | `ACDC_Cardiac_MRI.ipynb` | Cardiac Cine MRI | U-Net (ResNet34) | ~5~15:1 (RV/MYO) | 코드 완성 |
+| 안저 시신경 (REFUGE 2018) | `REFUGE_Optic_Disc_Cup.ipynb` | Fundus Photography(RGB) | U-Net (ResNet34) | Disc ~5:1, Cup ~50:1 | 코드 완성 |
+| 유방 초음파 종양 (BUSI) | `BUSI_Breast_Ultrasound.ipynb` | Ultrasound | U-Net (ResNet34) | ~3~10:1 | 코드 완성 |
 
 **피부 병변 (ISIC 2018) SoTA 참고** (2026년 3월 인터넷 조사 기준):
 | 방법 | Dice | IoU | 출처 |
@@ -242,6 +248,85 @@ criterion = get_loss_function(loss_name, class_counts, alpha=1.0, beta=0.9999, g
 
 
 
+### 4-0-E. 심장 구조 MRI 분할 (ACDC)
+
+- **파일**: `ACDC_Cardiac_MRI.ipynb`
+- **모델**: U-Net (ResNet34, ImageNet pretrained)
+- **태스크**: 4-class segmentation (Background, RV, MYO, LV)
+- **데이터**: ACDC Challenge — 100 patients (Train 70 / Val 10 / Test 20), 심장 cine MRI
+- **불균형**: RV/MYO는 ~5~15:1, LV는 상대적으로 완만
+- **공식 사이트**: https://www.creatis.insa-lyon.fr/Challenge/acdc/
+- **모달리티 특이점**: 2D 슬라이스 기반 처리, ED/ES 두 시점(End-Diastole / End-Systole) 포함
+- **입력 구성**: Grayscale → 3채널 복제 (ImageNet 인코더 호환)
+- **전처리**: Percentile 정규화, 256×256 리사이즈
+- **실험 Loss**: `ce_dice`, `wce_dice`, `lwce_dice`, `plwce_dice`, `cb_dice`, `plwce_focal_dice`
+- **Optuna alpha 범위**: PLWCE 2.5~15.0, PWCE 0.2~2.5
+- **평가 지표**: 클래스별 Dice (RV/MYO/LV), mDice (BG 제외)
+- **SoTA 참고** (2026년 3월 인터넷 조사 기준):
+  | 방법 | mDice (RV/MYO/LV) | 출처 |
+  |------|-------------------|------|
+  | SwinUNet (2021) | 90.00% (86.21/85.47/95.18) | ECCV'22 |
+  | TransUNet (2021) | 89.07% (74.00/55.86/87.61 → ED+ES 평균) | arXiv |
+  | U-Net baseline | ~85~88% | 복수 논문 |
+- **데이터 로드**:
+  - Google Drive: `MyDrive/imbalanced-data-LWCE/acdc/acdc.zip` → `/tmp/acdc_data/` 압축 해제
+  - zip 내부 구조: `acdc/training/{patient_id}/` (`.nii.gz` 볼륨 + `_gt.nii.gz` 마스크)
+- **결과 저장**: `results/ACDC_Cardiac_MRI/`
+
+---
+
+### 4-0-F. 안저 시신경 유두/컵 분할 (REFUGE 2018)
+
+- **파일**: `REFUGE_Optic_Disc_Cup.ipynb`
+- **모델**: U-Net (ResNet34, ImageNet pretrained)
+- **태스크**: 3-class segmentation (Background, Optic Disc, Optic Cup) 또는 2 × Binary
+- **데이터**: REFUGE 2018 — 400 train + 400 val + 400 test (fundus 이미지)
+- **불균형**: Disc ~5:1, Cup ~50:1 (Cup이 극심한 불균형)
+- **공식 사이트**: https://refuge.grand-challenge.org/ (2018)
+- **모달리티 특이점**: RGB 안저 사진, 고해상도(2124×2056) → 학습 시 리사이즈 필수
+- **전처리**: 512×512 리사이즈, ImageNet 정규화
+- **실험 Loss**: `ce_dice`, `wce_dice`, `lwce_dice`, `plwce_dice`, `cb_dice`, `plwce_focal_dice`
+- **Optuna alpha 범위**: PLWCE 2.5~15.0, PWCE 0.2~2.5
+- **평가 지표**: Disc Dice, Cup Dice, mDice; 추가로 CDR(Cup-to-Disc Ratio) AUC
+- **SoTA 참고** (2026년 3월 인터넷 조사 기준):
+  | 방법 | Disc Dice | Cup Dice | 출처 |
+  |------|-----------|----------|------|
+  | MNet-SAt (2024) | — | — | IEEE Access |
+  | REFUGE 우승 (2018) | ~97% | ~87% | Challenge leaderboard |
+  | U-Net baseline | ~94~96% | ~82~85% | 복수 논문 |
+- **데이터 로드**:
+  - Google Drive: `MyDrive/imbalanced-data-LWCE/refuge/refuge.zip` → `/tmp/refuge_data/` 압축 해제
+  - zip 내부 구조: `refuge/Training400/Images/*.jpg` + `refuge/Training400/Disc_Cup_Masks/*.bmp`
+- **결과 저장**: `results/REFUGE_Optic_Disc_Cup/`
+
+---
+
+### 4-0-G. 유방 초음파 종양 분할 (BUSI)
+
+- **파일**: `BUSI_Breast_Ultrasound.ipynb`
+- **모델**: U-Net (ResNet34, ImageNet pretrained)
+- **태스크**: Binary segmentation (종양 vs 배경) — benign + malignant 합산 또는 분리
+- **데이터**: BUSI (Breast Ultrasound Images) — 총 780장 (benign 437 + malignant 210 + normal 133)
+  - Normal 제외, benign + malignant 사용 (647장); Train 80% / Val 20%
+- **불균형**: BG:Tumor = **~3~10:1** (종양 크기 편차 큼)
+- **모달리티 특이점**: Grayscale 초음파, 256×256~500×500 다양한 해상도
+- **전처리**: 256×256 리사이즈, Grayscale → 3채널 복제, ImageNet 정규화
+- **실험 Loss**: `ce_dice`, `wce_dice`, `lwce_dice`, `plwce_dice`, `cb_dice`, `plwce_focal_dice`
+- **Optuna alpha 범위**: PLWCE 2.5~15.0, PWCE 0.2~2.5
+- **평가 지표**: Dice, Sensitivity, Specificity, AUC
+- **SoTA 참고** (2026년 3월 인터넷 조사 기준):
+  | 방법 | Dice | IoU | 출처 |
+  |------|------|-----|------|
+  | TransUNet+Att (2024) | ~87% | ~80% | arXiv |
+  | U-Net++ baseline | ~79~83% | ~70~75% | 복수 논문 |
+  | U-Net baseline | ~72~78% | ~65~70% | 복수 논문 |
+- **데이터 로드**:
+  - **Kaggle 자동 임포트**: `kagglehub.dataset_download("aryashah2k/breast-ultrasound-images-dataset")`
+  - 구조: `Dataset_BUSI_with_GT/{benign,malignant,normal}/{image}.png` + `{image}_mask.png`
+- **결과 저장**: `results/BUSI_Breast_Ultrasound/`
+
+---
+
 ### 4-0-D. SoTA 수치 작성 규칙
 
 새로운 도메인을 추가하거나 SoTA 수치를 기재할 때 반드시 아래를 준수:
@@ -331,6 +416,9 @@ medical_data/results/
   Pancreas_MultiOrgan_CT/     ← Pancreas_MultiOrgan_CT.ipynb
   Retinal_Image/              ← Retinal_Image.ipynb
   Endoscopic_Polyp_Image/     ← Endoscopic_Polyp_Image.ipynb
+  ACDC_Cardiac_MRI/           ← ACDC_Cardiac_MRI.ipynb
+  REFUGE_Optic_Disc_Cup/      ← REFUGE_Optic_Disc_Cup.ipynb
+  BUSI_Breast_Ultrasound/     ← BUSI_Breast_Ultrasound.ipynb
 ```
 
 - 각 노트북 Cell 0 또는 Cell 1에 아래 형식으로 설정:
@@ -401,9 +489,12 @@ study = optuna.create_study(
 | MoNuSeg_Nuclei_Pathology | ~3~8:1 | 2.5~15.0 | 0.2~2.5 | 2.5~15.0 | 0.5~5.0 | 20 | 40 |
 | WMH_Brain_Lesion_MRI | ~100~600:1 | **2.5~20.0** | 0.2~3.0 | **2.5~20.0** | 0.5~5.0 | 30 | 60 |
 | Pancreas_MultiOrgan_CT | 극심 (췌장) | 2.5~15.0 | 0.2~2.5 | 2.5~15.0 | 0.5~5.0 | 30 | 60 |
+| ACDC_Cardiac_MRI | ~5~15:1 (RV/MYO) | 2.5~15.0 | 0.2~2.5 | 2.5~15.0 | 0.5~5.0 | 30 | 60 |
+| REFUGE_Optic_Disc_Cup | Cup ~50:1 | 2.5~15.0 | 0.2~2.5 | 2.5~15.0 | 0.5~5.0 | 20 | 40 |
+| BUSI_Breast_Ultrasound | ~3~10:1 | 2.5~15.0 | 0.2~2.5 | 2.5~15.0 | 0.5~5.0 | 20 | 40 |
 
 > WMH는 극심한 불균형으로 PLWCE α 상한을 15.0 → **20.0** 으로 확장.
-> Pancreas는 다중 클래스라 trial 수를 30/60으로 늘림 (수렴 느림).
+> Pancreas/ACDC는 다중 클래스라 trial 수를 30/60으로 늘림 (수렴 느림).
 
 ### 6-5. 시각화 규칙
 - `matplotlib.use('Agg')` 서버 환경에서 필수
@@ -437,12 +528,12 @@ VS Code Remote Tunnel  ←  코드 편집 클라이언트
 
 #### Google Drive 데이터 로딩 패턴 (표준)
 
-직접 다운로드 불가 데이터셋은 아래 표준 패턴 사용.
+직접 다운로드 불가 데이터셋은 아래 표준 패턴 사용. **Drive에는 zip 파일 1개로 업로드** (폴더 구조째로 압축).
 
 **Cell 0 — Drive 마운트 + 경로 변수**
 
 ```python
-GDRIVE_DATA_PATH = '/content/drive/MyDrive/imbalanced-data-LWCE/{domain}'
+GDRIVE_ZIP = '/content/drive/MyDrive/imbalanced-data-LWCE/{domain}/{domain}.zip'
 
 IS_COLAB = False
 try:
@@ -454,29 +545,40 @@ except Exception:
     print('Colab 환경 아님 — 로컬/수동 경로 사용')
 ```
 
-**Cell 1 — Drive → /tmp 복사 (빠른 I/O)**
+**Cell 1 — Drive zip → /tmp 압축 해제 (빠른 I/O)**
 
 Drive는 네트워크 파일시스템(FUSE)이라 파일 I/O마다 네트워크 왕복 발생.
-→ 학습 시작 전 `/tmp`(로컬 SSD)로 한 번만 복사해두면 이후 I/O는 로컬 속도로 동작.
+→ zip을 `/tmp`(로컬 SSD)에 한 번만 압축 해제하면 이후 I/O는 로컬 속도로 동작.
 
 ```python
-DATA_DIR = '/tmp/{domain}_raw'
-if IS_COLAB and os.path.exists(GDRIVE_DATA_PATH):
-    import shutil
-    if not os.path.exists(os.path.join(DATA_DIR, '{check_subdir}')):
-        print('Google Drive에서 데이터 복사 중...')
-        shutil.copytree(GDRIVE_DATA_PATH, DATA_DIR, dirs_exist_ok=True)
-else:
-    if not os.path.exists(DATA_DIR):
-        print('[데이터 없음] Drive 경로 확인 또는 /tmp에 직접 배치')
+DATA_DIR = '/tmp/{domain}_data'
+CHECK_SUBDIR = '{check_subdir}'   # 압축 해제 완료 여부 확인용 하위 경로
+
+if not os.path.exists(os.path.join(DATA_DIR, CHECK_SUBDIR)):
+    if IS_COLAB and os.path.exists(GDRIVE_ZIP):
+        import zipfile
+        print(f'Drive에서 압축 해제 중: {GDRIVE_ZIP}')
+        os.makedirs(DATA_DIR, exist_ok=True)
+        with zipfile.ZipFile(GDRIVE_ZIP, 'r') as zf:
+            zf.extractall(DATA_DIR)
+        # zip 내부 최상위 폴더가 {domain}/ 인 경우 한 단계 올리기
+        _inner = os.path.join(DATA_DIR, '{domain}')
+        if os.path.isdir(_inner):
+            import shutil
+            for item in os.listdir(_inner):
+                shutil.move(os.path.join(_inner, item), DATA_DIR)
+            os.rmdir(_inner)
+        print('압축 해제 완료')
+    else:
+        print('[데이터 없음] Drive에 {domain}.zip 업로드 또는 /tmp에 직접 배치')
 ```
 
 #### 파일 저장 전략
 
 ```
 Google Drive (영구 보관)          /tmp (학습 중 임시)
-  └── results/*.json/xlsx/png      └── {domain}_raw/     ← 원본 데이터 복사본
-                                   └── {domain}_slices/  ← 전처리 캐시
+  └── {domain}/{domain}.zip        └── {domain}_data/    ← zip 압축 해제본
+  └── results/*.json/xlsx/png      └── {domain}_slices/  ← 전처리 캐시
                                    └── best_*.pth        ← 체크포인트
 ```
 
@@ -487,15 +589,15 @@ Google Drive (영구 보관)          /tmp (학습 중 임시)
 
 ```
 MyDrive/imbalanced-data-LWCE/
-  synapse/     train_npz/                      ← Pancreas CT (Synapse)
-               test_vol_h5/
-  wmh/         {SiteName}/{SubjectID}/pre/      ← WMH 2017 MRI
-               FLAIR.nii.gz, T1.nii.gz
-               ../wmh.nii.gz
-  monuseg/     MoNuSeg Training Data/           ← MoNuSeg 2018 Pathology
-               Tissue Images/*.tif
-               Annotations/*.xml
-  tn3k/        tg3k/thyroid-image/*.jpg         ← TN3K Thyroid Ultrasound
+  synapse/     synapse.zip   ← train_npz/ + test_vol_h5/ 압축   (Pancreas CT)
+  wmh/         wmh.zip       ← {SiteName}/{SubjectID}/pre/ 압축  (WMH 2017 MRI)
+  monuseg/     monuseg.zip   ← MoNuSeg Training Data/ 압축      (MoNuSeg 2018)
+  tn3k/        tn3k.zip      ← tg3k/ + tn3k/ 압축              (TN3K Thyroid)
+  acdc/        acdc.zip      ← training/{patient_id}/ 압축      (ACDC Cardiac)
+  refuge/      refuge.zip    ← Training400/ 압축                (REFUGE 2018)
+  (BUSI는 kagglehub 자동 다운로드 — Drive 업로드 불필요)
+
+  tn3k/        tg3k/thyroid-image/*.jpg         ← TN3K Thyroid Ultrasound (레거시, zip 이전)
                tg3k/thyroid-mask/*.jpg
                tn3k/test-image/*.jpg
                tn3k/tn3k-trainval-fold0.json
@@ -503,12 +605,15 @@ MyDrive/imbalanced-data-LWCE/
 
 #### 적용 노트북 현황
 
-| 노트북 | Drive 경로 키 | /tmp 복사 대상 | 상태 |
-|--------|--------------|---------------|------|
-| `Pancreas_MultiOrgan_CT.ipynb` | `synapse` | `/tmp/synapse_data` | ✅ 완료 |
-| `WMH_Brain_Lesion_MRI.ipynb` | `wmh` | `/tmp/wmh_raw` | ✅ 완료 |
-| `MoNuSeg_Nuclei_Pathology.ipynb` | `monuseg` | `/tmp/monuseg_raw` | ✅ 완료 |
-| `TN3K_Thyroid_Ultrasound.ipynb` | `tn3k` | `/tmp/tn3k_data` | ✅ 완료 (로컬 fallback 포함) |
+| 노트북 | Drive zip 경로 | /tmp 압축 해제 대상 | 상태 |
+|--------|---------------|-------------------|------|
+| `Pancreas_MultiOrgan_CT.ipynb` | `synapse/synapse.zip` | `/tmp/synapse_data` | ✅ zip 패턴 적용 |
+| `WMH_Brain_Lesion_MRI.ipynb` | `wmh/wmh.zip` | `/tmp/wmh_data` | ✅ zip 패턴 적용 |
+| `MoNuSeg_Nuclei_Pathology.ipynb` | `monuseg/monuseg.zip` | `/tmp/monuseg_data` | ✅ zip 패턴 적용 |
+| `TN3K_Thyroid_Ultrasound.ipynb` | `tn3k/tn3k.zip` | `/tmp/tn3k_data` | ✅ zip 패턴 적용 (로컬 fallback 포함) |
+| `ACDC_Cardiac_MRI.ipynb` | `acdc/acdc.zip` | `/tmp/acdc_data` | ✅ zip 패턴 적용 |
+| `REFUGE_Optic_Disc_Cup.ipynb` | `refuge/refuge.zip` | `/tmp/refuge_data` | ✅ zip 패턴 적용 |
+| `BUSI_Breast_Ultrasound.ipynb` | kagglehub 자동 | `/tmp/busi_data` (kagglehub 캐시) | ✅ kagglehub 패턴 |
 
 > **TN3K 특이점**: 로컬 환경에서는 `/root/imbalanced-data-LWCE/Thyroid Dataset/`이 이미 존재하므로 Drive 마운트 없이 자동으로 로컬 경로 사용.
 
