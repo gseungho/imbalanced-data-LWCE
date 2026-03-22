@@ -811,10 +811,13 @@ GitHub에서 클론 후 각 도메인 데이터를 아래 방법으로 준비한
 | 도메인 | 파일 | 데이터 취득 방법 | Colab 업로드 경로 |
 |--------|------|----------------|-----------------|
 | WMH 2017 MRI | `WMH_Brain_Lesion_MRI.ipynb` | **자동**: `kagglehub.dataset_download("farahmo/wmh-dataset")` — Cell 0 실행 시 자동 다운로드 | 불필요 |
-| TN3K Thyroid | `TN3K_Thyroid_Ultrasound.ipynb` | [TN3K GitHub](https://github.com/haifangong/TRFE-Net-for-thyroid-nodule-segmentation) 또는 직접 다운로드 | `MyDrive/imbalanced-data-LWCE/tn3k/` |
-| MoNuSeg 2018 | `MoNuSeg_Nuclei_Pathology.ipynb` | [공식 챌린지](https://monuseg.grand-challenge.org/) 계정 등록 후 다운로드 | `MyDrive/imbalanced-data-LWCE/monuseg/` |
+| TN3K Thyroid | `TN3K_Thyroid_Ultrasound.ipynb` | [TN3K GitHub](https://github.com/haifangong/TRFE-Net-for-thyroid-nodule-segmentation) 또는 직접 다운로드 | `MyDrive/imbalanced-data-LWCE/tn3k/tn3k.zip` |
+| MoNuSeg 2018 | `MoNuSeg_Nuclei_Pathology.ipynb` | [공식 챌린지](https://monuseg.grand-challenge.org/) 계정 등록 후 다운로드 | `MyDrive/imbalanced-data-LWCE/monuseg/monuseg.zip` |
 | Skin ISIC 2018 | `Skin_Lesion_ISIC2018.ipynb` | `kagglehub.dataset_download(...)` — Cell 0 실행 시 자동 (또는 [ISIC Archive](https://challenge.isic-archive.com/)) | 자동 |
 | Pancreas Synapse | `Pancreas_MultiOrgan_CT.ipynb` | [Synapse Platform](https://www.synapse.org/#!Synapse:syn3193805/wiki/) 계정 등록 → zip 압축 후 업로드 | `MyDrive/imbalanced-data-LWCE/synapse/synapse.zip` |
+| ACDC Cardiac | `ACDC_Cardiac_MRI.ipynb` | https://www.creatis.insa-lyon.fr/Challenge/acdc/ 계정 등록 → zip 압축 후 업로드 | `MyDrive/imbalanced-data-LWCE/acdc/acdc.zip` |
+| REFUGE 2018 | `REFUGE_Optic_Disc_Cup.ipynb` | https://refuge.grand-challenge.org/ 계정 등록 → zip 압축 후 업로드 | `MyDrive/imbalanced-data-LWCE/refuge/refuge.zip` |
+| BUSI | `BUSI_Breast_Ultrasound.ipynb` | **자동**: `kagglehub.dataset_download("aryashah2k/breast-ultrasound-images-dataset")` — Cell 0 실행 시 자동 | 불필요 |
 
 #### 상세 폴더 구조 (Drive 업로드 기준)
 
@@ -833,13 +836,13 @@ MyDrive/imbalanced-data-LWCE/
       test-mask/*.jpg        ← TN3K 테스트 마스크
       tn3k-trainval-fold0.json
   monuseg/
-    MoNuSeg Training Data/
-      Tissue Images/*.tif
-      Annotations/*.xml
-    MoNuSegTestData/
-      Tissue Images/*.tif
-      Annotations/*.xml
+    monuseg.zip              ← MoNuSeg Training Data/ + MoNuSegTestData/ 압축
   wmh/                       ← WMH는 kagglehub 자동 다운로드, Drive 불필요
+  acdc/
+    acdc.zip                 ← training/{patient_id}/ 전체 압축
+  refuge/
+    refuge.zip               ← Training400/ + Validation400/ 전체 압축
+  (BUSI는 kagglehub 자동 다운로드 — Drive 업로드 불필요)
 ```
 
 ### 10-4. 셀 내부 주석 스타일 (표준)
