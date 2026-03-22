@@ -1,0 +1,84 @@
+{
+  "domain": "WMH 2017 Brain White Matter Hyperintensity Segmentation",
+  "model": "U-Net (ResNet34, ImageNet pretrained)",
+  "sota_ref": {
+    "nnUNet_3D": {
+      "Dice": 0.8,
+      "Sensitivity": 0.79,
+      "Specificity": 0.99
+    },
+    "2D_UNet": {
+      "Dice": "0.75~0.79"
+    }
+  },
+  "num_classes": 2,
+  "class_counts": {
+    "Background": 559606808,
+    "WMH": 2233320
+  },
+  "imbalance": {
+    "BG_WMH": 250.6
+  },
+  "input_channels": "3 (FLAIR, T1, FLAIR)",
+  "bg_only_ratio": 0.3,
+  "train_slices": 8573,
+  "val_slices": 1047,
+  "final_epochs": 50,
+  "results": {
+    "CE+Dice              (기준선)": {
+      "loss_name": "ce_dice",
+      "alpha": 1.0,
+      "best_val_dice": 0.8495521279280536,
+      "Dice": 0.8758749496001088,
+      "Sensitivity": 0.8739402795503741,
+      "Specificity": 0.9994033188946122,
+      "AUC": 0.9918675424271607
+    },
+    "WCE+Dice": {
+      "loss_name": "wce_dice",
+      "alpha": 1.0,
+      "best_val_dice": 0.849920589543213,
+      "Dice": 0.8680735574938848,
+      "Sensitivity": 0.9564643718131021,
+      "Specificity": 0.9987875085480488,
+      "AUC": 0.9997264048457398
+    },
+    "LWCE+Dice": {
+      "loss_name": "lwce_dice",
+      "alpha": 1.0,
+      "best_val_dice": 0.8559591091220115,
+      "Dice": 0.8811976181338611,
+      "Sensitivity": 0.8777475661111148,
+      "Specificity": 0.9994387344541646,
+      "AUC": 0.995621919240623
+    },
+    "PLWCE+Dice           (alpha=3.27)": {
+      "loss_name": "plwce_dice",
+      "alpha": 3.274979805054202,
+      "best_val_dice": 0.8624531786309203,
+      "Dice": 0.8861816134322298,
+      "Sensitivity": 0.8879054683116336,
+      "Specificity": 0.9994310676357645,
+      "AUC": 0.9979158217935462
+    },
+    "CB+Dice": {
+      "loss_name": "cb_dice",
+      "alpha": 1.0,
+      "best_val_dice": 0.8594489590625742,
+      "Dice": 0.8813890426377906,
+      "Sensitivity": 0.8762739766568363,
+      "Specificity": 0.9994500305357127,
+      "AUC": 0.9874399853520551
+    },
+    "PLWCE+Focal+Dice     (α=11.29, γ=4.88)": {
+      "loss_name": "plwce_focal_dice",
+      "alpha": 11.286221446342095,
+      "best_val_dice": 0.8574474261538916,
+      "Dice": 0.8809130828401138,
+      "Sensitivity": 0.8819124601544839,
+      "Specificity": 0.9994096247393318,
+      "AUC": 0.9975129146674349
+    }
+  },
+  "best_model": "PLWCE+Dice           (alpha=3.27)"
+}

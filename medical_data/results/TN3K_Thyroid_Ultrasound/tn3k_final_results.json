@@ -9,11 +9,11 @@
   },
   "num_classes": 2,
   "class_counts": {
-    "Background": 137633211,
-    "Nodule": 13296197
+    "Background": 129364440,
+    "Nodule": 21564968
   },
   "imbalance": {
-    "BG_Nodule": 10.4
+    "BG_Nodule": 6.0
   },
   "train_count": 2303,
   "val_count": 576,
@@ -24,57 +24,57 @@
     "CE+Dice              (기준선)": {
       "loss_name": "ce_dice",
       "alpha": 1.0,
-      "best_val_dice": 0.9369466484257671,
-      "Dice": 0.12461119912146747,
-      "Sensitivity": 0.09797895184969518,
-      "Specificity": 0.9477157941182773,
-      "AUC": 0.5543951565457752
+      "best_val_dice": 0.8595787570239245,
+      "Dice": 0.882939202753223,
+      "Sensitivity": 0.8976644191098652,
+      "Specificity": 0.9850509074424707,
+      "AUC": 0.9939283406953552
     },
     "WCE+Dice": {
       "loss_name": "wce_dice",
       "alpha": 1.0,
-      "best_val_dice": 0.9221981852987392,
-      "Dice": 0.14991222947163402,
-      "Sensitivity": 0.13486167195687662,
-      "Specificity": 0.9268086173327454,
-      "AUC": 0.6088619274412449
+      "best_val_dice": 0.8341803084146394,
+      "Dice": 0.8468485658382128,
+      "Sensitivity": 0.9436109911162007,
+      "Specificity": 0.9686110523074911,
+      "AUC": 0.9934990474030772
     },
     "LWCE+Dice": {
       "loss_name": "lwce_dice",
       "alpha": 1.0,
-      "best_val_dice": 0.9386559803301322,
-      "Dice": 0.14689892074030564,
-      "Sensitivity": 0.12635301041138397,
-      "Specificity": 0.9345677338932791,
-      "AUC": 0.6010747991588242
+      "best_val_dice": 0.8644798128086467,
+      "Dice": 0.8778580442568517,
+      "Sensitivity": 0.8928763092487879,
+      "Specificity": 0.9844285746249937,
+      "AUC": 0.9934234885049599
     },
-    "PLWCE+Dice           (alpha=2.68)": {
+    "PLWCE+Dice           (alpha=6.90)": {
       "loss_name": "plwce_dice",
-      "alpha": 2.6787813589855043,
-      "best_val_dice": 0.9361152150234381,
-      "Dice": 0.12276100513853835,
-      "Sensitivity": 0.09938157754696994,
-      "Specificity": 0.9427416562307674,
-      "AUC": 0.5946783718549036
+      "alpha": 6.895748868991186,
+      "best_val_dice": 0.8558728085684286,
+      "Dice": 0.8775140205768108,
+      "Sensitivity": 0.886764206875393,
+      "Specificity": 0.9852020694545714,
+      "AUC": 0.9935899673767024
     },
     "CB+Dice": {
       "loss_name": "cb_dice",
       "alpha": 1.0,
-      "best_val_dice": 0.9380771043554623,
-      "Dice": 0.12310525003627781,
-      "Sensitivity": 0.10059338003743816,
-      "Specificity": 0.9412050125753605,
-      "AUC": 0.5773081037447607
+      "best_val_dice": 0.8543194328978597,
+      "Dice": 0.8755174906786397,
+      "Sensitivity": 0.8985734587958333,
+      "Specificity": 0.9830233114225204,
+      "AUC": 0.9937092116363707
     },
-    "PLWCE+Focal+Dice     (α=4.80, γ=1.10)": {
+    "PLWCE+Focal+Dice     (α=9.26, γ=1.88)": {
       "loss_name": "plwce_focal_dice",
-      "alpha": 4.804573981719386,
-      "best_val_dice": 0.9348574033763773,
-      "Dice": 0.12116415836201197,
-      "Sensitivity": 0.09682975539820547,
-      "Specificity": 0.9447502156038206,
-      "AUC": 0.5870848094647442
+      "alpha": 9.264116268646408,
+      "best_val_dice": 0.8512198658308974,
+      "Dice": 0.8646284247524096,
+      "Sensitivity": 0.9163848768852221,
+      "Specificity": 0.9775985292010712,
+      "AUC": 0.9933445184139889
     }
   },
-  "best_model": "WCE+Dice"
+  "best_model": "CE+Dice              (기준선)"
 }

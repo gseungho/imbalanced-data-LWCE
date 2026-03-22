@@ -1,0 +1,70 @@
+{
+  "domain": "ISIC 2018 Skin Lesion Segmentation",
+  "model": "U-Net (ResNet34, ImageNet pretrained)",
+  "class_counts": {
+    "BG": 14915423774,
+    "FG": 4203470882
+  },
+  "imbalance_ratio": 3.55,
+  "train_size": 2075,
+  "val_size": 259,
+  "test_size": 260,
+  "final_epochs": 30,
+  "results": {
+    "CE+Dice              (기준선)": {
+      "loss_name": "ce_dice",
+      "alpha": 1.0,
+      "best_val_dice": 0.9023115490422104,
+      "Dice": 0.8950253988113295,
+      "Sens": 0.9148082995002345,
+      "Spec": 0.9662941574314092,
+      "AUC": 0.9939016066414437
+    },
+    "WCE+Dice": {
+      "loss_name": "wce_dice",
+      "alpha": 1.0,
+      "best_val_dice": 0.9027870351617987,
+      "Dice": 0.8940899353710626,
+      "Sens": 0.9349555134942068,
+      "Spec": 0.9545463585565188,
+      "AUC": 0.9937349438636698
+    },
+    "LWCE+Dice": {
+      "loss_name": "lwce_dice",
+      "alpha": 1.0,
+      "best_val_dice": 0.9017510269627427,
+      "Dice": 0.9014590058545489,
+      "Sens": 0.9137070393848689,
+      "Spec": 0.9675631775158364,
+      "AUC": 0.9936787924670866
+    },
+    "PLWCE+Dice           (alpha=12.72)": {
+      "loss_name": "plwce_dice",
+      "alpha": 12.720734298712431,
+      "best_val_dice": 0.9045443083300735,
+      "Dice": 0.8934154841367967,
+      "Sens": 0.9163340030358396,
+      "Spec": 0.9680143468328847,
+      "AUC": 0.9945069861156701
+    },
+    "CB+Dice": {
+      "loss_name": "cb_dice",
+      "alpha": 1.0,
+      "best_val_dice": 0.9045037934274385,
+      "Dice": 0.8956465737734939,
+      "Sens": 0.9157680577926646,
+      "Spec": 0.9666093741121939,
+      "AUC": 0.9938287899497851
+    },
+    "PLWCE+Focal+Dice     (α=2.09, γ=1.39)": {
+      "loss_name": "plwce_focal_dice",
+      "alpha": 2.0887334147949828,
+      "best_val_dice": 0.9060030272512725,
+      "Dice": 0.898366387963349,
+      "Sens": 0.9047643730897419,
+      "Spec": 0.9724783982776234,
+      "AUC": 0.9940306910073231
+    }
+  },
+  "best_model": "LWCE+Dice"
+}

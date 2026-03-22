@@ -18,11 +18,13 @@
 | `pwce` | w = (total/count)^α | alpha로 강도 조절 |
 | `lwce` | w = 1 / log(1 + count) | 로그 스케일 완화 |
 | `plwce` | w = 1 / log(1 + count)^α | alpha로 강도 조절 |
+| `plwce_focal` | PLWCE 가중치 + Focal Loss | alpha(가중치 강도) + gamma(focal 강도) 2개 파라미터 |
 | `cb` | w = (1-β) / (1-β^n) | Effective Number 기반 |
 
 - 모든 가중치는 **평균으로 정규화** (`weights / mean(weights)`)
-- `alpha` 범위: 실험상 2.5~15.0 (Optuna로 탐색)
+- `alpha` 범위: 실험상 2.5~15.0 (Optuna로 탐색; 극심한 불균형 도메인은 ~20.0까지 확장)
 - `beta` 기본값: 0.9999 (CB Loss용)
+- `gamma` 범위: 0.5~5.0 (Focal Loss용; Optuna로 탐색)
 
 ### 2-2. Loss 클래스 구조
 
@@ -43,6 +45,18 @@ SegmentationLoss (마스터 클래스)
 - `dice` 포함 → CE + Dice 혼합 (각 0.5 비율)
 - `focal` 포함 → CE 대신 Focal Loss 사용
 - 가중치 키워드는 `plwce > lwce > pwce > wce > cb` 순으로 파싱 (우선순위)
+
+#### 도메인별 적용 손실 함수 현황
+
+| 도메인 | Binary Loss 목록 | Optuna 탐색 대상 |
+|--------|-----------------|-----------------|
+| Skin_Lesion_ISIC2018 | `ce_dice`, `wce_dice`, `lwce_dice`, `plwce_dice`, `cb_dice`, `plwce_focal_dice` | PLWCE α, PWCE α, PLWCE+Focal α+γ |
+| TN3K_Thyroid_Ultrasound | `ce_dice`, `wce_dice`, `lwce_dice`, `plwce_dice`, `cb_dice`, `plwce_focal_dice` | PLWCE α, PWCE α, PLWCE+Focal α+γ |
+| WMH_Brain_Lesion_MRI | `ce_dice`, `wce_dice`, `lwce_dice`, `plwce_dice`, `cb_dice`, `plwce_focal_dice` | PLWCE α, PWCE α, PLWCE+Focal α+γ |
+| MoNuSeg_Nuclei_Pathology | `ce_dice`, `wce_dice`, `lwce_dice`, `plwce_dice`, `cb_dice`, `plwce_focal_dice` | PLWCE α, PWCE α, PLWCE+Focal α+γ |
+| Pancreas_MultiOrgan_CT | `ce_dice`, `plwce_dice`, `pwce_dice`, `plwce_focal_dice` | PLWCE α, PWCE α, PLWCE+Focal α+γ |
+
+> **원칙**: `plwce_focal_dice`는 모든 도메인에 추가. PWCE α 탐색도 함께 진행.
 
 ### 2-4. Factory 함수
 
@@ -190,8 +204,8 @@ criterion = get_loss_function(loss_name, class_counts, alpha=1.0, beta=0.9999, g
   | 2D U-Net | ~0.750~0.790 | — | — | WMH Challenge |
   > ⚠️ nnU-Net 0.800은 Utrecht 단일 사이트 기준; 3-site 평균은 낮을 수 있음
 - **데이터 로드**:
-  - Google Drive: `MyDrive/imbalanced-data-LWCE/wmh/` → `/tmp/wmh_raw/` 자동 복사
-  - 공식 사이트: https://wmh.isi.uu.nl/ (무료 계정 등록 후 다운로드)
+  - **Kaggle (권장)**: `kagglehub.dataset_download("farahmo/wmh-dataset")` — 자동 다운로드
+  - 공식 사이트: https://wmh.isi.uu.nl/ (현재 접속 불가 — kagglehub 사용 권장)
   - 구조: `{SiteName}/{SubjectID}/pre/FLAIR.nii.gz + T1.nii.gz` + `../wmh.nii.gz`
 - **결과 저장**: `results/wmh_*.json/xlsx/png`
 - **연구 의의**: 이 프로젝트에서 가장 극단적인 불균형 → LWCE 계열 효과 검증의 핵심 도메인
@@ -378,6 +392,19 @@ study = optuna.create_study(
 # N_TRIALS_PF  = N_TRIALS * 2  (PLWCE+Focal: alpha+gamma 2개 파라미터 → 탐색 공간 2배)
 ```
 
+#### 도메인별 Optuna 탐색 범위
+
+| 도메인 | 불균형 | PLWCE α | PWCE α | PLWCE+Focal α | PLWCE+Focal γ | N_TRIALS | N_TRIALS_PF |
+|--------|--------|---------|--------|---------------|---------------|----------|-------------|
+| Skin_Lesion_ISIC2018 | 중간 | 2.5~15.0 | 0.2~2.5 | 2.5~15.0 | 0.5~5.0 | 20 | 40 |
+| TN3K_Thyroid_Ultrasound | ~20:1 | 2.5~15.0 | 0.2~2.5 | 2.5~15.0 | 0.5~5.0 | 20 | 40 |
+| MoNuSeg_Nuclei_Pathology | ~3~8:1 | 2.5~15.0 | 0.2~2.5 | 2.5~15.0 | 0.5~5.0 | 20 | 40 |
+| WMH_Brain_Lesion_MRI | ~100~600:1 | **2.5~20.0** | 0.2~3.0 | **2.5~20.0** | 0.5~5.0 | 30 | 60 |
+| Pancreas_MultiOrgan_CT | 극심 (췌장) | 2.5~15.0 | 0.2~2.5 | 2.5~15.0 | 0.5~5.0 | 30 | 60 |
+
+> WMH는 극심한 불균형으로 PLWCE α 상한을 15.0 → **20.0** 으로 확장.
+> Pancreas는 다중 클래스라 trial 수를 30/60으로 늘림 (수렴 느림).
+
 ### 6-5. 시각화 규칙
 - `matplotlib.use('Agg')` 서버 환경에서 필수
 - 학습 곡선 (Loss + Val Metric) 반드시 저장
@@ -503,18 +530,53 @@ MyDrive/imbalanced-data-LWCE/
 
 ```
 실험 결과 표 형식:
-| Loss Function | alpha | Dice | Sens | Spec | AUC |
-|---------------|-------|------|------|------|-----|
-| CE+Dice       | -     |      |      |      |     |
-| WCE+Dice      | -     |      |      |      |     |
-| LWCE+Dice     | -     |      |      |      |     |
-| PLWCE+Dice    | best  |      |      |      |     |
-| CB+Dice       | -     |      |      |      |     |
+| Loss Function    | alpha | gamma | Dice | Sens | Spec | AUC |
+|------------------|-------|-------|------|------|------|-----|
+| CE+Dice          | -     | -     |      |      |      |     |
+| WCE+Dice         | -     | -     |      |      |      |     |
+| LWCE+Dice        | -     | -     |      |      |      |     |
+| PLWCE+Dice       | best  | -     |      |      |      |     |
+| CB+Dice          | -     | -     |      |      |      |     |
+| PLWCE+Focal+Dice | best  | best  |      |      |      |     |
 ```
 
-- alpha는 Optuna 최적값 기재
+- alpha, gamma는 Optuna 최적값 기재 (단일 파라미터 모드는 해당 없는 항목 `-` 표시)
 - 최고 성능 수치 **볼드** 처리
 - 불균형 비율(BG:FG)도 함께 기재
+
+### 8-1. 최종 논문 결과 기록 방식 — 반복 실험 (구현 보류 중)
+
+> ⚠️ **구현 시점**: 모든 실험 도메인이 확정된 이후 일괄 적용. 현재는 설계만 기록.
+
+손실 함수 간 성능 차이가 작을 수 있으므로, 단일 실행 결과가 아닌 **반복 실험의 평균 및 표준편차**를 최종 논문 수치로 사용한다.
+
+#### 실험 프로토콜
+- **반복 횟수**: 5회 (seed=0, 1, 2, 3, 4)
+- **각 반복**: 동일한 최적 alpha/gamma로 전체 학습 실행 (Optuna 탐색은 1회만 수행, 이후 고정)
+- **기록 지표**: 각 Loss × 5회의 Dice (또는 mDice), Sensitivity, Specificity, AUC
+- **최종 수치**: `mean ± std` 형식
+
+#### 최종 결과 표 형식 (논문용)
+
+```
+| Loss Function    | alpha | gamma | Dice (mean±std)      | Sens (mean±std) | Spec (mean±std) |
+|------------------|-------|-------|----------------------|-----------------|-----------------|
+| CE+Dice          | -     | -     | 0.XXX ± 0.XXX        |                 |                 |
+| WCE+Dice         | -     | -     | 0.XXX ± 0.XXX        |                 |                 |
+| LWCE+Dice        | -     | -     | 0.XXX ± 0.XXX        |                 |                 |
+| PLWCE+Dice       | best  | -     | **0.XXX ± 0.XXX**    |                 |                 |
+| CB+Dice          | -     | -     | 0.XXX ± 0.XXX        |                 |                 |
+| PLWCE+Focal+Dice | best  | best  | 0.XXX ± 0.XXX        |                 |                 |
+```
+
+#### 평균 랭킹 분석
+- 모든 도메인에 대해 각 Loss의 Dice 순위를 매기고 Borda count로 종합 순위 산출
+- 표 형식: 행=Loss Function, 열=도메인, 셀=해당 도메인에서의 랭킹
+- 타뷸라 데이터 실험(KIIS 발표)과 동일한 히트맵 시각화 방식 적용
+
+#### 구현 위치
+- 각 노트북의 Cell 6(평가/저장) 뒤에 **Cell 7: 반복 실험** 셀을 추가
+- 공통 유틸리티 함수는 `medical_data/repeat_experiment.py`로 분리 예정
 
 ---
 
@@ -531,3 +593,208 @@ MyDrive/imbalanced-data-LWCE/
 - [ ] Cell 6: 전체 Loss 비교 학습 실행
 - [ ] Cell 7: 시각화 (학습 곡선 + 예측 결과)
 - [ ] Cell 8: 최종 평가 지표 출력 + JSON 저장
+
+---
+
+## 10. 노트북 통일 구조 표준
+
+모든 노트북은 아래 구조를 완전히 동일하게 유지한다. 기존 노트북도 이 표준으로 통일할 것.
+
+### 10-1. 셀 구성 순서 (표준)
+
+```
+[Markdown] 노트북 헤더 (제목, 도메인, 모달리티, 모델, 데이터셋 설명)
+[Code]     Cell 0 — 환경 설정 (pip install, import, 경로, device)
+[Code]     Cell 1 — 데이터 로드 (Drive/kagglehub 마운트, /tmp 복사, Dataset, DataLoader, 클래스비율)
+[Code]     Cell 2 — 모델 정의 (build_model, to_2ch_logits 등 유틸리티)
+[Code]     Cell 3 — 학습 함수 (train_{model} 정의 — 실행 안 함)
+[Code]     Cell 4 — Optuna alpha/gamma 탐색 (PLWCE, PWCE, PLWCE+Focal)
+[Code]     Cell 5 — 전체 Loss 비교 학습 실행
+[Code]     Cell 6 — 평가 및 결과 저장 (시각화, JSON, Excel, PNG)
+```
+
+- **Markdown 헤더 셀**은 Cell 0 앞에 반드시 위치 (모든 노트북 통일)
+- Cell 번호는 0-based (Cell 0, Cell 1, …)
+- **각 셀 첫 줄에 `# === Cell N: 제목 ===` 형식의 주석 추가** (Python 코드 셀 기준)
+
+### 10-2. Markdown 헤더 셀 형식 (표준)
+
+노트북을 처음 여는 사람(협업자, 리뷰어)이 코드를 한 줄도 읽지 않고도 **무엇을, 왜, 어떻게** 하는지 파악할 수 있어야 한다.
+아래 7개 섹션을 모두 포함할 것.
+
+```markdown
+# {도메인 이름} 불균형 세그멘테이션 실험
+
+---
+
+## 1. 태스크 및 도메인
+- **도메인**: {예: 갑상선 결절 초음파 세그멘테이션}
+- **모달리티**: {CT / MRI (FLAIR+T1) / Ultrasound / Dermoscopy / H&E Pathology / Fundus}
+- **태스크**: {Binary / 3-class / 9-class} segmentation
+  - 클래스: {예: 배경(0) / 결절(1)} 또는 {배경 + 8개 장기}
+- **핵심 도전**: {예: 경계 불명확, speckle 노이즈, 극심한 불균형, 소형 병변 등}
+
+## 2. 모델
+- **아키텍처**: {예: U-Net (ResNet34 백본) / TransUNet (R50+ViT-B/16) / PraNet (Res2Net50)}
+- **사전학습**: {예: ImageNet pretrained / ViT-B/16 pretrained}
+- **선택 이유**: {예: Binary segmentation 표준 베이스라인 / 멀티스케일 특성 필요 / Transformer 장거리 의존성}
+- **출력**: {예: 1채널 sigmoid → to_2ch_logits() 변환 / 9채널 softmax}
+
+## 3. 데이터셋
+- **이름**: {예: TN3K (Thyroid Nodule 3K)}
+- **규모**: {예: 3,493장 — Train 80% / Val 20% / Test: 공식 별도 제공}
+- **입력 해상도**: {예: 256×256 (리사이즈)}
+- **클래스 불균형**: BG:FG = **{비율}** ({불균형 수준 — 완만/중간/심각/극심})
+- **공식 분할**: {예: fold JSON 제공 / 볼륨 단위 공식 train-test 분리 / 없음 → 8:1:1 랜덤}
+
+## 4. 데이터 준비 (협업자용)
+> 아래 방법으로 데이터를 준비한 후 노트북을 실행할 것.
+
+**취득 방법**:
+- {예1: `kagglehub.dataset_download("farahmo/wmh-dataset")` — Cell 0 실행 시 자동}
+- {예2: https://monuseg.grand-challenge.org/ 계정 등록 후 수동 다운로드}
+
+**Colab Drive 업로드 경로** (수동 다운로드 시):
+```
+MyDrive/imbalanced-data-LWCE/{domain}/
+  {폴더 구조 기재}
+```
+
+**로컬 경로** (로컬 실행 시):
+- {예: `/root/imbalanced-data-LWCE/Thyroid Dataset/` 에 위치 시 자동 감지}
+
+## 5. 전처리 및 도메인 특이점
+- {예: CLAHE 적용 (Green 채널, clipLimit=2.0) — 혈관 대비 강조}
+- {예: 입력 3채널 구성 [FLAIR, T1, FLAIR] — ImageNet 인코더 3ch 맞춤}
+- {예: BG-only 슬라이스 30% 포함 (BG_ONLY_RATIO=0.3)}
+- {예: 패치 추출 1000×1000 → 256×256, stride=128 (50% overlap)}
+- {예: BGR→RGB 변환, 마스크 이진화 임계값 128}
+
+## 6. 실험 손실 함수 및 Optuna 탐색 범위
+| 손실 함수 | 탐색 파라미터 | 탐색 범위 | Trials |
+|-----------|-------------|----------|--------|
+| `ce_dice` | — | — | — |
+| `wce_dice` | — | — | — |
+| `lwce_dice` | — | — | — |
+| `plwce_dice` | alpha | {예: 2.5 ~ 15.0} | {N_TRIALS} |
+| `pwce_dice` | alpha | {예: 0.2 ~ 2.5} | {N_TRIALS} |
+| `cb_dice` | — | — | — |
+| `plwce_focal_dice` | alpha + gamma | alpha {범위}, gamma {0.5 ~ 5.0} | {N_TRIALS_PF} |
+
+## 7. SoTA 참고 ({YYYY년 MM월} 기준)
+| 방법 | {주요 지표} | {보조 지표} | 출처 |
+|------|------------|------------|------|
+| {최신 SOTA 방법} | **X.XXX** | X.XXX | {저널/학회} |
+| {비교 방법 2} | X.XXX | X.XXX | {출처} |
+| U-Net baseline | X.XXX | — | 복수 논문 |
+
+> 본 연구 목표: U-Net baseline 대비 LWCE/PLWCE 계열 손실 함수의 개선 효과 검증.
+> 평가 지표: {예: Dice, Sensitivity, Specificity, AUC}
+> 결과 저장: `medical_data/results/{도메인폴더}/`
+```
+
+#### 작성 원칙
+- **섹션 4 (데이터 준비)**는 반드시 실제 동작하는 경로/명령어로 작성 — 추상적 설명 금지
+- **섹션 5 (전처리)**는 코드를 보지 않아도 이해할 수 있게 — "왜" 이 전처리를 하는지 포함
+- **섹션 7 (SoTA)**는 rules.md §3, §4의 표를 그대로 복사해서 넣을 것 (별도 조사 불필요)
+- Markdown 헤더는 **읽는 문서**이지 코드 요약본이 아님 — 코드에 이미 있는 내용 단순 반복 금지
+
+### 10-3. 도메인별 데이터 준비 방법 (협업자용)
+
+GitHub에서 클론 후 각 도메인 데이터를 아래 방법으로 준비한다.
+
+| 도메인 | 파일 | 데이터 취득 방법 | Colab 업로드 경로 |
+|--------|------|----------------|-----------------|
+| WMH 2017 MRI | `WMH_Brain_Lesion_MRI.ipynb` | **자동**: `kagglehub.dataset_download("farahmo/wmh-dataset")` — Cell 0 실행 시 자동 다운로드 | 불필요 |
+| TN3K Thyroid | `TN3K_Thyroid_Ultrasound.ipynb` | [TN3K GitHub](https://github.com/haifangong/TRFE-Net-for-thyroid-nodule-segmentation) 또는 직접 다운로드 | `MyDrive/imbalanced-data-LWCE/tn3k/` |
+| MoNuSeg 2018 | `MoNuSeg_Nuclei_Pathology.ipynb` | [공식 챌린지](https://monuseg.grand-challenge.org/) 계정 등록 후 다운로드 | `MyDrive/imbalanced-data-LWCE/monuseg/` |
+| Skin ISIC 2018 | `Skin_Lesion_ISIC2018.ipynb` | `kagglehub.dataset_download(...)` — Cell 0 실행 시 자동 (또는 [ISIC Archive](https://challenge.isic-archive.com/)) | 자동 |
+| Pancreas Synapse | `Pancreas_MultiOrgan_CT.ipynb` | [Synapse Platform](https://www.synapse.org/#!Synapse:syn3193805/wiki/) 계정 등록 → zip 압축 후 업로드 | `MyDrive/imbalanced-data-LWCE/synapse/synapse.zip` |
+
+#### 상세 폴더 구조 (Drive 업로드 기준)
+
+```
+MyDrive/imbalanced-data-LWCE/
+  synapse/
+    synapse.zip              ← train_npz/ + test_vol_h5/ 압축 (전체 업로드)
+  tn3k/
+    tg3k/
+      thyroid-image/*.jpg    ← TG3K 갑상선 이미지
+      thyroid-mask/*.jpg     ← TG3K 갑상선 마스크
+    tn3k/
+      trainval-image/*.jpg   ← TN3K 훈련/검증 이미지
+      trainval-mask/*.jpg    ← TN3K 훈련/검증 마스크
+      test-image/*.jpg       ← TN3K 테스트 이미지
+      test-mask/*.jpg        ← TN3K 테스트 마스크
+      tn3k-trainval-fold0.json
+  monuseg/
+    MoNuSeg Training Data/
+      Tissue Images/*.tif
+      Annotations/*.xml
+    MoNuSegTestData/
+      Tissue Images/*.tif
+      Annotations/*.xml
+  wmh/                       ← WMH는 kagglehub 자동 다운로드, Drive 불필요
+```
+
+### 10-4. 셀 내부 주석 스타일 (표준)
+
+```python
+# === Cell 0: 환경 설정 ===
+
+# --- 라이브러리 설치 ---
+# !pip install segmentation-models-pytorch albumentations optuna kagglehub
+
+# --- 라이브러리 import ---
+import os, sys, json
+...
+
+# --- 경로 및 하이퍼파라미터 설정 ---
+DOMAIN = 'skin_lesion'      # 결과 파일명 prefix
+IMG_SIZE = 256
+...
+```
+
+- 섹션 구분: `# --- 소제목 ---`
+- 셀 헤더: `# === Cell N: 셀 이름 ===`
+- 인라인 설명: 코드 오른쪽에 짧게 (`# 배경 포함 전체 클래스 수`)
+- 경고/주의: `# ⚠️ 주의: ...` 형식
+
+### 10-5. 현재 노트북 구조 적합성 현황
+
+| 노트북 | Markdown 헤더 | Cell 번호 표준 | PLWCE+Focal | Optuna TQDM_DISABLE | study_pf 순서 |
+|--------|:------------:|:------------:|:-----------:|:------------------:|:-----------:|
+| `Skin_Lesion_ISIC2018.ipynb` | ✅ | 🔲 미확인 | 🔲 미추가 | 🔲 미확인 | ✅ |
+| `TN3K_Thyroid_Ultrasound.ipynb` | ✅ | 🔲 미확인 | 🔲 미추가 | ✅ | ✅ |
+| `WMH_Brain_Lesion_MRI.ipynb` | 🔲 없음 | 🔲 미확인 | 🔲 미추가 | 🔲 미확인 | ✅ |
+| `MoNuSeg_Nuclei_Pathology.ipynb` | 🔲 없음 | 🔲 미확인 | 🔲 미추가 | ✅ | ✅ |
+| `Pancreas_MultiOrgan_CT.ipynb` | 🔲 없음 | 🔲 미확인 | 🔲 미추가 | ✅ | ✅ |
+
+> **다음 작업**: rules.md 기준으로 위 체크리스트 완성. Markdown 헤더 없는 노트북 3개 추가, `plwce_focal_dice` 전 노트북 적용.
+
+---
+
+## 11. CLAUDE.md vs rules.md 차이
+
+| 항목 | `CLAUDE.md` | `rules.md` |
+|------|-------------|------------|
+| 로드 방식 | Claude Code 세션 시작 시 **자동 로드** | `@medical_data/rules.md` 명시 참조 시에만 로드 |
+| 용도 | Claude가 따라야 할 행동 지침, 코딩 스타일, 금지 사항 | 연구 규칙, 실험 설계, 도메인 정보 문서 |
+| 대상 독자 | Claude Code AI 어시스턴트 | 연구팀 협업자 + Claude |
+| 버전 관리 | 리포지토리 루트에 두면 git으로 관리됨 | git으로 관리됨 |
+| 권장 위치 | `/root/imbalanced-data-LWCE/CLAUDE.md` (루트) | `medical_data/rules.md` (현재 위치) |
+
+**권장 방향**: 현재 `rules.md`를 그대로 유지하면서, 루트에 `CLAUDE.md`를 별도로 만들어 두면 Claude Code가 자동으로 연구 컨텍스트를 인식함.
+
+`CLAUDE.md`에 넣을 내용 (예시):
+```markdown
+# 프로젝트 컨텍스트
+의료 이미지 세그멘테이션 불균형 연구 프로젝트.
+자세한 규칙과 실험 설계는 @medical_data/rules.md 참조.
+
+# 핵심 규칙 요약
+- 손실 함수는 항상 get_loss_function()을 통해 생성
+- to_2ch_logits(p) 패턴 사용 ([-p, p] 방식)
+- Optuna로 alpha/gamma 탐색 후 최종 실험
+- 결과는 medical_data/results/{도메인}/ 에 저장
+```

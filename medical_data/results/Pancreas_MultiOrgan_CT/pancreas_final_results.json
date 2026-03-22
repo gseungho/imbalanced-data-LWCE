@@ -1,0 +1,102 @@
+{
+  "CE+Dice (기준선)": {
+    "loss_name": "ce_dice",
+    "alpha": 1.0,
+    "gamma": 2.0,
+    "best_val_mdice": 0.9079874799047646,
+    "test_mDice": 0.7588933399158,
+    "per_class_dice": {
+      "aorta": 0.8261212940371282,
+      "gallbladder": 0.4850260395017714,
+      "spleen": 0.793145285929482,
+      "left_kidney": 0.7696737445498106,
+      "right_kidney": 0.9401832141118093,
+      "liver": 0.5857963961460013,
+      "stomach": 0.8831628882981407,
+      "pancreas": 0.7880378567522569
+    },
+    "best_alpha_optuna": {
+      "plwce": 6.439801463842676,
+      "pwce": 3.984682391452517,
+      "plwce_focal": {
+        "alpha": 8.37052871691016,
+        "gamma": 4.764197289119815
+      }
+    }
+  },
+  "PLWCE+Dice (alpha=6.44)": {
+    "loss_name": "plwce_dice",
+    "alpha": 6.439801463842676,
+    "gamma": 2.0,
+    "best_val_mdice": 0.9096799973202379,
+    "test_mDice": 0.7619146565069992,
+    "per_class_dice": {
+      "aorta": 0.826413449778954,
+      "gallbladder": 0.468960219458171,
+      "spleen": 0.8077139395632907,
+      "left_kidney": 0.7662303964387229,
+      "right_kidney": 0.9365787659138448,
+      "liver": 0.5769040850125192,
+      "stomach": 0.8910092428486901,
+      "pancreas": 0.8215071530418007
+    },
+    "best_alpha_optuna": {
+      "plwce": 6.439801463842676,
+      "pwce": 3.984682391452517,
+      "plwce_focal": {
+        "alpha": 8.37052871691016,
+        "gamma": 4.764197289119815
+      }
+    }
+  },
+  "PWCE+Dice  (alpha=3.98)": {
+    "loss_name": "pwce_dice",
+    "alpha": 3.984682391452517,
+    "gamma": 2.0,
+    "best_val_mdice": 0.7671337417874671,
+    "test_mDice": 0.6509828835118767,
+    "per_class_dice": {
+      "aorta": 0.8079741616898998,
+      "gallbladder": 0.0008867822102708404,
+      "spleen": 0.7773171635405571,
+      "left_kidney": 0.7177438401706517,
+      "right_kidney": 0.907943069946244,
+      "liver": 0.500036525113227,
+      "stomach": 0.8161942740564886,
+      "pancreas": 0.6797672513676744
+    },
+    "best_alpha_optuna": {
+      "plwce": 6.439801463842676,
+      "pwce": 3.984682391452517,
+      "plwce_focal": {
+        "alpha": 8.37052871691016,
+        "gamma": 4.764197289119815
+      }
+    }
+  },
+  "PLWCE+Focal+Dice (alpha=8.37, gamma=4.76)": {
+    "loss_name": "plwce_focal_dice",
+    "alpha": 8.37052871691016,
+    "gamma": 4.764197289119815,
+    "best_val_mdice": 0.9041650812876851,
+    "test_mDice": 0.7425770236569048,
+    "per_class_dice": {
+      "aorta": 0.8107084707595776,
+      "gallbladder": 0.46557064588503416,
+      "spleen": 0.7766612170138956,
+      "left_kidney": 0.7447864749121903,
+      "right_kidney": 0.9409647494389102,
+      "liver": 0.5576139867964683,
+      "stomach": 0.8557546641941186,
+      "pancreas": 0.7885559802550435
+    },
+    "best_alpha_optuna": {
+      "plwce": 6.439801463842676,
+      "pwce": 3.984682391452517,
+      "plwce_focal": {
+        "alpha": 8.37052871691016,
+        "gamma": 4.764197289119815
+      }
+    }
+  }
+}

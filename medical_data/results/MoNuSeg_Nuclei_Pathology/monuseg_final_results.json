@@ -1,0 +1,83 @@
+{
+  "domain": "MoNuSeg 2018 Multi-organ Nuclei Segmentation",
+  "model": "U-Net (ResNet34, ImageNet pretrained)",
+  "sota_ref": {
+    "HoverNet": {
+      "Dice": 0.826,
+      "AJI": 0.618
+    },
+    "U-Net": {
+      "Dice": "0.790~0.800"
+    }
+  },
+  "num_classes": 2,
+  "class_counts": {
+    "Background": 49254048,
+    "Nucleus": 19165536
+  },
+  "imbalance": {
+    "BG_Nucleus": 2.6
+  },
+  "patch_size": 256,
+  "patch_stride": 128,
+  "train_patches": 1044,
+  "val_patches": 288,
+  "final_epochs": 50,
+  "results": {
+    "CE+Dice              (기준선)": {
+      "loss_name": "ce_dice",
+      "alpha": 1.0,
+      "best_val_dice": 0.8355392208295728,
+      "Dice": 0.8168419383909689,
+      "Sensitivity": 0.813001476302328,
+      "Specificity": 0.9497157604108262,
+      "AUC": 0.9674800794234413
+    },
+    "WCE+Dice": {
+      "loss_name": "wce_dice",
+      "alpha": 1.0,
+      "best_val_dice": 0.8353277747820327,
+      "Dice": 0.8156025885239544,
+      "Sensitivity": 0.8580114097864014,
+      "Specificity": 0.93035267650141,
+      "AUC": 0.9668711438608854
+    },
+    "LWCE+Dice": {
+      "loss_name": "lwce_dice",
+      "alpha": 1.0,
+      "best_val_dice": 0.8390317517410484,
+      "Dice": 0.8081454496612532,
+      "Sensitivity": 0.7891948664193346,
+      "Specificity": 0.9535916947715575,
+      "AUC": 0.9648096623383592
+    },
+    "PLWCE+Dice           (alpha=2.85)": {
+      "loss_name": "plwce_dice",
+      "alpha": 2.8544836441371864,
+      "best_val_dice": 0.8371184377968448,
+      "Dice": 0.8125542913349827,
+      "Sensitivity": 0.8029645413035355,
+      "Specificity": 0.9508947051752361,
+      "AUC": 0.9643101929982943
+    },
+    "CB+Dice": {
+      "loss_name": "cb_dice",
+      "alpha": 1.0,
+      "best_val_dice": 0.8339779756445275,
+      "Dice": 0.7993918183422748,
+      "Sensitivity": 0.8193156872214771,
+      "Specificity": 0.9347273354201185,
+      "AUC": 0.9613033123889503
+    },
+    "PLWCE+Focal+Dice     (α=2.68, γ=1.90)": {
+      "loss_name": "plwce_focal_dice",
+      "alpha": 2.684312595328363,
+      "best_val_dice": 0.8378214203733563,
+      "Dice": 0.8160892613376318,
+      "Sensitivity": 0.8199484666212972,
+      "Specificity": 0.9463424353608216,
+      "AUC": 0.9662888146689346
+    }
+  },
+  "best_model": "CE+Dice              (기준선)"
+}
