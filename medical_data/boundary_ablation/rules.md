@@ -107,6 +107,36 @@ boundary_ablation/results/
 
 ---
 
+## Lambda Annealing (향후 개선 아이디어)
+
+현재 구현은 컴포넌트 수에 따라 λ를 균등 분배(`1/n`)로 고정.
+
+**개선 방향**: BL은 초반 학습이 불안정하므로 epoch에 따라 BL 비중을 서서히 높이는 annealing 적용.
+
+제안 방식 (3컴포넌트: PLWCE+Dice+BL):
+```
+α_t = min(epoch / T_max, 0.5)   # 0 → 0.5 선형 증가
+
+loss = (1 - α_t)/2 × PLWCE + (1 - α_t)/2 × Dice + α_t × BL
+```
+- 초반: PLWCE 0.5  Dice 0.5  BL 0.0
+- 후반: PLWCE 0.25 Dice 0.25 BL 0.5
+
+제안 방식 (2컴포넌트: PLWCE+BL, PLWCE+LBL):
+```
+α_t = min(epoch / T_max, 0.5)   # 0 → 0.5 선형 증가
+
+loss = (1 - α_t) × PLWCE + α_t × BL
+```
+- 초반: PLWCE 1.0  BL 0.0
+- 후반: PLWCE 0.5  BL 0.5
+
+**유의사항**:
+- 50 epoch 학습 기준으로 annealing 효과가 크지 않을 수 있음 (epoch 수가 충분히 많아야 후반부 BL 비중 증가 효과를 볼 수 있음)
+- 현재 ablation은 균등 분배로 완료 후, 추후 별도 실험으로 비교 예정
+
+---
+
 ## 참고 문헌
 
 - Kervadec et al. (2019). "Boundary loss for highly unbalanced segmentation." *MIDL 2019*.

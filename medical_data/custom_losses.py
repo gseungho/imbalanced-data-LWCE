@@ -282,24 +282,39 @@ class SegmentationLoss(nn.Module):
         else:
             self.boundary_loss = None
 
-        # --- 5. Lambda: 활성 컴포넌트 수로 균등 분배 ---
+        # --- 5. Lambda: 활성 컴포넌트 수로 균등 분배 (초기값) ---
         n = 1 + (self.region_loss is not None) + (self.boundary_loss is not None)
-        self.lam = 1.0 / n
+        lam = 1.0 / n
+        self.lam_ce       = lam
+        self.lam_region   = lam if self.region_loss   is not None else 0.0
+        self.lam_boundary = lam if self.boundary_loss is not None else 0.0
         print(f"[{loss_name}] Components: CE"
               + (f" + {type(self.region_loss).__name__}" if self.region_loss else "")
               + (f" + {type(self.boundary_loss).__name__}" if self.boundary_loss else "")
-              + f"  (λ={self.lam:.3f} each)")
+              + f"  (λ={lam:.3f} each)")
+
+    def set_boundary_alpha(self, alpha_t):
+        """Boundary Loss annealing: BL 비중을 alpha_t로, 나머지를 균등 분배.
+        alpha_t = min(epoch / T_max, 0.5) 형태로 호출.
+        boundary_loss가 없으면 무시.
+        """
+        if self.boundary_loss is None:
+            return
+        n_non_boundary = 1 + (self.region_loss is not None)
+        self.lam_boundary = alpha_t
+        self.lam_ce       = (1.0 - alpha_t) / n_non_boundary
+        self.lam_region   = (1.0 - alpha_t) / n_non_boundary if self.region_loss is not None else 0.0
 
     def forward(self, logits, targets):
         if isinstance(self.ce_loss, nn.CrossEntropyLoss):
             if self.ce_loss.weight is not None and self.ce_loss.weight.device != logits.device:
                 self.ce_loss.weight = self.ce_loss.weight.to(logits.device)
 
-        loss = self.lam * self.ce_loss(logits, targets.long())
+        loss = self.lam_ce * self.ce_loss(logits, targets.long())
         if self.region_loss is not None:
-            loss = loss + self.lam * self.region_loss(logits, targets)
+            loss = loss + self.lam_region * self.region_loss(logits, targets)
         if self.boundary_loss is not None:
-            loss = loss + self.lam * self.boundary_loss(logits, targets)
+            loss = loss + self.lam_boundary * self.boundary_loss(logits, targets)
         return loss
 
 
