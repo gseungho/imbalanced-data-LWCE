@@ -48,20 +48,17 @@ LWCE의 핵심 철학("log scaling으로 가중치 폭발 억제")을 픽셀 거
 
 ---
 
-## 실험 조합 (8종)
+## 실험 조합 (5종) — LBL 제외 확정
 
 | # | loss_name | 설명 | Dice | BL | PLWCE |
 |---|---|---|---|---|---|
 | 1 | `ce_dice` | 기존 베이스라인 | ✅ | ❌ | ❌ |
 | 2 | `plwce_dice` | 기존 PLWCE 베스트 | ✅ | ❌ | ✅ |
-| 3 | `ce_dice_boundary` | 문헌 베이스라인 | ✅ | BL | ❌ |
+| 3 | `ce_dice_boundary` | 문헌 베이스라인 (Kervadec 2019) | ✅ | BL | ❌ |
 | 4 | `plwce_dice_boundary` | **핵심 실험** | ✅ | BL | ✅ |
-| 5 | `plwce_dice_log_boundary` | **핵심 실험** | ✅ | LBL | ✅ |
-| 6 | `ce_dice_log_boundary` | Dice+LBL 효과 분리 | ✅ | LBL | ❌ |
-| 7 | `plwce_boundary` | Dice 제거 실험 | ❌ | BL | ✅ |
-| 8 | `plwce_log_boundary` | Dice 제거 실험 | ❌ | LBL | ✅ |
+| 5 | `plwce_boundary` | Dice 제거 실험 (성능 하락 예상) | ❌ | BL | ✅ |
 
-**7, 8번 예상**: 성능 하락 가능성 높음 (BL만으로 region coverage 보장 불가)
+**LBL(Log-Boundary Loss) 제외 이유**: 3개 도메인 실험 결과 BL 대비 유의미한 성능 차이 없음 → 실험군에서 제거.
 
 **핵심 비교**: `plwce_dice_boundary` vs `ce_dice_boundary` — PLWCE가 BL 환경에서 추가 이점을 갖는가?
 
@@ -73,7 +70,8 @@ LWCE의 핵심 철학("log scaling으로 가중치 폭발 억제")을 픽셀 거
 
 - `plwce_dice_boundary` → `best_alpha_with_dice` (plwce_dice_log_boundary에도 재사용)
 - `plwce_boundary` → `best_alpha_without_dice` (plwce_log_boundary에도 재사용)
-- proxy: subset_ratio=0.15, epochs=5, n_trials=20
+- proxy: subset_ratio=0.15, epochs=8, n_trials=20
+- 탐색 방식: **GridSampler** (TPE/MedianPruner 미사용) — min→max 균일 20등분 순차 탐색
 
 기존 실험 최적 alpha (fallback):
 - WMH: 3.275
@@ -84,11 +82,18 @@ LWCE의 핵심 철학("log scaling으로 가중치 폭발 억제")을 픽셀 거
 
 ## 도메인별 설정
 
-| 도메인 | 불균형비 | 기존 1위 | FINAL_EPOCHS | optimizer |
-|---|---|---|---|---|
-| WMH | ~100:1 (극심) | plwce_dice | 50 | Adam |
-| ISIC 2018 | ~4:1 (중간) | lwce_dice | 30 | Adam |
-| TN3K | ~3:1 (낮음) | ce_dice | 50 | AdamW |
+| 도메인 | 불균형비 | 기존 1위 | FINAL_EPOCHS | optimizer | 모델 |
+|---|---|---|---|---|---|
+| WMH | ~250:1 (극심) | plwce_dice | 50 | Adam | U-Net (ResNet34) |
+| ISIC 2018 | ~4:1 (중간) | lwce_dice | 30 | Adam | U-Net (ResNet34) |
+| TN3K | ~6:1 (중간) | ce_dice | 50 | AdamW | U-Net (ResNet34) |
+| DRIVE | ~9:1 (중간) | plwce_focal_dice | 30 | Adam | IterNet |
+| LiTS | Tumor ~356:1 (극심) | plwce_dice | 50 | Adam+CosineAnneal | U-Net++ (ResNet50) |
+| Kvasir | ~5:1 (중간) | lwce_dice | 20 | Adam | PraNet (Res2Net50) |
+
+> DRIVE: test GT 없음 → val set으로 평가  
+> LiTS: 3-class (BG/Liver/Tumor), 평가 지표 = Liver_Dice / Tumor_Dice / mDice  
+> Kvasir: PraNet 4-출력 구조, 각 출력에 손실 합산
 
 ---
 
@@ -97,12 +102,16 @@ LWCE의 핵심 철학("log scaling으로 가중치 폭발 억제")을 픽셀 거
 ```
 boundary_ablation/results/
 ├── wmh/
-│   ├── wmh_boundary_optuna.json      # Optuna 결과
-│   ├── wmh_boundary_ablation.json    # 최종 평가 결과
-│   ├── boundary_ablation_curves.png
-│   └── boundary_ablation_bar.png
+│   ├── wmh_boundary_optuna.json       # Optuna 결과
+│   ├── wmh_boundary_ablation.json     # 최종 평가 결과 (JSON)
+│   ├── wmh_boundary_ablation.xlsx     # 최종 평가 결과 (Excel: Summary + Training_History 시트)
+│   ├── boundary_ablation_curves.png   # 학습 곡선
+│   └── boundary_ablation_bar.png      # Test Dice 바차트
 ├── isic2018/
-└── tn3k/
+├── tn3k/
+├── drive/                             # (신규) 망막 혈관, val set 평가
+├── lits/                              # (신규) 간/종양, Liver_Dice+Tumor_Dice+mDice
+└── kvasir/                            # (신규) 폴립, test set 평가
 ```
 
 ---

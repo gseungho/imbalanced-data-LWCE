@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python C:/tmp/patch_notebooks.py)",
+      "mcp__ide__executeCode",
+      "Read(//tmp/**)",
+      "Bash(python C:/tmp/patch_results_filenames.py)",
+      "Bash(python patch_isic_retinal.py)",
+      "Bash(python patch_kvasir.py)",
+      "Bash(python patch_boundary_excel.py)",
+      "Bash(python create_drive_ba.py)",
+      "Bash(python create_lits_ba.py)",
+      "Bash(python create_kvasir_ba.py)",
+      "Bash(python \"C:/tmp/create_drive_ba.py\")",
+      "Bash(python \"C:/tmp/create_lits_ba.py\")",
+      "Bash(python \"C:/tmp/create_kvasir_ba.py\")"
+    ]
+  }
+}

@@ -471,13 +471,22 @@ if self.weights is not None and self.weights.device != logits.device:
 ### 6-4. Optuna 설정 표준
 
 ```python
-study = optuna.create_study(
-    direction='maximize',
-    pruner=optuna.pruners.MedianPruner(n_startup_trials=5, n_warmup_steps=2)
+# GridSampler: TPE/MedianPruner 대신 min→max 균일 분할 순차 탐색
+# 1D (alpha 단일): n_trials = N 과 grid 크기 일치 필수
+sampler = optuna.samplers.GridSampler(
+    {'alpha': np.linspace(LOW, HIGH, N_TRIALS).tolist()}
 )
-# proxy 설정: subset_ratio=0.15, epochs=5
+# 2D (alpha+gamma): grid = N_ALPHA × N_GAMMA → n_trials = N_ALPHA * N_GAMMA
+sampler_pf = optuna.samplers.GridSampler({
+    'alpha': np.linspace(ALPHA_LOW, ALPHA_HIGH, N_ALPHA).tolist(),
+    'gamma': np.linspace(GAMMA_LOW, GAMMA_HIGH, N_GAMMA).tolist(),
+})
+study = optuna.create_study(direction='maximize', sampler=sampler)
+# proxy 설정: subset_ratio=0.15, epochs=8
 # N_TRIALS     = 20~30   (alpha 단일 파라미터 탐색)
-# N_TRIALS_PF  = N_TRIALS * 2  (PLWCE+Focal: alpha+gamma 2개 파라미터 → 탐색 공간 2배)
+# N_TRIALS_PF  = N_ALPHA * N_GAMMA  (PLWCE+Focal: 20→4×5, 40→8×5, 60→10×6)
+# ⚠️ GridSampler와 MedianPruner 병행 금지
+# ⚠️ n_trials가 grid 크기와 불일치 시 탐색 조기 종료 또는 중복 발생
 ```
 
 #### 도메인별 Optuna 탐색 범위
@@ -636,19 +645,20 @@ MyDrive/imbalanced-data-LWCE/
 
 ```
 실험 결과 표 형식:
-| Loss Function    | alpha | gamma | Dice | Sens | Spec | AUC |
-|------------------|-------|-------|------|------|------|-----|
-| CE+Dice          | -     | -     |      |      |      |     |
-| WCE+Dice         | -     | -     |      |      |      |     |
-| LWCE+Dice        | -     | -     |      |      |      |     |
-| PLWCE+Dice       | best  | -     |      |      |      |     |
-| CB+Dice          | -     | -     |      |      |      |     |
-| PLWCE+Focal+Dice | best  | best  |      |      |      |     |
+| Loss Function    | alpha | gamma | Dice | Sensitivity | Specificity | AUC |
+|------------------|-------|-------|------|-------------|-------------|-----|
+| CE+Dice          | -     | -     |      |             |             |     |
+| WCE+Dice         | -     | -     |      |             |             |     |
+| LWCE+Dice        | -     | -     |      |             |             |     |
+| PLWCE+Dice       | best  | -     |      |             |             |     |
+| CB+Dice          | -     | -     |      |             |             |     |
+| PLWCE+Focal+Dice | best  | best  |      |             |             |     |
 ```
 
 - alpha, gamma는 Optuna 최적값 기재 (단일 파라미터 모드는 해당 없는 항목 `-` 표시)
 - 최고 성능 수치 **볼드** 처리
 - 불균형 비율(BG:FG)도 함께 기재
+- **지표명 주의**: `Sensitivity`, `Specificity` (약어 `Sens`/`Spec` 금지 — JSON/Excel 키와 불일치 발생)
 
 ### 8-1. 최종 논문 결과 기록 방식 — 반복 실험 (구현 보류 중)
 
@@ -665,14 +675,14 @@ MyDrive/imbalanced-data-LWCE/
 #### 최종 결과 표 형식 (논문용)
 
 ```
-| Loss Function    | alpha | gamma | Dice (mean±std)      | Sens (mean±std) | Spec (mean±std) |
-|------------------|-------|-------|----------------------|-----------------|-----------------|
-| CE+Dice          | -     | -     | 0.XXX ± 0.XXX        |                 |                 |
-| WCE+Dice         | -     | -     | 0.XXX ± 0.XXX        |                 |                 |
-| LWCE+Dice        | -     | -     | 0.XXX ± 0.XXX        |                 |                 |
-| PLWCE+Dice       | best  | -     | **0.XXX ± 0.XXX**    |                 |                 |
-| CB+Dice          | -     | -     | 0.XXX ± 0.XXX        |                 |                 |
-| PLWCE+Focal+Dice | best  | best  | 0.XXX ± 0.XXX        |                 |                 |
+| Loss Function    | alpha | gamma | Dice (mean±std)      | Sensitivity (mean±std) | Specificity (mean±std) |
+|------------------|-------|-------|----------------------|------------------------|------------------------|
+| CE+Dice          | -     | -     | 0.XXX ± 0.XXX        |                        |                        |
+| WCE+Dice         | -     | -     | 0.XXX ± 0.XXX        |                        |                        |
+| LWCE+Dice        | -     | -     | 0.XXX ± 0.XXX        |                        |                        |
+| PLWCE+Dice       | best  | -     | **0.XXX ± 0.XXX**    |                        |                        |
+| CB+Dice          | -     | -     | 0.XXX ± 0.XXX        |                        |                        |
+| PLWCE+Focal+Dice | best  | best  | 0.XXX ± 0.XXX        |                        |                        |
 ```
 
 #### 평균 랭킹 분석

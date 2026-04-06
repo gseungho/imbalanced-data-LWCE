@@ -22,14 +22,22 @@ imbalanced-data-LWCE/
 ├── medical_data/
 │   ├── custom_losses.py          # 핵심 모듈 — 모든 손실 함수 정의
 │   ├── rules.md                  # 도메인별 실험 설계 및 SoTA 비교
-│   ├── {Domain}.ipynb            # 도메인 실험 노트북 (8종)
+│   ├── {Domain}.ipynb            # 도메인 실험 노트북 (11종)
 │   ├── results/{도메인}/         # JSON/xlsx/PNG 결과 저장
+│   │   └── experiment_summary.md # 전체 실험 결과 요약
 │   └── boundary_ablation/
 │       ├── rules.md              # Boundary ablation 실험 배경 및 설계
 │       ├── {Domain}_boundary_ablation.ipynb   # ablation 노트북 (3종: WMH/ISIC/TN3K)
 │       └── results/{도메인}/     # ablation 결과
-└── tabular_data/
-    └── scr/custom_losses.py      # 표 형 데이터용 손실 함수 (별도 버전)
+├── tabular_data/
+│   ├── Imbalanced_Data_Loss.ipynb  # 표 형 데이터 실험 노트북
+│   └── scr/
+│       ├── custom_losses.py      # XGBoost용 커스텀 grad/hess 손실 (numpy 기반)
+│       ├── data_handler.py       # 데이터 로드 및 전처리
+│       ├── evaluation.py         # 평가 지표
+│       ├── optuna_tuner_alpha_only.py   # alpha 단독 Optuna 탐색
+│       └── optuna_tuner_xgb_linear.py  # XGBoost linear booster Optuna 탐색
+└── papers/                       # 참고 문헌 PDF
 ```
 
 ### custom_losses.py 구조 (`medical_data/`)
@@ -74,13 +82,14 @@ get_loss_function()           # Factory 함수 (항상 이걸 통해 생성)
 - `to_2ch_logits(p) = torch.cat([-p, p], dim=1)` 패턴 사용 — `[zeros, p]` 방식 금지
 - Optuna로 alpha/gamma 탐색 후 최종 실험 진행
 - **세그멘테이션 인사이트**: Dice Loss는 분모 정규화로 소수 클래스 무시를 이미 방지 → LWCE+Dice 조합에서 LWCE 효과가 희석됨 (실험으로 확인)
-- **Boundary Loss 실험** (`boundary_ablation/`): CE를 LWCE/PLWCE로 교체 + Dice + BL/LBL 조합 — Dice와 중복 없는 방식으로 LWCE 적용
+- **Boundary Loss 실험** (`boundary_ablation/`): CE를 LWCE/PLWCE로 교체 + Dice + BL 조합 — Dice와 중복 없는 방식으로 LWCE 적용
+  - `ce_dice` = CE + Dice (기존 베이스라인)
+  - `plwce_dice` = PLWCE + Dice (기존 PLWCE 베스트)
   - `ce_dice_boundary` = CE + Dice + BL (문헌 베이스라인, Kervadec 2019)
   - `plwce_dice_boundary` = PLWCE + Dice + BL (핵심 실험)
-  - `plwce_dice_log_boundary` = PLWCE + Dice + LBL (log scaling 확장)
-  - `plwce_boundary` / `plwce_log_boundary` = Dice 제거 실험 (성능 하락 예상)
-  - **LBL (Log-Boundary Loss)**: 거리 맵에 `log(1+|d|)` 적용 — LWCE의 log scaling 철학을 픽셀 거리 도메인에 확장
-  - **BL/LBL Loss 음수 정상**: 모델이 병변 내부(d<0)를 잘 예측할수록 loss가 음수로 수렴 — 정상 동작
+  - `plwce_boundary` = PLWCE + BL (Dice 제거 실험, 성능 하락 예상)
+  - **LBL 제거**: LBL(Log-Boundary Loss)은 BL 대비 유의미한 성능 차이 없어 실험군에서 제외
+  - **BL Loss 음수 정상**: 모델이 병변 내부(d<0)를 잘 예측할수록 loss가 음수로 수렴 — 정상 동작
 
 ### 경로 규칙
 - custom_losses import: `sys.path.insert(0, '/root/imbalanced-data-LWCE/medical_data')`
@@ -94,7 +103,12 @@ get_loss_function()           # Factory 함수 (항상 이걸 통해 생성)
 - `if t.value is not None` — `if t.value` 사용 금지 (Dice=0.0 trial 필터링 버그)
 - `study_pf` 시각화 코드는 반드시 `study_pf = optuna.create_study(...)` 정의 이후에 위치
 - alpha 범위: 2.5~15.0 (극심한 불균형 도메인은 ~20.0까지 확장)
-- proxy 설정: `subset_ratio=0.15`, `epochs=5`, `n_trials=20`
+- proxy 설정: `subset_ratio=0.15`, `epochs=8`, `n_trials=20`
+- **GridSampler 사용**: TPE 대신 균일 분할 `GridSampler`로 min→max 순차 탐색
+  - 1D (alpha only): `GridSampler({'alpha': np.linspace(LOW, HIGH, N_TRIALS).tolist()})`
+  - 2D (alpha+gamma): `GridSampler({'alpha': ..., 'gamma': ...})` — N_TRIALS_PF=40→8×5, 60→10×6
+  - `n_trials` 값이 grid 크기와 정확히 일치해야 함 (N_TRIALS_PF는 명시적 int로 지정)
+  - GridSampler와 MedianPruner 병행 금지 (Kvasir/Retinal 등에서 pruner 제거됨)
 
 ### 데이터 로딩
 - WMH: `kagglehub.dataset_download("farahmo/wmh-dataset")` 자동 다운로드
@@ -102,6 +116,12 @@ get_loss_function()           # Factory 함수 (항상 이걸 통해 생성)
 - 기타: Google Drive `MyDrive/imbalanced-data-LWCE/{domain}/` → `/tmp/` 복사
 - WMH 입력: 3채널 `[FLAIR, T1, FLAIR]` (ImageNet 인코더 3ch 맞춤)
 - WMH BG-only 슬라이스: `BG_ONLY_RATIO=0.3` (WMH 슬라이스 수의 30% 포함)
+
+### tabular_data 손실 함수 (`tabular_data/scr/custom_losses.py`)
+- PyTorch 대신 **numpy 기반**, XGBoost 커스텀 objective용 grad/hess 반환
+- 클래스: `WeightedCrossEntropy`, `PowerScaledInverseCE`, `LogWeightedCE`, `PowerLogWeightedCE`
+- `initialize(y_true)` 호출로 가중치 초기화 후 `compute_grad_hess(y_true, y_pred)` 사용
+- medical_data의 `get_loss_function()` 팩토리 패턴과 별개 — 두 버전 혼용 금지
 
 ---
 
@@ -116,6 +136,7 @@ get_loss_function()           # Factory 함수 (항상 이걸 통해 생성)
 | TransUNet import | `sys.path.add(networks/)` + `from . import` | `sys.path.add(TransUNet/)` + `from networks.xxx import` |
 | 학습 전 모델 호출 | Cell 정의 마지막에 `build_model()` 호출 | 정의만 하고 호출 금지 (불필요한 weight 다운로드) |
 | DataLoader num_workers | `NUM_WORKERS = 2` (또는 그 이상) | `NUM_WORKERS = 0` — Colab notebook에서 반복 학습 시 worker 프로세스 정리 오류 발생 |
+| 평가 지표명 | `'Sens'`, `'Spec'` 키 사용 | `'Sensitivity'`, `'Specificity'` — JSON/Excel 키와 통일, 전 노트북 표준 |
 
 ---
 
