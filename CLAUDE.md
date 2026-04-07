@@ -104,7 +104,7 @@ get_loss_function()           # Factory 함수 (항상 이걸 통해 생성)
 - `study_pf` 시각화 코드는 반드시 `study_pf = optuna.create_study(...)` 정의 이후에 위치
 - alpha 범위: 2.5~15.0 (극심한 불균형 도메인은 ~20.0까지 확장)
 - proxy 설정: `subset_ratio=0.15`, `epochs=8`, `n_trials=20`
-- **GridSampler 사용**: TPE 대신 균일 분할 `GridSampler`로 min→max 순차 탐색
+- **GridSampler 사용**: TPE 대신 균일 분할 `GridSampler`로 전체 범위 탐색
   - 1D (alpha only): `GridSampler({'alpha': np.linspace(LOW, HIGH, N_TRIALS).tolist()})`
   - 2D (alpha+gamma): `GridSampler({'alpha': ..., 'gamma': ...})` — N_TRIALS_PF=40→8×5, 60→10×6
   - `n_trials` 값이 grid 크기와 정확히 일치해야 함 (N_TRIALS_PF는 명시적 int로 지정)

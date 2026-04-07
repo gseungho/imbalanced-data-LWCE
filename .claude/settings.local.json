@@ -13,7 +13,10 @@
       "Bash(python create_kvasir_ba.py)",
       "Bash(python \"C:/tmp/create_drive_ba.py\")",
       "Bash(python \"C:/tmp/create_lits_ba.py\")",
-      "Bash(python \"C:/tmp/create_kvasir_ba.py\")"
+      "Bash(python \"C:/tmp/create_kvasir_ba.py\")",
+      "Bash(python3)",
+      "Bash(grep -l \"class_counts\" *.ipynb)",
+      "Bash(ls:*)"
     ]
   }
 }
