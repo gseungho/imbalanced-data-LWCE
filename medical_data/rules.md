@@ -137,7 +137,7 @@ criterion = get_loss_function(loss_name, class_counts, alpha=1.0, beta=0.9999, g
 | 뇌 백질 병변 MRI (WMH 2017) | `WMH_Brain_Lesion_MRI.ipynb` | MRI (FLAIR+T1) | U-Net (ResNet34) | ~100~600:1 | 코드 완성 |
 | 조직병리 세포핵 (MoNuSeg 2018) | `MoNuSeg_Nuclei_Pathology.ipynb` | H&E Pathology | U-Net (ResNet34) | ~3~8:1 | 코드 완성 |
 | 심장 구조 MRI (ACDC) | `ACDC_Cardiac_MRI.ipynb` | Cardiac Cine MRI | U-Net (ResNet34) | ~5~15:1 (RV/MYO) | 코드 완성 |
-| 안저 시신경 (REFUGE 2018) | `REFUGE_Optic_Disc_Cup.ipynb` | Fundus Photography(RGB) | U-Net (ResNet34) | Disc ~5:1, Cup ~50:1 | 코드 완성 |
+| 안저 시신경 (REFUGE2) | `REFUGE_Optic_Disc_Cup.ipynb` | Fundus Photography(RGB) | U-Net (ResNet34) | Disc ~5:1, Cup ~50:1 | 코드 완성 |
 | 유방 초음파 종양 (BUSI) | `BUSI_Breast_Ultrasound.ipynb` | Ultrasound | U-Net (ResNet34) | ~3~10:1 | 코드 완성 |
 
 **피부 병변 (ISIC 2018) SoTA 참고** (2026년 3월 인터넷 조사 기준):
@@ -275,28 +275,32 @@ criterion = get_loss_function(loss_name, class_counts, alpha=1.0, beta=0.9999, g
 
 ---
 
-### 4-0-F. 안저 시신경 유두/컵 분할 (REFUGE 2018)
+### 4-0-F. 안저 시신경 유두/컵 분할 (REFUGE2)
 
 - **파일**: `REFUGE_Optic_Disc_Cup.ipynb`
 - **모델**: U-Net (ResNet34, ImageNet pretrained)
-- **태스크**: 3-class segmentation (Background, Optic Disc, Optic Cup) 또는 2 × Binary
-- **데이터**: REFUGE 2018 — 400 train + 400 val + 400 test (fundus 이미지)
+- **태스크**: 3-class segmentation (Background, Optic Disc, Optic Cup)
+- **데이터**: REFUGE2 — 400 train + 400 val + 400 test (공식 분할, fundus 이미지)
 - **불균형**: Disc ~5:1, Cup ~50:1 (Cup이 극심한 불균형)
-- **공식 사이트**: https://refuge.grand-challenge.org/ (2018)
-- **모달리티 특이점**: RGB 안저 사진, 고해상도(2124×2056) → 학습 시 리사이즈 필수
+- **모달리티 특이점**: RGB 안저 사진, 고해상도 원본 → 학습 시 512×512 리사이즈 필수
 - **전처리**: 512×512 리사이즈, ImageNet 정규화
 - **실험 Loss**: `ce_dice`, `wce_dice`, `lwce_dice`, `plwce_dice`, `cb_dice`, `plwce_focal_dice`
 - **Optuna alpha 범위**: PLWCE 2.5~15.0, PWCE 0.2~2.5
-- **평가 지표**: Disc Dice, Cup Dice, mDice; 추가로 CDR(Cup-to-Disc Ratio) AUC
-- **SoTA 참고** (2026년 3월 인터넷 조사 기준):
+- **평가 지표**: Disc Dice, Cup Dice, mDice (BG 제외)
+- **SoTA 참고** (2026년 기준):
   | 방법 | Disc Dice | Cup Dice | 출처 |
   |------|-----------|----------|------|
   | MNet-SAt (2024) | — | — | IEEE Access |
-  | REFUGE 우승 (2018) | ~97% | ~87% | Challenge leaderboard |
+  | REFUGE2 우승 | ~97% | ~87% | Challenge leaderboard |
   | U-Net baseline | ~94~96% | ~82~85% | 복수 논문 |
 - **데이터 로드**:
   - Google Drive: `MyDrive/imbalanced-data-LWCE/refuge/refuge.zip` → `/tmp/refuge_data/` 압축 해제
-  - zip 내부 구조: `refuge/Training400/Images/*.jpg` + `refuge/Training400/Disc_Cup_Masks/*.bmp`
+  - zip 내부 구조 (6개 폴더 직접 압축, 래퍼 없음):
+    - `Training400/Glaucoma/*.jpg`, `Training400/Non-Glaucoma/*.jpg` (학습 이미지)
+    - `Annotation-Training400/Disc_Cup_Masks/Glaucoma/*.bmp`, `.../Non-Glaucoma/*.bmp` (학습 마스크)
+    - `REFUGE-Validation400/*.jpg`, `REFUGE-Validation400-GT/Disc_Cup_Masks/*.bmp` (val)
+    - `Test400/*.jpg`, `REFUGE-Test-GT/Disc_Cup_Masks/G/*.bmp` + `.../N/*.bmp` (test)
+  - 마스크 pixel 값: 0=배경, 128=Disc, 255=Cup
 - **결과 저장**: `results/REFUGE_Optic_Disc_Cup/`
 
 ---
@@ -610,7 +614,7 @@ MyDrive/imbalanced-data-LWCE/
                tn3k/test-mask/*.jpg
                tn3k/tn3k-trainval-fold0.json
   acdc/        acdc.zip      ← training/{patient_id}/ 압축      (ACDC Cardiac)
-  refuge/      refuge.zip    ← Training400/ 압축                (REFUGE 2018)
+  refuge/      refuge.zip    ← 6개 폴더 직접 압축              (REFUGE2)
   (BUSI는 kagglehub 자동 다운로드 — Drive 업로드 불필요)
 ```
 
@@ -827,7 +831,7 @@ GitHub에서 클론 후 각 도메인 데이터를 아래 방법으로 준비한
 | Skin ISIC 2018 | `Skin_Lesion_ISIC2018.ipynb` | `kagglehub.dataset_download(...)` — Cell 0 실행 시 자동 (또는 [ISIC Archive](https://challenge.isic-archive.com/)) | 자동 |
 | Pancreas Synapse | `Pancreas_MultiOrgan_CT.ipynb` | [Synapse Platform](https://www.synapse.org/#!Synapse:syn3193805/wiki/) 계정 등록 → zip 압축 후 업로드 | `MyDrive/imbalanced-data-LWCE/synapse/synapse.zip` |
 | ACDC Cardiac | `ACDC_Cardiac_MRI.ipynb` | https://www.creatis.insa-lyon.fr/Challenge/acdc/ 계정 등록 → zip 압축 후 업로드 | `MyDrive/imbalanced-data-LWCE/acdc/acdc.zip` |
-| REFUGE 2018 | `REFUGE_Optic_Disc_Cup.ipynb` | https://refuge.grand-challenge.org/ 계정 등록 → zip 압축 후 업로드 | `MyDrive/imbalanced-data-LWCE/refuge/refuge.zip` |
+| REFUGE2 | `REFUGE_Optic_Disc_Cup.ipynb` | https://refuge.grand-challenge.org/ 계정 등록 → 6개 폴더 zip 압축 후 업로드 | `MyDrive/imbalanced-data-LWCE/refuge/refuge.zip` |
 | BUSI | `BUSI_Breast_Ultrasound.ipynb` | **자동**: `kagglehub.dataset_download("aryashah2k/breast-ultrasound-images-dataset")` — Cell 0 실행 시 자동 | 불필요 |
 
 #### 상세 폴더 구조 (Drive 업로드 기준)

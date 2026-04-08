@@ -13,7 +13,11 @@
       "Bash(python create_kvasir_ba.py)",
       "Bash(python \"C:/tmp/create_drive_ba.py\")",
       "Bash(python \"C:/tmp/create_lits_ba.py\")",
-      "Bash(python \"C:/tmp/create_kvasir_ba.py\")"
+      "Bash(python \"C:/tmp/create_kvasir_ba.py\")",
+      "Bash(grep -v \"^G$\")",
+      "Bash(python fix_refuge_nb.py)",
+      "Bash(python make_refuge_ablation.py)",
+      "Bash(rm make_refuge_ablation.py)"
     ]
   }
 }

@@ -90,10 +90,12 @@ LWCE의 핵심 철학("log scaling으로 가중치 폭발 억제")을 픽셀 거
 | DRIVE | ~9:1 (중간) | plwce_focal_dice | 30 | Adam | IterNet |
 | LiTS | Tumor ~356:1 (극심) | plwce_dice | 50 | Adam+CosineAnneal | U-Net++ (ResNet50) |
 | Kvasir | ~5:1 (중간) | lwce_dice | 20 | Adam | PraNet (Res2Net50) |
+| REFUGE2 | Disc ~5:1, Cup ~50:1 | 미정 (실험 전) | 50 | Adam | U-Net (ResNet34) |
 
 > DRIVE: test GT 없음 → val set으로 평가  
 > LiTS: 3-class (BG/Liver/Tumor), 평가 지표 = Liver_Dice / Tumor_Dice / mDice  
-> Kvasir: PraNet 4-출력 구조, 각 출력에 손실 합산
+> Kvasir: PraNet 4-출력 구조, 각 출력에 손실 합산  
+> REFUGE2: 3-class (BG/Disc/Cup), 평가 지표 = mDice / Disc_Dice / Cup_Dice
 
 ---
 
@@ -111,7 +113,8 @@ boundary_ablation/results/
 ├── tn3k/
 ├── drive/                             # (신규) 망막 혈관, val set 평가
 ├── lits/                              # (신규) 간/종양, Liver_Dice+Tumor_Dice+mDice
-└── kvasir/                            # (신규) 폴립, test set 평가
+├── kvasir/                            # (신규) 폴립, test set 평가
+└── refuge/                            # (신규) 안저 Disc/Cup, mDice+Disc_Dice+Cup_Dice
 ```
 
 ---
