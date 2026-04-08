@@ -71,7 +71,7 @@ LWCE의 핵심 철학("log scaling으로 가중치 폭발 억제")을 픽셀 거
 - `plwce_dice_boundary` → `best_alpha_with_dice` (plwce_dice_log_boundary에도 재사용)
 - `plwce_boundary` → `best_alpha_without_dice` (plwce_log_boundary에도 재사용)
 - proxy: subset_ratio=0.15, epochs=8, n_trials=20
-- 탐색 방식: **GridSampler** (TPE/MedianPruner 미사용) — min→max 균일 20등분 순차 탐색
+- 탐색 방식: **GridSampler** (TPE/MedianPruner 미사용) — 균일 20등분으로 전체 범위 커버 (탐색 순서는 랜덤)
 
 기존 실험 최적 alpha (fallback):
 - WMH: 3.275
@@ -82,15 +82,15 @@ LWCE의 핵심 철학("log scaling으로 가중치 폭발 억제")을 픽셀 거
 
 ## 도메인별 설정
 
-| 도메인 | 불균형비 | 기존 1위 | FINAL_EPOCHS | optimizer | 모델 |
-|---|---|---|---|---|---|
-| WMH | ~250:1 (극심) | plwce_dice | 50 | Adam | U-Net (ResNet34) |
-| ISIC 2018 | ~4:1 (중간) | lwce_dice | 30 | Adam | U-Net (ResNet34) |
-| TN3K | ~6:1 (중간) | ce_dice | 50 | AdamW | U-Net (ResNet34) |
-| DRIVE | ~9:1 (중간) | plwce_focal_dice | 30 | Adam | IterNet |
-| LiTS | Tumor ~356:1 (극심) | plwce_dice | 50 | Adam+CosineAnneal | U-Net++ (ResNet50) |
-| Kvasir | ~5:1 (중간) | lwce_dice | 20 | Adam | PraNet (Res2Net50) |
-| REFUGE2 | Disc ~5:1, Cup ~50:1 | 미정 (실험 전) | 50 | Adam | U-Net (ResNet34) |
+| 도메인 | 불균형비 | 기존 1위 | FINAL_EPOCHS | Early Stop | optimizer | 모델 |
+|---|---|---|---|---|---|---|
+| WMH | ~250:1 (극심) | plwce_dice | 75 | patience=15 | Adam | U-Net (ResNet34) |
+| ISIC 2018 | ~4:1 (중간) | lwce_dice | 75 | patience=15 | Adam | U-Net (ResNet34) |
+| TN3K | ~6:1 (중간) | ce_dice | 75 | patience=15 | AdamW | U-Net (ResNet34) |
+| DRIVE | ~9:1 (중간) | plwce_focal_dice | 75 | patience=15 | Adam | IterNet |
+| LiTS | Tumor ~356:1 (극심) | plwce_dice | 75 | patience=15 | Adam+CosineAnneal | U-Net++ (ResNet50) |
+| Kvasir | ~5:1 (중간) | lwce_dice | 75 | patience=15 | Adam | PraNet (Res2Net50) |
+| REFUGE2 | Disc ~5:1, Cup ~50:1 | 미정 (실험 전) | 75 | patience=15 | Adam | U-Net (ResNet34) |
 
 > DRIVE: test GT 없음 → val set으로 평가  
 > LiTS: 3-class (BG/Liver/Tumor), 평가 지표 = Liver_Dice / Tumor_Dice / mDice  
@@ -119,33 +119,43 @@ boundary_ablation/results/
 
 ---
 
-## Lambda Annealing (향후 개선 아이디어)
+## Lambda Annealing (구현 완료)
 
-현재 구현은 컴포넌트 수에 따라 λ를 균등 분배(`1/n`)로 고정.
+BL은 초반 학습이 불안정하므로 **지연 선형(delayed linear)** annealing 적용.
 
-**개선 방향**: BL은 초반 학습이 불안정하므로 epoch에 따라 BL 비중을 서서히 높이는 annealing 적용.
-
-제안 방식 (3컴포넌트: PLWCE+Dice+BL):
+**공식**:
 ```
-α_t = min(epoch / T_max, 0.5)   # 0 → 0.5 선형 증가
+WARMUP = int(epochs × 0.2)   # 처음 20% 에포크: BL = 0 고정
 
-loss = (1 - α_t)/2 × PLWCE + (1 - α_t)/2 × Dice + α_t × BL
+epoch ≤ WARMUP  →  α_t = 0
+epoch > WARMUP  →  α_t = min((epoch - WARMUP) / (epochs - WARMUP), 1.0) × alpha_max
 ```
-- 초반: PLWCE 0.5  Dice 0.5  BL 0.0
-- 후반: PLWCE 0.25 Dice 0.25 BL 0.5
 
-제안 방식 (2컴포넌트: PLWCE+BL, PLWCE+LBL):
+**alpha_max (컴포넌트 수에 따라 분리)**:
+| 조합 | alpha_max | 최종 가중치 |
+|---|---|---|
+| 3-comp (CE+Dice+BL) | **1/3** | CE = Dice = BL = 0.333 (균등) |
+| 2-comp (CE+BL) | **0.5** | CE = BL = 0.5 (균등) |
+
+**코드 (train_model 내 epoch 루프)**:
+```python
+if criterion.boundary_loss is not None:
+    WARMUP = int(epochs * 0.2)
+    has_region = criterion.region_loss is not None
+    alpha_max = 1/3 if has_region else 0.5
+    if epoch <= WARMUP:
+        alpha_t = 0.0
+    else:
+        alpha_t = min((epoch - WARMUP) / (epochs - WARMUP), 1.0) * alpha_max
+    criterion.set_boundary_alpha(alpha_t)
 ```
-α_t = min(epoch / T_max, 0.5)   # 0 → 0.5 선형 증가
 
-loss = (1 - α_t) × PLWCE + α_t × BL
-```
-- 초반: PLWCE 1.0  BL 0.0
-- 후반: PLWCE 0.5  BL 0.5
+**변경 이유**:
+- 기존 `min(epoch/epochs, 0.5)`: 3-comp에서 BL 최종 50% → CE·Dice 각 25%로 BL 편향 심함
+- DRIVE CE+Dice+BL: Dice 0.530으로 급락 (baseline 0.611) — 과도한 BL 비중이 원인으로 판단
+- 워밍업 없이 epoch 1부터 BL 증가 → 초반 불안정 학습 노출
 
-**유의사항**:
-- 50 epoch 학습 기준으로 annealing 효과가 크지 않을 수 있음 (epoch 수가 충분히 많아야 후반부 BL 비중 증가 효과를 볼 수 있음)
-- 현재 ablation은 균등 분배로 완료 후, 추후 별도 실험으로 비교 예정
+**Early Stopping**: patience=15 (모든 도메인 공통, 75 epoch 기준)
 
 ---
 
