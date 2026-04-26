@@ -21,6 +21,9 @@
       "Bash(python3)",
       "Bash(grep -l \"class_counts\" *.ipynb)",
       "Bash(ls:*)"
+    ],
+    "additionalDirectories": [
+      "C:\\Users\\Seung\\Desktop\\Research\\.claude\\skills"
     ]
   }
 }
