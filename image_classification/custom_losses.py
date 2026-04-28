@@ -34,6 +34,8 @@ def calculate_weights(class_counts, mode='ce', alpha=1.0, beta=0.9999):
         weights = np.ones_like(counts)
     elif mode == 'wce':
         weights = total / safe_counts
+    elif mode == 'pwce':
+        weights = np.power(total / safe_counts, alpha)
     elif mode == 'lwce':
         weights = 1.0 / np.log1p(safe_counts)
     elif mode == 'plwce':
@@ -80,13 +82,14 @@ class ClassificationLoss(nn.Module):
     """
     loss_name 문자열 파싱으로 손실함수 선택.
 
-    지원하는 loss_name (6종):
+    지원하는 loss_name (7종):
         'ce'           → CrossEntropyLoss (가중치 없음)
         'wce'          → 가중 CE (역빈도)
+        'pwce'         → 파워 가중 CE (alpha 파라미터)
         'lwce'         → 로그 가중 CE
         'plwce'        → 파워-로그 가중 CE (alpha 파라미터)
         'cb'           → 클래스 균형 CE (beta 파라미터)
-        'plwce_focal'  → PLWCE 가중치 + Focal Loss (alpha, gamma 파라미터)
+        'focal'        → CE 가중치 + Focal Loss (gamma 파라미터)
 
     Args:
         loss_name: 위의 6가지 문자열 중 하나
@@ -104,6 +107,8 @@ class ClassificationLoss(nn.Module):
             weight_mode = 'plwce'
         elif 'lwce' in loss_name:
             weight_mode = 'lwce'
+        elif 'pwce' in loss_name:
+            weight_mode = 'pwce'
         elif 'wce' in loss_name:
             weight_mode = 'wce'
         elif 'cb' in loss_name:

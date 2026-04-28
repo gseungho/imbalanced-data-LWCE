@@ -20,7 +20,10 @@
       "Bash(rm make_refuge_ablation.py)",
       "Bash(python3)",
       "Bash(grep -l \"class_counts\" *.ipynb)",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "Bash(python)",
+      "Read(//root/**)",
+      "Bash(python image_detection/create_notebook.py)"
     ],
     "additionalDirectories": [
       "C:\\Users\\Seung\\Desktop\\Research\\.claude\\skills"
