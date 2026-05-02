@@ -23,7 +23,13 @@
       "Bash(ls:*)",
       "Bash(python)",
       "Read(//root/**)",
-      "Bash(python image_detection/create_notebook.py)"
+      "Bash(python image_detection/create_notebook.py)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\Seung\\\\Desktop\\\\Research\\\\Deep_Learning\\\\imbalanced-data-LWCE\" -Directory)",
+      "Bash(Select-Object Name)",
+      "Bash(Get-Content *)"
     ],
     "additionalDirectories": [
       "C:\\Users\\Seung\\Desktop\\Research\\.claude\\skills"
