@@ -1,0 +1,321 @@
+\documentclass[12pt]{article}
+
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath, amssymb}
+\usepackage{enumerate}
+\usepackage{hyperref}
+
+\begin{filecontents*}[overwrite]{refs.bib}
+@inproceedings{lin2017,
+  author    = {Tsung-Yi Lin and Priya Goyal and Ross Girshick and Kaiming He and Piotr Doll{\'a}r},
+  title     = {Focal Loss for Dense Object Detection},
+  booktitle = {ICCV},
+  year      = {2017},
+}
+@inproceedings{cui2019,
+  author    = {Yin Cui and Menglin Jia and Tsung-Yi Lin and Yang Song and Serge Belongie},
+  title     = {Class-Balanced Loss Based on Effective Number of Samples},
+  booktitle = {CVPR},
+  year      = {2019},
+}
+@inproceedings{cao2019,
+  author    = {Kaidi Cao and Colin Wei and Adrien Gaidon and Nikos Ar{\'{e}}chiga and Tengyu Ma},
+  title     = {Learning Imbalanced Datasets with Label-Distribution-Aware Margin Loss},
+  booktitle = {NeurIPS},
+  year      = {2019},
+}
+@article{wang2019,
+  author    = {Shuo Wang and Wanli Liu and Lingqiao Wu and Lihua Cao and Qi Meng and Wei Chen},
+  title     = {Learning from Imbalanced Data Sets with Weighted Cross-Entropy Function},
+  journal   = {Pattern Recognition Letters},
+  year      = {2019},
+}
+@inproceedings{he2016,
+  author    = {Kaiming He and Xiangyu Zhang and Shaoqing Ren and Jian Sun},
+  title     = {Deep Residual Learning for Image Recognition},
+  booktitle = {CVPR},
+  year      = {2016},
+}
+@article{chawla2002,
+  author    = {Nitesh V. Chawla and Kevin W. Bowyer and Lawrence O. Hall and W. Philip Kegelmeyer},
+  title     = {{SMOTE}: Synthetic Minority Over-sampling Technique},
+  journal   = {Journal of Artificial Intelligence Research},
+  volume    = {16},
+  pages     = {321--357},
+  year      = {2002},
+}
+@techreport{krizhevsky2009,
+  author      = {Alex Krizhevsky},
+  title       = {Learning Multiple Layers of Features from Tiny Images},
+  institution = {University of Toronto},
+  year        = {2009},
+}
+@inproceedings{liu2019,
+  author    = {Ziwei Liu and Zhongqi Miao and Xiaohang Zhan and Jiayun Wang and Boqing Gong and Stella X. Yu},
+  title     = {Large-Scale Long-Tailed Recognition in an Open World},
+  booktitle = {CVPR},
+  year      = {2019},
+}
+@inproceedings{van_horn2018,
+  author    = {Grant Van Horn and Oisin Mac Aodha and Yang Song and Yin Cui and Chen Sun and Alex Shepard and Hartwig Adam and Pietro Perona and Serge Belongie},
+  title     = {The {iNaturalist} Species Classification and Detection Dataset},
+  booktitle = {CVPR},
+  year      = {2018},
+}
+@article{he2009,
+  author    = {Haibo He and Edwardo A. Garcia},
+  title     = {Learning from Imbalanced Data},
+  journal   = {IEEE Transactions on Knowledge and Data Engineering},
+  volume    = {21},
+  number    = {9},
+  pages     = {1263--1284},
+  year      = {2009},
+}
+@article{buda2018,
+  author    = {Mateusz Buda and Atsuto Maki and Maciej A. Mazurowski},
+  title     = {A Systematic Study of the Class Imbalance Problem in Convolutional Neural Networks},
+  journal   = {Neural Networks},
+  volume    = {106},
+  pages     = {249--259},
+  year      = {2018},
+}
+@article{johnson2019,
+  author    = {Justin M. Johnson and Taghi M. Khoshgoftaar},
+  title     = {Survey on Deep Learning with Class Imbalance},
+  journal   = {Journal of Big Data},
+  volume    = {6},
+  number    = {1},
+  pages     = {27},
+  year      = {2019},
+}
+@inproceedings{drummond2003,
+  author    = {Chris Drummond and Robert C. Holte},
+  title     = {{C4.5}, Class Imbalance, and Cost Sensitivity: Why Under-Sampling Beats Over-Sampling},
+  booktitle = {Workshop on Learning from Imbalanced Datasets, ICML},
+  year      = {2003},
+}
+@inproceedings{ren2018,
+  author    = {Mengye Ren and Wenyuan Zeng and Bin Yang and Raquel Urtasun},
+  title     = {Learning to Reweight Examples for Robust Deep Learning},
+  booktitle = {ICML},
+  year      = {2018},
+}
+@inproceedings{kang2020,
+  author    = {Bingyi Kang and Saining Xie and Marcus Rohrbach and Zhicheng Yan and Albert Gordo and Jiashi Feng and Yannis Kalantidis},
+  title     = {Decoupling Representation and Classifier for Long-Tailed Recognition},
+  booktitle = {ICLR},
+  year      = {2020},
+}
+@inproceedings{zhou2020,
+  author    = {Boyan Zhou and Quan Cui and Xiu-Shen Wei and Zhao-Min Chen},
+  title     = {{BBN}: Bilateral-Branch Network with Cumulative Learning for Long-Tailed Visual Recognition},
+  booktitle = {CVPR},
+  year      = {2020},
+}
+@inproceedings{menon2021,
+  author    = {Aditya Krishna Menon and Sadeep Jayasumana and Ankit Singh Rawat and Himanshu Jain and Andreas Veit and Sanjiv Kumar},
+  title     = {Long-Tail Learning via Logistic Regression},
+  booktitle = {ICML},
+  year      = {2021},
+}
+@inproceedings{tan2020,
+  author    = {Jingru Tan and Changbao Wang and Buyu Li and Quanquan Li and Wanli Ouyang and Changqing Yan and Junjie Yan},
+  title     = {Equalization Loss for Long-Tailed Object Recognition},
+  booktitle = {CVPR},
+  year      = {2020},
+}
+@inproceedings{zhang2021,
+  author    = {Songyang Zhang and Zeming Li and Shipeng Yan and Xuming He and Jian Sun},
+  title     = {Distribution Alignment: A Unified Framework for Long-Tail Visual Recognition},
+  booktitle = {CVPR},
+  year      = {2021},
+}
+@inproceedings{akiba2019,
+  author    = {Takuya Akiba and Shotaro Sano and Toshihiko Yanase and Takeru Ohta and Masanori Koyama},
+  title     = {Optuna: A Next-Generation Hyperparameter Optimization Framework},
+  booktitle = {KDD},
+  year      = {2019},
+}
+\end{filecontents*}
+
+\usepackage[numbers]{natbib}
+
+\title{Log-Scale Class Weighting for Robust Imbalanced Classification}
+\author{Seung Ho Go \and Hyunseok Lee \and Jin Hee Yoon\\
+        \small Sejong University}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+Class imbalance is a pervasive challenge in machine learning, arising across
+diverse domains such as medical diagnosis, fraud detection, and visual recognition,
+where minority classes are critically important yet severely underrepresented.
+Weighted Cross-Entropy (WCE), the most direct remedy, assigns inverse-frequency
+weights to each class, but these weights diverge rapidly as the imbalance ratio
+grows, leading to numerical instability.
+More sophisticated alternatives within the re-weighting family, such as
+Class-Balanced (CB) Loss and Focal Loss, introduce additional hyperparameters
+and can degrade below standard cross-entropy (CE) performance at high imbalance
+ratios.
+We propose \textbf{Logarithmic Weighted Cross-Entropy (LWCE)}, which replaces
+inverse-frequency weights with logarithmically compressed counterparts
+$w_i = 1/\log(n_i+1)$, and its generalization \textbf{PLWCE}
+($w_i = 1/(\log(n_i+1))^\alpha$), which allows dataset-adaptive tuning of the
+focusing strength via a single exponent $\alpha$ selected by Optuna grid search
+on a small proxy subset.
+We conduct a controlled evaluation on CIFAR-10-LT and CIFAR-100-LT at imbalance
+ratios of 10, 50, and 100, using ResNet-32 with five random seeds.
+Comparing six loss functions (CE, PWCE, LWCE, PLWCE, CB Loss, Focal Loss),
+we find that LWCE and PLWCE consistently outperform CE on macro-averaged F1 and
+tail-class accuracy as the imbalance ratio increases, while CB Loss and Focal Loss
+degrade relative to CE at IR\,=\,100.
+On CIFAR-10-LT at IR\,=\,100, PLWCE achieves F1-Macro of $0.458\pm0.018$
+versus $0.431\pm0.021$ for CE and $0.406\pm0.015$ for CB Loss.
+On CIFAR-100-LT at IR\,=\,100, LWCE and PLWCE reach F1-Macro of 0.185 and 0.186,
+surpassing CE (0.179) and CB Loss (0.158).
+These results suggest that logarithmic weight compression offers a simple, stable,
+and parameter-efficient alternative to existing re-weighting strategies for
+class-imbalanced classification.
+\end{abstract}
+
+\section{Introduction}
+\label{sec:intro}
+
+In many real-world classification tasks---spanning medical diagnosis, financial
+fraud detection, network intrusion detection, and visual recognition---sample
+counts across categories follow a long-tailed distribution: a small number of
+majority classes concentrate the bulk of training data while many minority classes
+are represented by only a handful of examples~\cite{cui2019,cao2019}.
+Under such conditions, a classifier trained with standard cross-entropy (CE) loss is
+implicitly biased toward majority classes: the aggregate gradient signal is dominated
+by numerically abundant samples, so the model achieves high overall accuracy by
+largely ignoring rare but equally valid categories---a phenomenon commonly termed
+\textit{majority bias}.
+
+Existing strategies to combat class imbalance fall broadly into two families.
+\textbf{Resampling methods} directly manipulate the training distribution:
+oversampling techniques such as SMOTE~\cite{chawla2002} synthesize new minority-class
+instances, while undersampling discards majority-class examples to restore balance.
+Although conceptually straightforward, both directions carry inherent risks.
+Oversampling can introduce synthetic artifacts and lead to overfitting on
+interpolated points, whereas undersampling discards potentially informative
+majority-class samples, distorting the true data distribution.
+Algorithm-level approaches avoid data manipulation altogether by modifying the
+training objective to reflect class importance.
+These include margin-based methods that widen decision boundaries for minority
+classes~\cite{cao2019}, logit-adjustment techniques that calibrate class-prior
+probabilities at inference time, and \textit{loss re-weighting} methods that
+scale the cross-entropy loss by class-dependent weights.
+While the former two families require architectural modifications or post-hoc
+calibration, re-weighting methods are architecture-agnostic and applicable across
+data modalities with minimal implementation overhead.
+This paper focuses on the re-weighting family.
+
+\textbf{Weighted Cross-Entropy (WCE)}~\cite{wang2019} scales the loss for class
+$i$ by $w_i \propto 1/n_i$, where $n_i$ is the number of training samples in
+that class.
+Although conceptually simple, WCE suffers from a critical numerical instability:
+as the imbalance ratio (IR) grows, the inverse-frequency weight $1/n_i$ diverges
+rapidly, producing extreme gradient magnitudes that destabilize optimization.
+This becomes especially problematic at severe imbalance---for instance, in
+CIFAR-100-LT at IR\,=\,100 the rarest class contains only $n_i = 5$ samples,
+making straightforward WCE impractical.
+
+Several more sophisticated alternatives have been proposed.
+\textbf{Focal Loss}~\cite{lin2017} addresses the class imbalance problem at the
+\textit{sample} level by introducing a modulating factor $(1-p_t)^\gamma$ that
+down-weights easy, often majority-class examples.
+However, its behavior depends on per-sample prediction probabilities rather than
+class frequency, making it sensitive to the calibration quality of the model and
+yielding inconsistent gains across different imbalance regimes.
+\textbf{Class-Balanced (CB) Loss}~\cite{cui2019} grounds re-weighting in the
+concept of \textit{effective number of samples}, providing a theoretically
+motivated schedule through a hyperparameter $\beta \in (0,1)$.
+Yet $\beta$ requires careful tuning, and in our experiments CB Loss consistently
+underperforms CE at high imbalance ratios---degrading to F1-Macro of 0.406 against
+CE's 0.431 on CIFAR-10-LT at IR = 100, and 0.158 against 0.179 on CIFAR-100-LT
+at the same ratio---suggesting that its weight schedule becomes too aggressive when
+tail-class sample counts are very small.
+
+To overcome the weight explosion of WCE while retaining its simplicity and
+interpretability, we propose \textbf{Logarithmic Weighted Cross-Entropy (LWCE)},
+which replaces the inverse-frequency weight with a logarithmically compressed
+counterpart:
+\begin{equation}
+  w_i = \frac{1}{\log(n_i + 1)}.
+  \label{eq:lwce}
+\end{equation}
+The logarithmic compression fundamentally bounds weight growth:
+whereas WCE weights grow as $\mathcal{O}(n_i^{-1})$, LWCE weights grow only as
+$\mathcal{O}((\log n_i)^{-1})$.
+The method preserves a meaningful boost for rare classes without
+inducing numerical instability, and requires no additional hyperparameters.
+We further generalize LWCE to \textbf{Power-Log Weighted CE (PLWCE)} by introducing
+a single tunable exponent $\alpha$:
+\begin{equation}
+  w_i = \frac{1}{\bigl(\log(n_i + 1)\bigr)^\alpha},
+  \label{eq:plwce}
+\end{equation}
+which spans a continuous spectrum from near-uniform weighting ($\alpha \to 0$) to
+aggressive minority focus ($\alpha \gg 1$), with LWCE recovered at $\alpha = 1$.
+The optimal $\alpha$ per imbalance ratio is identified via Optuna grid search on a
+20\% proxy subset, requiring negligible additional computation.
+
+We evaluate the proposed methods on the standard long-tailed image classification
+benchmarks, CIFAR-10-LT and CIFAR-100-LT, across three imbalance ratios
+(IR $\in \{10, 50, 100\}$) using ResNet-32 trained from scratch~\cite{he2016}.
+All experiments are repeated with five random seeds to report mean $\pm$ standard
+deviation.
+We compare LWCE and PLWCE against CE, Power-Scaled WCE (PWCE), CB Loss, and Focal
+Loss using overall Top-1 accuracy, macro-averaged F1-score, and group-wise accuracy
+on head (Many), middle (Medium), and tail (Few) classes defined by a tertile split
+of training counts.
+
+Results demonstrate that LWCE and PLWCE consistently improve over CE on F1-Macro
+and Few-class accuracy as the imbalance ratio increases, while avoiding the
+performance degradation exhibited by CB Loss and Focal Loss at high IRs.
+On CIFAR-10-LT at IR = 100, PLWCE achieves F1-Macro of $0.458 \pm 0.018$,
+surpassing CE ($0.431 \pm 0.021$) and CB Loss ($0.406 \pm 0.015$).
+On CIFAR-100-LT at IR = 100, LWCE and PLWCE reach F1-Macro of $0.185$ and $0.186$,
+outperforming CE ($0.179$) and CB Loss ($0.158$), with the gap widening at the
+tail-class level.
+
+The main contributions of this paper are:
+\begin{enumerate}
+  \item We formally characterize the \textit{weight explosion} failure mode of WCE
+        and demonstrate its practical consequences on CIFAR-LT benchmarks.
+  \item We propose LWCE, a parameter-free drop-in replacement for WCE based on
+        logarithmic weight compression, and its single-parameter generalization PLWCE.
+  \item We provide a controlled comparison of six loss functions on CIFAR-10-LT and
+        CIFAR-100-LT with five-seed repetition, revealing that logarithmic re-weighting
+        offers a more stable and consistent improvement over CE than CB Loss or Focal
+        Loss, particularly in the high-imbalance regime.
+\end{enumerate}
+
+The remainder of this paper is organized as follows.
+Section~\ref{sec:related} reviews related work on long-tailed learning.
+Section~\ref{sec:method} formally defines LWCE and PLWCE and analyzes their
+theoretical properties.
+Section~\ref{sec:experiments} describes the experimental setup and presents results.
+Section~\ref{sec:conclusion} concludes.
+
+\section{Related Work}
+\label{sec:related}
+
+\section{Proposed Method}
+\label{sec:method}
+
+\section{Experiments}
+\label{sec:experiments}
+
+\section{Conclusion}
+\label{sec:conclusion}
+
+\nocite{*}
+\bibliographystyle{plainnat}
+\bibliography{refs}
+
+\end{document}

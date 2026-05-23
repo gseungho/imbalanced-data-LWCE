@@ -41,6 +41,12 @@
       "sourceType": "github",
       "computedHash": "fb8df7db8d769f67f25a425cb03afe8916da96ac739ba5cf65c5f90faa225531"
     },
+    "latex-paper-en": {
+      "source": "bahayonghang/academic-writing-skills",
+      "sourceType": "github",
+      "skillPath": "academic-writing-skills/latex-paper-en/SKILL.md",
+      "computedHash": "6162083a54b34e771ccfae7ed3a0e15ceb8826e8d1b09312eb0e7a176eba1fd8"
+    },
     "project-planner": {
       "source": "Shubhamsaboo/awesome-llm-apps",
       "sourceType": "github",

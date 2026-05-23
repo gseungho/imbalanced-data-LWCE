@@ -1,0 +1,874 @@
+%\documentclass{beamer}
+\documentclass[aspectratio=169]{beamer}
+
+\usepackage[utf8]{inputenc}
+\usepackage{booktabs}
+\usepackage{comment}
+\usepackage{marvosym}
+
+%%%-----------------------------------------------------------%
+\definecolor {cfred}{rgb}{0.709,0.196,0.329} 	%{ 181 ,50 ,84}
+\definecolor {cfgrey}{rgb}{0.537,0.537,0.537} 	%{ 137,137,137}
+\definecolor {cflink}{rgb}{0.615,0.615,0.607} 	%{157,157,155}
+
+\setbeamercolor{palette primary}{bg=cfred,fg=white}
+\setbeamercolor{palette secondary}{bg=cfred,fg=white}
+\setbeamercolor{palette tertiary}{bg=cfred,fg=white}
+\setbeamercolor{palette quaternary}{bg=cfred,fg=white}
+\setbeamercolor{structure}{fg=cfred}		 % itemize, enumerate, etc
+\setbeamercolor{section in toc}{fg=cfred} 		 % TOC sections
+% Override palette coloring with secondary
+\setbeamercolor{subsection in head/foot}{bg=cfgrey,fg=white}
+%%%------------------------------------------------------------
+
+
+\setbeamercolor{uppercolor}{fg=white,bg=cfred}%
+\setbeamercolor{lowercolor}{fg=black,bg=white}%
+\def \bblock{\begin{beamerboxesrounded}[upper=uppercolor,lower=lowercolor,shadow=true]}
+\def \eblock{\end{beamerboxesrounded}}
+%%-----------------------------------------------------------
+
+%% Intestazione ripetuta per ogni slide
+\addtobeamertemplate{headline}{%
+\vspace{0.25cm}
+
+\hfill
+\includegraphics[height=1.0cm]{sejong_logo.png}
+\hspace{0.5cm}
+
+\vspace{0.25cm}
+{\color{cfred} \hrule}
+\textbf{}
+}{}
+%%-------------------------------------------------------------
+
+
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{footline}{
+  
+  \begin{beamercolorbox}[wd=\paperwidth, ht=2.25ex, dp=1ex, right, rightskip=0.3cm]{page number in foot}
+    
+    \raisebox{0.3cm}{ 
+      \color{black} 
+      \scriptsize
+      \insertframenumber{} / \inserttotalframenumber
+    } 
+    
+    
+  \end{beamercolorbox}
+}
+% --- 여기까지 ---
+
+
+\title[LWCE]
+{Logarithmic Scale Weighted Cross-Entropy}\subtitle{for Class-Imbalanced Learning}
+
+\author[Seung Ho Go, Hyunseok Lee, Jin Hee Yoon]
+{Seung Ho Go\inst{1} \and Hyunseok Lee\inst{2} \and Jin Hee Yoon\inst{3}}
+
+\institute[Sejong Univ.]
+{
+  \inst{1}%
+  Department of Software, Sejong University, Korea
+  \vspace{-0.2cm}
+  \and
+  \inst{2}%
+  Department of Data Science, Sejong University, Korea
+  \vspace{-0.2cm} 
+  \and
+  \inst{3}%
+  Department of Mathematics and Statistics, Sejong University, Korea
+ }
+
+\date[KIIS 2025] % (optional)
+{The 2025 Fall Conference, Korean Institute of Intelligent Systems \\ November 2025}
+
+
+\setbeamertemplate{frametitle}[default][left, rightskip=.5cm] {}
+\addtobeamertemplate{frametitle}{\vspace*{-1.4cm}}{}
+%End of title page configuration block
+%------------------------------------------------------------
+
+
+%------------------------------------------------------------
+% 섹션 시작 시 TOC만 표시 (현재 섹션 하이라이트)
+\AtBeginSection[]
+{
+  \begin{frame}
+    \frametitle{Table of Contents}
+    \tableofcontents[currentsection, currentsubsection]
+  \end{frame}
+}
+
+%---------------------------------------------------------
+\begin{document}
+
+%The next statement creates the title page.
+\frame{\titlepage}
+
+%------------------------------------------------------------
+
+% Page 2: Table of Contents
+\section{Research Motivation \& Related Research}
+%------------------------------------------------------------
+
+% Page 3: Latent Majority Bias in Imbalanced Data
+\begin{frame}{Latent Majority Bias in Imbalanced Data}
+
+\vspace{0.03\textwidth} % 상단 여백 조절
+
+\begin{columns}[T] % 'T' (Top-aligned) 옵션
+
+  % --- 왼쪽: 텍스트 ---
+  \column{0.45\textwidth} % 텍스트 컬럼 너비
+  \begin{itemize}
+      \item Class imbalance: Common in healthcare, finance, manufacturing.
+      \item Models on imbalanced data: High accuracy by ignoring minorities $\to$ deceptive.
+      \item Fatal risks: Missed rare diseases, undetected fraud, overlooked defects.
+  \end{itemize}
+
+  % --- 오른쪽: 이미지 ---
+  \column{0.55\textwidth} % 이미지 컬럼 너비
+  \centering
+  \includegraphics[width=1.0\textwidth, height=0.7\textheight]{confusion_matrix_v3.pdf}
+
+\end{columns}
+
+\end{frame}
+%------------------------------------------------------------
+
+
+% Page 4: Common Approaches to Class Imbalance
+\begin{frame}{Common Approaches to Class Imbalance}
+
+\vspace{0.03\textwidth} % 전체적인 상단 여백 살짝 조절
+
+% --- 상단: 두 가지 주요 접근법 ---
+\begin{columns}[T] % 'T' (top-aligned) 옵션
+
+  % --- 1. Data Resampling ---
+  \column{0.5\textwidth}
+  \bblock{1. Data Resampling}
+    \begin{itemize}
+        \item \textbf{What it is:} Modifies the training set distribution to achieve a better balance.
+        \item \textbf{Examples:}
+        \begin{itemize}
+            \item Oversampling (SMOTE, ADASYN)
+            \item Undersampling (Tomek Links, ENN)
+        \end{itemize}
+    \end{itemize}
+  \eblock
+
+  % --- 2. Cost-Sensitive Learning ---
+  \column{0.5\textwidth}
+  \bblock{2. Cost-Sensitive Learning}
+    \begin{itemize}
+        \item \textbf{What it is:} Adjusts the algorithm to assign a higher penalty for misclassifying minority samples.
+        \item \textbf{Examples:}
+        \begin{itemize}
+            \item Weighted Cross-Entropy (WCE)
+            \item Focal Loss, Class-Balanced Loss
+        \end{itemize}
+    \end{itemize}
+  \eblock
+
+\end{columns}
+
+\vspace{0.05\textwidth}
+
+% --- 하단: 왜 Cost-Sensitive가 필요한가?
+\begin{columns}[T]
+  
+  % --- CE 수식 ---
+  \column{0.4\textwidth}
+    \textbf{Standard Cross-Entropy}:
+    $$ \mathcal{L}_{CE} = - \sum_{i=1}^{N} y_i \log(p_i) $$
+
+  \column{0.6\textwidth}
+    \textbf{Problem:} The total loss is \alert{dominated} by the majority class, and the gradient signal from the minority class is overwhelmed.
+    
+    \vspace{0.3cm}
+    $\to$ \textit{Focus on \textbf{Cost-Sensitive Learning}.}
+
+\end{columns}
+
+\end{frame}
+%------------------------------------------------------------
+
+% Page 5: Existing Methods (I) - Inverse Weighting
+\begin{frame}{Existing Methods (I): Inverse Weighting Schemes}
+
+\vspace{0.03\textwidth}
+The simplest cost-sensitive method is to assign a weight $w_i$ to the standard CE loss:
+$$ \mathcal{L}_{WCE} = - \sum_{i=1}^{N} \alert{w_i} \cdot y_i \log(p_i) $$
+
+
+\begin{block}{Weighted Cross-Entropy (WCE) \& Inverse Sqrt WCE}
+    \begin{itemize}
+        \item \textbf{Core Idea:} Weights are inversely proportional to class frequency, sometimes softened.
+        \item \textbf{Weight Formula} ($n_i$: samples in class $i$)\textbf{:}
+              $$ w_i \propto \frac{1}{n_i} \quad \text{or} \quad w_i \propto \frac{1}{\sqrt{n_i}} $$
+    \end{itemize}
+\end{block}
+
+\end{frame}
+%------------------------------------------------------------
+
+
+% Page 6: Existing Methods (II) - Advanced Losses
+\begin{frame}{Existing Methods (II): Advanced Losses}
+
+\vspace{0.03\textwidth}
+
+\begin{columns}[T]
+
+  % --- 1. Focal Loss ---
+  \column{0.5\textwidth}
+  \bblock{1. Focal Loss}
+    \begin{itemize}
+        \item \textbf{Core Idea:} Focuses on \alert{sample difficulty} instead of class frequency.
+        \item Down-weights the loss of "easy" (often majority) samples.
+        \item \textbf{Formula} ($p_t$: prob. of true class)\textbf{:}
+              $$ \mathcal{L}_{FL} = - \alpha_t (1 - p_t)^{\gamma} \log(p_t) $$
+        \item \textbf{Key Hyperparameter:}
+              \begin{itemize}
+                  \item $\gamma$ controls the focusing rate.
+              \end{itemize}
+    \end{itemize}
+  \eblock
+
+  % --- 2. Class-Balanced (CB) Loss ---
+  \column{0.5\textwidth}
+  \bblock{2. Class-Balanced (CB) Loss}
+    \begin{itemize}
+        \item \textbf{Core Idea:} A principled re-weighting based on the "effective number of samples".
+        \item \textbf{Weight Formula ($N_i(n_i, \beta)$):}
+              $$ w_i = \frac{1 - \beta}{1 - \beta^{n_i}} $$
+              $$ \mathcal{L}_{CB} = - \sum w_i \cdot \mathcal{L}_{CE}(y_i, p_i) $$
+        \item \textbf{Key Hyperparameter:}
+              \begin{itemize}
+                  \item $\beta$ controls the curve.
+              \end{itemize}
+    \end{itemize}
+  \eblock
+
+\end{columns}
+\end{frame}
+%------------------------------------------------------------
+
+% Page 7: Table of Contents
+\section{Proposed Methodology}
+%------------------------------------------------------------
+
+% Page 8: Proposed Methodology (I) - The Core Idea
+\begin{frame}{Proposed Methodology (I): The Core Idea}
+
+\vspace{0.03\textwidth}
+
+\begin{columns}[T]
+
+  % --- 왼쪽: 문제점 ---
+  \column{0.4\textwidth}
+  \begin{block}{Motivation: Instability of WCE}
+    Standard WCE weight: $$ w_i = \frac{N_{total}}{n_i} \propto \frac{1}{n_i} $$
+    
+    \begin{alertblock}{Critical Issue}
+    Severe imbalance ($n_i \to \text{small}$) causes $w_i$ to \alert{explode}.
+    \begin{itemize}
+        \item Numerical instability.
+        \item Severe overfitting to minority
+    \end{itemize}
+    \end{alertblock}
+  \end{block}
+
+  % --- 오른쪽: 해결책 ---
+  \column{0.6\textwidth}
+  \bblock{Solution: Log-Weighted CE (LWCE)}
+    We use log-scaling to \alert{tame} the weights:
+    \vspace{-0.02\textwidth}
+    $$ w_i \propto \frac{1}{\log(n_i + 1)} $$
+    
+    \vspace{-0.03\textwidth}
+    \centering
+    \includegraphics[width=0.9\textwidth, height=0.55\textheight]{wce_vs_lwce_relative_v2.pdf}
+  \eblock
+  
+\end{columns}
+\end{frame}
+%------------------------------------------------------------
+
+% Page 9: Proposed Methodology (II) - Generalization (PLWCE)
+\begin{frame}{Proposed Methodology (II): Power-Scaled LWCE (PLWCE)}
+
+\vspace{0.06\textwidth}
+
+% --- 상단: PLWCE 수식 ---
+\bblock{Generalization: Power-Scaled Adaptive CE (PLWCE)}
+    We introduce $\alpha$ to flexibly control the \alert{focusing strength}:
+    $$ w_i \propto \frac{1}{(\log(n_i + 1))^{\alert{\alpha}}} $$
+\eblock
+
+\begin{columns}[T]
+
+  % --- 왼쪽: 알파의 역할 (표로 정리) ---
+  \column{0.45\textwidth}
+  \begin{table}
+      \centering
+      \begin{tabular}{cl}
+          \textbf{Alpha ($\alpha$)} & \textbf{Role \& Effect} \\
+          \midrule
+          $\alpha = 1.0$ & Balanced LWCE \\
+          \addlinespace
+          $\alpha > 1.0$ & \alert{Aggressive} focus on minority \\
+          \addlinespace
+          $\alpha < 1.0$ & Conservative weighting \\
+          \bottomrule
+      \end{tabular}
+      \caption{Role of the $\alpha$ parameter}
+  \end{table}
+
+  % --- 오른쪽: 알파 비교 그래프 ---
+  \column{0.55\textwidth}
+  \vspace{-0.02\textwidth}
+  \centering
+  \includegraphics[width=0.9\textwidth, height=0.55\textheight]{plwce_alpha_relative_zoomed.pdf}
+\end{columns}
+
+\end{frame}
+%------------------------------------------------------------
+
+% Page 10: Proposed Methodology (III): Power-Scaled WCE (PS-WCE)
+\begin{comment}
+\begin{frame}{Proposed Methodology (III): Power-Scaled WCE (PS-WCE)}
+
+\vspace{0.06\textwidth}
+
+% --- 상단: PS-WCE 수식 ---
+\bblock{Generalization of Standard WCE}
+    This approach generalizes standard WCE by adding an exponent $\alpha$:
+    $$ w_i \propto \frac{1}{(n_i)^{\alert{\alpha}}} $$
+\eblock
+
+\begin{columns}[T]
+
+  % --- 왼쪽: 알파의 역할 (표로 정리) ---
+  \column{0.45\textwidth}
+  \begin{table}
+    \centering
+    \begin{tabular}{cl}
+        \textbf{Alpha ($\alpha$)} & \textbf{Role \& Effect} \\
+        \midrule
+        $\alpha = 1.0$ & Standard WCE (Explodes) \\
+        \addlinespace
+        $\alpha = 0.5$ & Sqrt WCE (Standard fix) \\
+        \addlinespace
+        $\alpha < 0.5$ & More Conservative (Flatter) \\
+        \bottomrule
+    \end{tabular}
+    \caption{Role of the $\alpha$ parameter}
+  \end{table}
+  \vspace{0.2cm}
+  \begin{alertblock}{Limitation}
+      Unlike LWCE, this method still suffers from \alert{potential instability} as $n_i \to 0$, just at a different rate.
+  \end{alertblock}
+
+  % --- 오른쪽: 알파 비교 그래프 ---
+  \column{0.55\textwidth}
+  \vspace{-0.02\textwidth}
+  \centering
+  % 새로 생성한 그래프 (pswce_alpha_relative_zoomed.pdf) 삽입
+  \includegraphics[width=0.9\textwidth, height=0.55\textheight]{pswce_alpha_relative_zoomed.pdf}
+\end{columns}
+
+\end{frame}
+\end{comment}
+%------------------------------------------------------------
+
+% Page 10: Table of Contents
+\section{Experiment Results}
+
+% Page 11: Experimental Setup (I) - Data & Model
+\begin{frame}{Experimental Setup (I): Datasets & Model}
+
+\vspace{0.02\textwidth}
+\begin{table}
+    \centering
+    \caption{Benchmark Datasets (Sorted by IR)}
+    \small % 글자 크기 약간 줄임
+    \begin{tabular}{lcc}
+        \toprule
+        \textbf{Dataset} & \textbf{\# Classes} & \textbf{Imbalance Ratio (IR)} \\
+        \midrule
+        Credit Card Fraud & 2 & 587:1 \\
+        APS Failure & 2 & 59:1 \\
+        Page Blocks & 5 & 175:1 \\
+        Yeast & 10 & 93:1 \\
+        ... (Total 11) & ... & ... \\
+        German Credit & 2 & 2.3:1 \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\begin{block}{Base Model: XGBoost}
+    \textbf{XGBoost} with linear booster (`gblinear`) as a robust baseline.
+    \begin{itemize}
+        \item Handles both binary and multi-class tasks.
+        \item Efficient for large-scale tabular data.
+    \end{itemize}
+\end{block}
+
+
+\end{frame}
+%------------------------------------------------------------
+
+% Page 12: Experimental Setup (II) - Metrics & Optimization
+\begin{frame}{Experimental Setup (II): Metrics & Optimization}
+
+\vspace{0.03\textwidth}
+
+\begin{columns}[T]
+
+  % --- 왼쪽: 평가 지표 ---
+  \column{0.5\textwidth}
+  \bblock{Evaluation Metrics}
+    Standard accuracy is misleading for imbalanced data. We focus on:
+    \begin{itemize}
+        \item \textbf{F1-Score:} Harmonic mean of precision and recall, averaged across classes.
+        \item \textbf{PR-AUC:} Area under the Precision-Recall curve, highly sensitive to minority class performance.
+    \end{itemize}
+  \eblock
+
+  % --- 오른쪽: 최적화 (Optuna) ---
+  \column{0.5\textwidth}
+  \bblock{Hyperparameter Optimization}
+    We used \textbf{Optuna} for automated hyperparameter tuning.
+    \begin{itemize}
+        \item \textbf{Search Space:}
+        \begin{itemize}
+            \item \texttt{learning\_rate}, \texttt{n\_estimators}
+            \item Regularization: \texttt{lambda} (L2), \texttt{alpha} (L1)
+            \item Loss-specific: $\gamma$ (Focal), $\beta$ (CB), $\alpha$ (PS-WCE, PLWCE)
+        \end{itemize}
+        \item \textbf{Protocol:} 3-fold CV, 100 trials per dataset.
+    \end{itemize}
+  \eblock
+
+\end{columns}
+
+\end{frame}
+%------------------------------------------------------------
+
+% Page 13: Full Results (I)
+\begin{frame}{Full Experimental Results (I)}
+\vspace{0.03\textwidth}
+
+%--- 표 전체를 프레임 폭에 맞춤 ---
+\resizebox{\textwidth}{!}{%
+\scriptsize
+\setlength{\tabcolsep}{6pt}
+\renewcommand{\arraystretch}{0.8}
+
+\begin{tabular}{c@{\hskip 0.3cm}c@{\hskip 0.3cm}c}
+
+% --- Row 1 ---
+\textbf{Credit Card Fraud} & \textbf{Aps Failure} & \textbf{Secom} \\[2pt]
+\begin{tabular}{p{2.0cm}cc}
+\toprule Loss & F1 & PR \\ \midrule
+CE & 0.722 & \textbf{\textcolor{blue}{0.711}} \\
+WCE & 0.796 & 0.698 \\
+WCE(sq) & 0.797 & 0.700 \\
+PS-WCE & \textbf{\textcolor{blue}{0.799}} & 0.701 \\
+Focal & 0.757 & \textbf{\textcolor{blue}{0.715}} \\
+CB & \textbf{\textcolor{blue}{0.801}} & 0.704 \\
+LWCE & 0.747 & \textbf{\textcolor{red}{0.716}} \\
+PLWCE & \textbf{\textcolor{red}{0.806}} & 0.701 \\
+\bottomrule \end{tabular}
+&
+\begin{tabular}{p{2.0cm}cc}
+\toprule Loss & F1 & PR \\ \midrule
+CE & 0.759 & 0.812 \\
+WCE & 0.648 & 0.813 \\
+WCE(sq) & 0.761 & 0.825 \\
+PS-WCE & \textbf{\textcolor{red}{0.776}} & 0.825 \\
+Focal & \textbf{\textcolor{blue}{0.774}} & \textbf{\textcolor{blue}{0.826}} \\
+CB & 0.756 & \textbf{\textcolor{blue}{0.827}} \\
+LWCE & 0.765 & 0.824 \\
+PLWCE & \textbf{\textcolor{blue}{0.773}} & \textbf{\textcolor{red}{0.828}} \\
+\bottomrule \end{tabular}
+&
+\begin{tabular}{p{2.0cm}cc}
+\toprule Loss & F1 & PR \\ \midrule
+CE & 0.167 & 0.141 \\
+WCE & \textbf{\textcolor{red}{0.276}} & \textbf{\textcolor{blue}{0.167}} \\
+WCE(sq) & 0.172 & 0.137 \\
+PS-WCE & 0.189 & 0.136 \\
+Focal & 0.145 & 0.139 \\
+CB & 0.128 & 0.142 \\
+LWCE & \textbf{\textcolor{blue}{0.222}} & \textbf{\textcolor{red}{0.177}} \\
+PLWCE & \textbf{\textcolor{blue}{0.213}} & \textbf{\textcolor{blue}{0.171}} \\
+\bottomrule \end{tabular} \\
+\noalign{\vspace{0.02\textwidth}}
+\\[\baselineskip]
+
+% --- Row 2 ---
+\textbf{Bank Marketing} & \textbf{Credit Card Default} & \textbf{Telco Churn} \\[2pt]
+\begin{tabular}{p{2.0cm}cc}
+\toprule Loss & F1 & PR \\ \midrule
+CE & 0.456 & \textbf{\textcolor{red}{0.548}} \\
+WCE & 0.562 & 0.539 \\
+WCE(sq) & \textbf{\textcolor{red}{0.574}} & 0.545 \\
+PS-WCE & \textbf{\textcolor{blue}{0.573}} & 0.545 \\
+Focal & \textbf{\textcolor{blue}{0.567}} & \textbf{\textcolor{blue}{0.546}} \\
+CB & 0.474 & 0.503 \\
+LWCE & 0.489 & \textbf{\textcolor{blue}{0.548}} \\
+PLWCE & 0.558 & \textbf{\textcolor{blue}{0.546}} \\
+\bottomrule \end{tabular}
+&
+\begin{tabular}{p{2.0cm}cc}
+\toprule Loss & F1 & PR \\ \midrule
+CE & 0.357 & \textbf{\textcolor{red}{0.498}} \\
+WCE & \textbf{\textcolor{blue}{0.501}} & 0.449 \\
+WCE(sq) & \textbf{\textcolor{blue}{0.496}} & \textbf{\textcolor{blue}{0.483}} \\
+PS-WCE & 0.483 & 0.479 \\
+Focal & \textbf{\textcolor{red}{0.510}} & \textbf{\textcolor{blue}{0.48}} \\
+CB & 0.487 & 0.472 \\
+LWCE & 0.488 & 0.473 \\
+PLWCE & 0.484 & 0.479 \\
+\bottomrule \end{tabular} 
+&
+\begin{tabular}{p{2.0cm}cc}
+\toprule Loss & F1 & PR \\ \midrule
+CE & 0.593 & 0.628 \\
+WCE & 0.623 & \textbf{\textcolor{red}{0.643}} \\
+WCE(sq) & \textbf{\textcolor{blue}{0.629}} & 0.629 \\
+PS-WCE & 0.624 & \textbf{\textcolor{blue}{0.641}} \\
+Focal & 0.623 & \textbf{\textcolor{blue}{0.635}} \\
+CB & \textbf{\textcolor{red}{0.630}} & 0.626 \\
+LWCE & \textbf{\textcolor{blue}{0.629}} & 0.625 \\
+PLWCE & \textbf{\textcolor{blue}{0.629}} & 0.624 \\
+\bottomrule \end{tabular} \\
+\end{tabular}
+}
+\end{frame}
+%------------------------------------------------------------
+
+% Page 14: Full Results (II)
+\begin{frame}{Full Experimental Results (II)}
+\vspace{0.03\textwidth}
+
+%--- 표 전체를 프레임 폭에 맞춤 ---
+\resizebox{\textwidth}{!}{%
+\scriptsize
+\setlength{\tabcolsep}{6pt}
+\renewcommand{\arraystretch}{0.8}
+
+\begin{tabular}{c@{\hskip 0.3cm}c@{\hskip 0.3cm}c}
+
+% --- Row 1 ---
+\textbf{German Credit} & \textbf{Page Blocks (Multi)} & \textbf{Yeast (Multi)} \\[2pt]
+\begin{tabular}{p{2.0cm}cc}
+\toprule Loss & F1 & PR \\ \midrule
+CE & 0.585 & 0.640 \\
+WCE & \textbf{\textcolor{red}{0.630}} & 0.631 \\
+WCE(sq) & 0.615 & \textbf{\textcolor{red}{0.644}} \\
+PS-WCE & 0.602 & 0.639 \\
+Focal & 0.601 & \textbf{\textcolor{blue}{0.641}} \\
+CB & \textbf{\textcolor{blue}{0.626}} & \textbf{\textcolor{blue}{0.641}} \\
+LWCE & 0.591 & \textbf{\textcolor{blue}{0.641}} \\
+PLWCE & \textbf{\textcolor{blue}{0.628}} & \textbf{\textcolor{blue}{0.642}} \\
+\bottomrule \end{tabular}
+&
+\begin{tabular}{p{2.0cm}cc}
+\toprule Loss & F1 & PR \\ \midrule
+CE & 0.829 & \textbf{\textcolor{blue}{0.885}} \\
+WCE & 0.006 & 0.200 \\
+WCE(sq) & \textbf{\textcolor{blue}{0.835}} & 0.883 \\
+PS-WCE & 0.813 & 0.882 \\
+Focal & 0.792 & 0.843 \\
+CB & \textbf{\textcolor{red}{0.838}} & 0.883 \\
+LWCE & 0.815 & \textbf{\textcolor{blue}{0.892}} \\
+PLWCE & \textbf{\textcolor{blue}{0.834}} & \textbf{\textcolor{red}{0.893}} \\
+\bottomrule \end{tabular}
+&
+\begin{tabular}{p{2.0cm}cc}
+\toprule Loss & F1 & PR \\ \midrule
+CE & \textbf{\textcolor{red}{0.577}} & \textbf{\textcolor{blue}{0.597}} \\
+WCE & 0.447 & 0.570 \\
+WCE(sq) & 0.521 & 0.593 \\
+PS-WCE & \textbf{\textcolor{blue}{0.533}} & 0.593 \\
+Focal & 0.462 & 0.514 \\
+CB & 0.518 & 0.592 \\
+LWCE & \textbf{\textcolor{blue}{0.541}} & \textbf{\textcolor{red}{0.598}} \\
+PLWCE & 0.528 & \textbf{\textcolor{blue}{0.594}} \\
+\bottomrule \end{tabular} \\
+\noalign{\vspace{0.02\textwidth}}
+\\[\baselineskip]
+
+% --- Row 2 ---
+\textbf{Steel Faults (Multi)} & \textbf{Glass (Multi)} & \\[2pt]
+\begin{tabular}{p{2.0cm}cc}
+\toprule Loss & F1 & PR \\ \midrule
+CE & \textbf{\textcolor{blue}{0.706}} & \textbf{\textcolor{red}{0.726}} \\
+WCE & 0.628 & 0.721 \\
+WCE(sq) & 0.691 & \textbf{\textcolor{blue}{0.725}} \\
+PS-WCE & 0.698 & \textbf{\textcolor{red}{0.726}} \\
+Focal & 0.667 & 0.707 \\
+CB & \textbf{\textcolor{blue}{0.706}} & \textbf{\textcolor{blue}{0.725}} \\
+LWCE & \textbf{\textcolor{red}{0.710}} & \textbf{\textcolor{red}{0.726}} \\
+PLWCE & 0.696 & \textbf{\textcolor{red}{0.726}} \\
+\bottomrule \end{tabular}
+&
+\begin{tabular}{p{2.0cm}cc}
+\toprule Loss & F1 & PR \\ \midrule
+CE & 0.661 & 0.731 \\
+WCE & 0.668 & 0.695 \\
+WCE(sq) & 0.707 & 0.735 \\
+PS-WCE & \textbf{\textcolor{blue}{0.719}} & 0.705 \\
+Focal & 0.698 & \textbf{\textcolor{red}{0.744}} \\
+CB & \textbf{\textcolor{blue}{0.710}} & \textbf{\textcolor{blue}{0.736}} \\
+LWCE & \textbf{\textcolor{red}{0.736}} & \textbf{\textcolor{blue}{0.740}} \\
+PLWCE & 0.678 & 0.719 \\
+\bottomrule \end{tabular}
+&
+% 빈 슬롯
+\\
+
+\end{tabular}
+}
+\end{frame}
+%------------------------------------------------------------
+
+% Page 15: Overall Performance Heatmap Summary
+\begin{frame}{Overall Performance Summary: Heatmap}
+\vspace{0.015\textwidth}
+\begin{columns}[T]
+
+  % --- 왼쪽: F1-Score Heatmap ---
+  \column{0.5\textwidth}
+  \centering
+  \includegraphics[width=1.0\textwidth, height=0.7\textheight]{f1_heatmap.pdf}
+
+  % --- 오른쪽: PR-AUC Heatmap ---
+  \column{0.5\textwidth}
+  \centering
+  \includegraphics[width=1.0\textwidth, height=0.7\textheight]{pr_auc_heatmap.pdf}
+
+\end{columns}
+\vfill
+\vspace{-0.015\textwidth}
+% --- 하단: 핵심 결론 ---
+\bblock{Key Finding: Robustness}
+    \textbf{LWCE} \& \textbf{PLWCE} are consistently top-ranked (Y-axis).
+    The \alert{green colors} in the \textbf{top-left region} confirm their robustness on datasets with extreme imbalance.
+\eblock
+
+\end{frame}
+%------------------------------------------------------------
+
+% Page 16: Discussion (I) - The Role of Alpha (α)
+\begin{comment}
+\begin{frame}{Discussion (I): The Role of $\alpha$ as a Trade-off Tuner}
+
+\vspace{0.02\textwidth}
+\begin{block}{Observation from Results}
+    \begin{itemize}
+        \item Optimizing for F1-Score often resulted in $\alpha > 1.0$ (PLWCE).
+        \item However, in several cases (e.g., Bank Marketing, Telco Churn), this led to a lower PR-AUC score compared to LWCE ($\alpha=1.0$).
+    \end{itemize}
+\end{block}
+
+\vspace{-0.015\textwidth}
+\bblock{Interpretation: The Precision-Recall Trade-off}
+    The $\alpha$ parameter acts as a "Recall vs. Precision" tuner:
+    \begin{itemize}
+        \item \textbf{LWCE ($\alpha = 1.0$):} Provides a stable, balanced baseline with high \alert{Precision} (good for PR-AUC).
+        \vfill
+        \item \textbf{PLWCE ($\alpha > 1.0$):} \alert{Aggressively} focuses on the minority class, leading to higher \alert{Recall} (good for F1-Score), but can sometimes hurt Precision.
+    \end{itemize}
+    \vfill
+    $\to$ \textit{This is not a flaw, but a feature: The choice of $\alpha$ allows specialization based on the problem's needs (e.g., recall in medical vs. precision in spam filtering).}
+\eblock
+
+\end{frame}
+\end{comment}
+%------------------------------------------------------------
+
+% Page 16: Table of Contents
+\section{Discussion \& Future Work}
+%------------------------------------------------------------
+
+% Page 17: Discussion - Why Tune Alpha?
+\begin{frame}{Discussion (I): The Benefit of Tuning $\alpha$}
+
+\vspace{0.02\textwidth}
+\begin{block}{Observation from Results}
+    \begin{itemize}
+        \item The results show that LWCE ($\alpha=1.0$) is already a very strong and robust baseline, often outperforming SOTA methods.
+        \item However, in 5 out of 11 datasets, PLWCE (tuning $\alpha > 1.0$) achieved an even higher F1-Score than LWCE.
+    \end{itemize}
+\end{block}
+
+\vspace{-0.01\textwidth}
+\bblock{Conclusion: Alpha as a "Performance Booster"}
+    $\alpha$ acts as a data-specific "booster":
+    \begin{itemize}
+        \item LWCE ($\alpha=1.0$) is sufficient and provides top-tier performance.
+        \item For some \alert{extremely imbalanced} datasets, tuning $\alpha > 1$ allows PLWCE to find a better optimum, boosting \textbf{both F1 and PR-AUC} scores.
+    \end{itemize}
+    \vfill
+    $\to$ \textit{PLWCE generalizes LWCE, providing an optional tuning parameter for achieving the best possible performance in critical scenarios.}
+\eblock
+
+\end{frame}
+%------------------------------------------------------------
+
+% Page 18: Discussion (II) - Difficulty of Isolating Alpha
+\begin{frame}{Discussion (II): Difficulty of Isolating $\alpha$}
+
+\vspace{0.03\textwidth}
+\begin{columns}[T]
+
+  % --- 왼쪽: 한계점 설명 ---
+  \column{0.45\textwidth}
+  \bblock{Challenge: Isolating $\alpha$ vs. IR}
+    \begin{itemize}
+        \item \textbf{Ideal Experiment:} Fix all model parameters (LR, L1/L2, etc.) across all 11 datasets, and tune only $\alpha$.
+        \vfill
+        \item \textbf{Problem:} A single set of fixed parameters failed. It was too sub-optimal for diverse datasets (e.g., \texttt{credit\_card\_fraud}), causing poor metrics and rendering the entire imbalanced data analysis meaningless under these conditions
+    \end{itemize}
+  \eblock
+
+  % --- 오른쪽: 상관관계 산점도 ---
+  \column{0.55\textwidth}
+  \centering
+  \includegraphics[width=1.0\textwidth, height=0.7\textheight]{ir_vs_alpha_correlation.pdf}
+  \vspace{-0.03\textwidth}
+  \begin{itemize}
+      \item \small Shows a \alert{weak positive trend}: higher imbalance (larger IR) seems to prefer a larger $\alpha$ ($\alpha > 1$).
+  \end{itemize}
+  
+\end{columns}
+\end{frame}
+%------------------------------------------------------------
+
+% Page 19: Future Work (I)
+\begin{frame}{Future Work (I): Model \& Weighting Expansion}
+
+\vspace{0.03\textwidth}
+
+\bblock{1. Application to Other Models}
+    \begin{itemize}
+        \item \textbf{Tree-based Models:} Validate LWCE/PLWCE on non-linear `gbtree` models (standard XGBoost, LightGBM).
+        \vfill
+        \item \textbf{Deep Learning:} Apply to CNNs/Transformers for highly imbalanced tasks like object detection or medical segmentation.
+    \end{itemize}
+\eblock
+
+\vspace{0.01\textwidth}
+
+\bblock{2. Combining with Dynamic Sample Weighting}
+    \begin{itemize}
+        \item Our method (PLWCE) uses \alert{static, class-level} weights.
+        \vfill
+        \item \textbf{Hypothesis:} We can combine this with \alert{dynamic, sample-level} methods (like Focal Loss or GHM) that focus on "easy" vs. "hard" samples.
+        \vfill
+        \item \textbf{Goal:} Investigate a hybrid loss that benefits from both stable class-based re-weighting (our $\alpha$) and dynamic sample-level focus (like Focal's $\gamma$).
+    \end{itemize}
+\eblock
+
+\end{frame}
+%------------------------------------------------------------
+
+% Page 20: Future Work (II)
+\begin{frame}{Future Work (II): Automated Alpha ($\alpha$) Tuning}
+
+\vspace{0.05\textwidth}
+
+\bblock{3. Automated Alpha ($\alpha$) Tuning}
+    \begin{itemize}
+        \item As discussed (P18), isolating $\alpha$'s effect is challenging due to other interacting hyperparameters.
+        \vfill
+        \item \textbf{Controlled Experiment:}
+        \begin{itemize}
+            \item Use a large dataset (e.g., \texttt{credit\_card\_fraud}).
+            \item Fix minority samples and \alert{sub-sample the majority class} to create 5+ datasets with controlled IRs (e.g., 5:1, 10:1, 100:1).
+        \end{itemize}
+        \vfill
+        \item \textbf{Goal:} Find a clear correlation between \alert{IR} and the \alert{optimal $\alpha$} by running alpha-only tuning on these controlled datasets.
+        \vfill
+        \item \textbf{Ultimate Aim:} Develop a heuristic or formula to set $\alpha$ \alert{automatically}, eliminating the need for expensive trial-and-error tuning.
+    \end{itemize}
+\eblock
+
+\end{frame}
+%------------------------------------------------------------
+
+% Page 21: Conclusion
+\begin{frame}{Conclusion}
+
+\vspace{0.03\textwidth}
+\bblock{Key Contributions}
+    \begin{enumerate}
+        \item \textbf{Identified Instability:} We highlighted the numerical instability of standard WCE ($1/n_i$) in extreme imbalance scenarios.
+        \vfill
+        \item \textbf{Proposed LWCE:} We proposed \textbf{LWCE} ($1/\log(n_i+1)$) as a simple, stable, and parameter-free solution that fundamentally tames weight explosion.
+        \vfill
+        \item \textbf{Proposed PLWCE:} We generalized this into \textbf{PLWCE} ($1/(\log n_i)^\alpha$), demonstrating how $\alpha$ acts as a performance booster for extremely imbalanced datasets.
+        \vfill
+        \item \textbf{Validated Performance:} Our methods proved \alert{highly robust and competitive}, consistently ranking in the Top 2 across 11 diverse datasets against strong baselines.
+    \end{enumerate}
+\eblock
+
+\end{frame}
+%------------------------------------------------------------
+
+% Page 22: References
+\begin{frame}{References}
+    
+    \vspace{0.05\textwidth}
+    \footnotesize % 참고 문헌은 작은 폰트 사용
+    \begin{itemize}
+        \item[1] T. Y. Lin, P. Goyal, R. Girshick, K. He, and P. Dollár, “Focal Loss for Dense Object Detection,” in *Proc. IEEE Int. Conf. Computer Vision (ICCV)*, 2017.
+        
+        \vspace{0.3cm} % 항목 간 간격
+        
+        \item[2] Y. Cui, M. Jia, T. Y. Lin, Y. Song, and S. Belongie, “Class-Balanced Loss Based on Effective Number of Samples,” in *Proc. IEEE/CVF Conf. Computer Vision and Pattern Recognition (CVPR)*, 2019.
+        
+        \vspace{0.3cm}
+        
+        \item[3] T. H. Phan and K. Yamamoto, “Resolving Class Imbalance in Object Detection with Weighted Cross Entropy Losses,” *arXiv preprint arXiv:2006.01413*, 2020.
+        
+        \vspace{0.3cm}
+        
+        \item[4] S. Wang, W. Liu, L. Wu, et al., “Learning from Imbalanced Data Sets with Weighted Cross-Entropy Function,” *Pattern Recognition Letters*, 2019.
+        
+        \vspace{0.3cm}
+        
+        \item[5] L. S. T. Al-Badar and A. S. H. Al-Nuaimi, “Comparison of Two Main Approaches for Handling Imbalanced Data in Churn Prediction Problem,” *Iraqi Journal for Computers and Informatics*, 2021.
+        
+    \end{itemize}
+\end{frame}
+%------------------------------------------------------------
+
+% Page 23: Thank You & Q&A
+\begin{frame} % 제목 없음
+
+\vfill
+{\Huge Thank You for Your Attention!}
+
+\vspace{0.5cm}
+
+\begin{itemize}
+    \item{\LARGE Seung Ho Go}
+    \vspace{0.1cm}
+    \item{\large gseungho999@gmail.com}
+    \vspace{0.1cm}
+    \item{\large https://github.com/gseungho}
+\end{itemize}
+
+\vfill % 하단 공간
+
+\end{frame}
+%------------------------------------------------------------
+
+\end{document}

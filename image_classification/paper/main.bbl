@@ -1,0 +1,108 @@
+\begin{thebibliography}{20}
+\providecommand{\natexlab}[1]{#1}
+\providecommand{\url}[1]{\texttt{#1}}
+\expandafter\ifx\csname urlstyle\endcsname\relax
+  \providecommand{\doi}[1]{doi: #1}\else
+  \providecommand{\doi}{doi: \begingroup \urlstyle{rm}\Url}\fi
+
+\bibitem[Akiba et~al.(2019)Akiba, Sano, Yanase, Ohta, and Koyama]{akiba2019}
+Takuya Akiba, Shotaro Sano, Toshihiko Yanase, Takeru Ohta, and Masanori Koyama.
+\newblock Optuna: A next-generation hyperparameter optimization framework.
+\newblock In \emph{KDD}, 2019.
+
+\bibitem[Buda et~al.(2018)Buda, Maki, and Mazurowski]{buda2018}
+Mateusz Buda, Atsuto Maki, and Maciej~A. Mazurowski.
+\newblock A systematic study of the class imbalance problem in convolutional neural networks.
+\newblock \emph{Neural Networks}, 106:\penalty0 249--259, 2018.
+
+\bibitem[Cao et~al.(2019)Cao, Wei, Gaidon, Ar{\'{e}}chiga, and Ma]{cao2019}
+Kaidi Cao, Colin Wei, Adrien Gaidon, Nikos Ar{\'{e}}chiga, and Tengyu Ma.
+\newblock Learning imbalanced datasets with label-distribution-aware margin loss.
+\newblock In \emph{NeurIPS}, 2019.
+
+\bibitem[Chawla et~al.(2002)Chawla, Bowyer, Hall, and Kegelmeyer]{chawla2002}
+Nitesh~V. Chawla, Kevin~W. Bowyer, Lawrence~O. Hall, and W.~Philip Kegelmeyer.
+\newblock {SMOTE}: Synthetic minority over-sampling technique.
+\newblock \emph{Journal of Artificial Intelligence Research}, 16:\penalty0 321--357, 2002.
+
+\bibitem[Cui et~al.(2019)Cui, Jia, Lin, Song, and Belongie]{cui2019}
+Yin Cui, Menglin Jia, Tsung-Yi Lin, Yang Song, and Serge Belongie.
+\newblock Class-balanced loss based on effective number of samples.
+\newblock In \emph{CVPR}, 2019.
+
+\bibitem[Drummond and Holte(2003)]{drummond2003}
+Chris Drummond and Robert~C. Holte.
+\newblock {C4.5}, class imbalance, and cost sensitivity: Why under-sampling beats over-sampling.
+\newblock In \emph{Workshop on Learning from Imbalanced Datasets, ICML}, 2003.
+
+\bibitem[He and Garcia(2009)]{he2009}
+Haibo He and Edwardo~A. Garcia.
+\newblock Learning from imbalanced data.
+\newblock \emph{IEEE Transactions on Knowledge and Data Engineering}, 21\penalty0 (9):\penalty0 1263--1284, 2009.
+
+\bibitem[He et~al.(2016)He, Zhang, Ren, and Sun]{he2016}
+Kaiming He, Xiangyu Zhang, Shaoqing Ren, and Jian Sun.
+\newblock Deep residual learning for image recognition.
+\newblock In \emph{CVPR}, 2016.
+
+\bibitem[Horn et~al.(2018)Horn, Aodha, Song, Cui, Sun, Shepard, Adam, Perona, and Belongie]{van_horn2018}
+Grant~Van Horn, Oisin~Mac Aodha, Yang Song, Yin Cui, Chen Sun, Alex Shepard, Hartwig Adam, Pietro Perona, and Serge Belongie.
+\newblock The {iNaturalist} species classification and detection dataset.
+\newblock In \emph{CVPR}, 2018.
+
+\bibitem[Johnson and Khoshgoftaar(2019)]{johnson2019}
+Justin~M. Johnson and Taghi~M. Khoshgoftaar.
+\newblock Survey on deep learning with class imbalance.
+\newblock \emph{Journal of Big Data}, 6\penalty0 (1):\penalty0 27, 2019.
+
+\bibitem[Kang et~al.(2020)Kang, Xie, Rohrbach, Yan, Gordo, Feng, and Kalantidis]{kang2020}
+Bingyi Kang, Saining Xie, Marcus Rohrbach, Zhicheng Yan, Albert Gordo, Jiashi Feng, and Yannis Kalantidis.
+\newblock Decoupling representation and classifier for long-tailed recognition.
+\newblock In \emph{ICLR}, 2020.
+
+\bibitem[Krizhevsky(2009)]{krizhevsky2009}
+Alex Krizhevsky.
+\newblock Learning multiple layers of features from tiny images.
+\newblock Technical report, University of Toronto, 2009.
+
+\bibitem[Lin et~al.(2017)Lin, Goyal, Girshick, He, and Doll{\'a}r]{lin2017}
+Tsung-Yi Lin, Priya Goyal, Ross Girshick, Kaiming He, and Piotr Doll{\'a}r.
+\newblock Focal loss for dense object detection.
+\newblock In \emph{ICCV}, 2017.
+
+\bibitem[Liu et~al.(2019)Liu, Miao, Zhan, Wang, Gong, and Yu]{liu2019}
+Ziwei Liu, Zhongqi Miao, Xiaohang Zhan, Jiayun Wang, Boqing Gong, and Stella~X. Yu.
+\newblock Large-scale long-tailed recognition in an open world.
+\newblock In \emph{CVPR}, 2019.
+
+\bibitem[Menon et~al.(2021)Menon, Jayasumana, Rawat, Jain, Veit, and Kumar]{menon2021}
+Aditya~Krishna Menon, Sadeep Jayasumana, Ankit~Singh Rawat, Himanshu Jain, Andreas Veit, and Sanjiv Kumar.
+\newblock Long-tail learning via logistic regression.
+\newblock In \emph{ICML}, 2021.
+
+\bibitem[Ren et~al.(2018)Ren, Zeng, Yang, and Urtasun]{ren2018}
+Mengye Ren, Wenyuan Zeng, Bin Yang, and Raquel Urtasun.
+\newblock Learning to reweight examples for robust deep learning.
+\newblock In \emph{ICML}, 2018.
+
+\bibitem[Tan et~al.(2020)Tan, Wang, Li, Li, Ouyang, Yan, and Yan]{tan2020}
+Jingru Tan, Changbao Wang, Buyu Li, Quanquan Li, Wanli Ouyang, Changqing Yan, and Junjie Yan.
+\newblock Equalization loss for long-tailed object recognition.
+\newblock In \emph{CVPR}, 2020.
+
+\bibitem[Wang et~al.(2019)Wang, Liu, Wu, Cao, Meng, and Chen]{wang2019}
+Shuo Wang, Wanli Liu, Lingqiao Wu, Lihua Cao, Qi~Meng, and Wei Chen.
+\newblock Learning from imbalanced data sets with weighted cross-entropy function.
+\newblock \emph{Pattern Recognition Letters}, 2019.
+
+\bibitem[Zhang et~al.(2021)Zhang, Li, Yan, He, and Sun]{zhang2021}
+Songyang Zhang, Zeming Li, Shipeng Yan, Xuming He, and Jian Sun.
+\newblock Distribution alignment: A unified framework for long-tail visual recognition.
+\newblock In \emph{CVPR}, 2021.
+
+\bibitem[Zhou et~al.(2020)Zhou, Cui, Wei, and Chen]{zhou2020}
+Boyan Zhou, Quan Cui, Xiu-Shen Wei, and Zhao-Min Chen.
+\newblock {BBN}: Bilateral-branch network with cumulative learning for long-tailed visual recognition.
+\newblock In \emph{CVPR}, 2020.
+
+\end{thebibliography}
