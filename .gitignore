@@ -14,7 +14,7 @@ settings.local.json
 *.synctex.gz
 
 # ── 실험 폴더 (협업자 비공개) ──────────────────────────
-network_data/
+network_data/KICS 하계학술대회
 
 # ── 대용량 데이터셋 & 체크포인트 ──────────────────────
 *.pth
