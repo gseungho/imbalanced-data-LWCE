@@ -1,0 +1,195 @@
+%% Expert Systems with Applications --- Elsevier CAS single-column template
+\documentclass[a4paper,fleqn]{cas-sc}
+
+\usepackage[authoryear,longnamesfirst]{natbib}
+\usepackage{amsmath,amssymb}
+
+\begin{document}
+\let\WriteBookmarks\relax
+\def\floatpagepagefraction{1}
+\def\textpagefraction{.001}
+
+\shorttitle{Logarithmic Weighted Cross-Entropy for Imbalanced Classification}
+\shortauthors{S.~H.~Go et~al.}
+
+\title[mode=title]{Logarithmic Weighted Cross-Entropy: A Stable and
+Parameter-Efficient Re-weighting Loss for Class-Imbalanced Classification}
+
+\author[1]{Seung Ho Go}
+\ead{gseungho999@gmail.com}
+\credit{Conceptualization, Methodology, Software, Writing -- original draft}
+
+\affiliation[1]{organization={Sejong University},
+            addressline={209 Neungdong-ro, Gwangjin-gu},
+            city={Seoul},
+            country={Republic of Korea}}
+
+\author[1]{Hyunseok Lee}
+\credit{Methodology, Validation, Writing -- review \& editing}
+
+\author[1]{Jin Hee Yoon}
+\cormark[1]
+\credit{Supervision, Conceptualization, Writing -- review \& editing}
+
+\cortext[1]{Corresponding author}
+
+\begin{abstract}
+Class imbalance is a pervasive obstacle in machine learning, arising whenever a
+few majority categories dominate the training data while critically important
+minority categories remain severely underrepresented. Among algorithm-level
+remedies, Weighted Cross-Entropy (WCE) is the most direct: it scales the loss of
+each class by the inverse of its frequency. However, these inverse-frequency
+weights grow without bound as the imbalance becomes more severe, producing
+unstable optimization. More elaborate alternatives such as Class-Balanced (CB)
+Loss and Focal Loss introduce additional hyperparameters and, in our experiments,
+behave inconsistently across datasets---occasionally falling below ordinary
+Cross-Entropy (CE). We propose Logarithmic Weighted Cross-Entropy (LWCE), which
+replaces the inverse-frequency weight with a logarithmically compressed
+counterpart that keeps a meaningful boost for rare classes while bounding weight
+growth, and which introduces no additional hyperparameters. We further generalize
+it to Power-Log Weighted Cross-Entropy (PLWCE) through a single exponent that
+adjusts the focusing strength and is selected automatically on a small proxy
+subset. To assess generality, we evaluate the proposed losses across three
+distinct application domains that together span a wide range of imbalance
+severity: long-tailed image classification, tabular classification benchmarks,
+and network intrusion detection. Across these domains, LWCE and PLWCE improve
+over Cross-Entropy as the imbalance grows and, unlike the competing re-weighting
+losses, never collapse to substantially worse performance on any dataset. These
+results indicate that logarithmic weight compression offers a simple, stable, and
+parameter-efficient alternative to existing re-weighting strategies for
+class-imbalanced classification.
+\end{abstract}
+
+\begin{highlights}
+\item A logarithmic re-weighting loss that bounds the weight explosion of weighted cross-entropy.
+\item A single-parameter generalization tuned automatically on a small proxy subset.
+\item Evaluation spans image, tabular, and network-intrusion domains of varying imbalance.
+\item The proposed losses improve as imbalance grows and never collapse on any dataset.
+\end{highlights}
+
+\begin{keywords}
+Class imbalance \sep Long-tailed learning \sep Cross-entropy loss \sep
+Cost-sensitive learning \sep Network intrusion detection
+\end{keywords}
+
+\maketitle
+
+\section{Introduction}\label{sec:intro}
+
+Across a wide range of real-world classification tasks---including medical
+diagnosis, financial fraud detection, network intrusion detection, and visual
+recognition---the categories of interest are rarely observed in equal
+proportions. Instead, a small number of majority categories concentrate the
+overwhelming majority of the available samples, while many minority categories
+are represented by only a handful of examples~\citep{he2009,johnson2019}. This
+long-tailed structure is not an artifact of poor data collection but an intrinsic
+property of the underlying phenomena: healthy patients vastly outnumber those
+with a rare disease, legitimate transactions dwarf fraudulent ones, and benign
+network traffic far exceeds malicious traffic. Because the minority categories
+are often precisely the ones that carry the greatest practical cost when missed,
+building classifiers that remain reliable under imbalance is a problem of broad
+and lasting importance.
+
+The central difficulty is that the standard training objective is itself biased
+toward the majority. When a model is trained with ordinary Cross-Entropy (CE)
+loss, the aggregate gradient signal is dominated by the numerically abundant
+classes, so the optimizer can drive the overall loss down while largely ignoring
+rare categories. The resulting classifier attains a high overall accuracy yet
+performs poorly on exactly the minority classes that matter most---a failure mode
+commonly described as majority bias. Standard accuracy therefore masks the
+problem rather than revealing it, and a method that addresses imbalance must
+improve minority-class performance without sacrificing the majority.
+
+Existing remedies fall broadly into two families. Resampling methods reshape the
+training distribution directly: oversampling techniques such as the Synthetic
+Minority Over-sampling Technique (SMOTE) synthesize new minority
+instances~\citep{chawla2002}, while undersampling discards majority examples to
+restore balance. Both directions carry well-known risks---oversampling can
+introduce synthetic artifacts and encourage overfitting, whereas undersampling
+discards potentially informative majority data~\citep{drummond2003}. Algorithm-level
+methods instead modify the training objective. These include margin-based losses
+that enlarge the decision boundary around minority
+classes~\citep{cao2019}, logit-adjustment techniques that calibrate class priors,
+and loss re-weighting methods that scale the per-class loss by class-dependent
+weights. Among these, re-weighting is especially attractive because it is
+architecture-agnostic, modality-independent, and requires only a minimal change
+to the loss function; this paper focuses on the re-weighting family.
+
+Despite its appeal, re-weighting remains unsatisfying in practice. Weighted
+Cross-Entropy (WCE), the most direct re-weighting scheme, assigns each class a
+weight inversely proportional to its frequency; as the imbalance grows more
+severe these weights grow without bound, producing extreme gradients that
+destabilize training. More sophisticated alternatives were designed to soften
+this behavior but bring their own drawbacks. Focal Loss reduces the influence of
+easy, typically majority, examples through a tunable focusing term, but it
+operates on per-sample confidence rather than class frequency and therefore
+behaves inconsistently across imbalance levels. Class-Balanced (CB) Loss
+re-weights by an effective number of samples governed by an additional
+hyperparameter, yet that hyperparameter is sensitive and, in our experiments, CB
+Loss degrades below plain Cross-Entropy under severe imbalance. In short, the
+field still lacks a re-weighting loss that is simultaneously simple,
+hyperparameter-light, numerically stable, and dependable across both the level of
+imbalance and the application domain.
+
+To address this gap, we propose Logarithmic Weighted Cross-Entropy (LWCE). The
+key idea is to replace the inverse-frequency weight of WCE with a logarithmically
+compressed counterpart. The logarithm fundamentally bounds the growth of the
+weights, so the explosive behavior of WCE is removed while a meaningful emphasis
+on rare classes is preserved; crucially, the resulting loss introduces no
+additional hyperparameters and can be used as a drop-in replacement for
+Cross-Entropy. We further generalize LWCE to Power-Log Weighted Cross-Entropy
+(PLWCE) by introducing a single exponent that continuously controls the focusing
+strength, ranging from near-uniform weighting to an aggressive emphasis on the
+tail. This exponent is the only free parameter, and it is selected automatically
+through a lightweight grid search on a small proxy subset, adding negligible
+computational overhead.
+
+We assess the proposed losses through a deliberately broad empirical study rather
+than a single benchmark. To test whether the benefit of logarithmic compression
+generalizes, we evaluate across three application domains that together cover a
+wide spectrum of imbalance severity: long-tailed image classification on standard
+vision benchmarks, a collection of tabular classification datasets drawn from
+public repositories, and several network intrusion detection datasets in which
+rare attack types are extremely scarce. In every domain we compare the same set
+of re-weighting losses under a controlled protocol with repeated runs, and we
+report metrics that explicitly reflect minority-class performance rather than
+overall accuracy alone. This cross-domain design lets us examine not only whether
+the proposed losses help, but how their advantage changes as imbalance becomes
+more extreme.
+
+The main contributions of this paper are as follows.
+\begin{enumerate}
+  \item We identify and characterize the weight-explosion failure mode of Weighted
+        Cross-Entropy and motivate logarithmic compression as a principled remedy.
+  \item We propose Logarithmic Weighted Cross-Entropy, a parameter-free drop-in
+        replacement for Weighted Cross-Entropy, together with its single-parameter
+        generalization, Power-Log Weighted Cross-Entropy, whose only exponent is
+        tuned automatically on a small proxy subset.
+  \item We provide a controlled cross-domain evaluation spanning image, tabular,
+        and network intrusion detection data, showing that the proposed losses
+        improve over Cross-Entropy as imbalance grows and, unlike Class-Balanced
+        Loss and Focal Loss, never collapse to substantially worse performance on
+        any dataset.
+\end{enumerate}
+
+The remainder of this paper is organized as follows.
+Section~\ref{sec:related} reviews related work on learning from imbalanced and
+long-tailed data. Section~\ref{sec:method} defines the proposed losses and
+analyzes their properties. Section~\ref{sec:experiments} describes the
+experimental setup across the three domains and presents the results.
+Section~\ref{sec:conclusion} concludes and discusses limitations and future work.
+
+\section{Related Work}\label{sec:related}
+
+\section{Proposed Method}\label{sec:method}
+
+\section{Experiments}\label{sec:experiments}
+
+\section{Conclusion}\label{sec:conclusion}
+
+\printcredits
+
+\bibliographystyle{cas-model2-names}
+\bibliography{refs}
+
+\end{document}

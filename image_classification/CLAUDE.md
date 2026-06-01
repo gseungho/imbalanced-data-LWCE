@@ -42,11 +42,11 @@ image_classification/
 | loss_name | 가중치 방식 | 파라미터 | Optuna | 범위 |
 |-----------|-----------|---------|--------|------|
 | `ce` | 균일 (가중치 없음) | — | × | — |
-| `pwce` | `(total / n)^alpha` | alpha | ○ | [0.5, 5.0] |
+| `pwce` | `(total / n)^alpha` | alpha | ○ | [0.3, 5.0] |
 | `lwce` | `1 / log1p(n)` | — | × | — |
-| `plwce` | `1 / log1p(n)^alpha` | alpha | ○ | [2.0, 15.0] |
+| `plwce` | `1 / log1p(n)^alpha` | alpha | ○ | [0.5, 6.0] |
 | `cb` | `(1-beta) / (1-beta^n+1e-6)` | beta=0.9999 | × | — |
-| `focal` | CE + `(1-pt)^gamma` | gamma | ○ | [0.5, 5.0] |
+| `focal` | CE + `(1-pt)^gamma` | gamma | ○ | [1.0, 5.0] |
 
 **가중치 파싱 우선순위** (substring 충돌 방지):
 ```
@@ -151,30 +151,37 @@ Normalize(mean=[0.4914, 0.4822, 0.4465],
 
 ### 설정
 ```python
-PROXY_EPOCHS       = 40
-PROXY_SUBSET_RATIO = 0.20    # 전체 train 데이터의 20% 사용
+PROXY_EPOCHS        = 20
+PROXY_SUBSET_RATIO  = 0.20    # 전체 train 데이터의 20% 사용
+PROXY_MIN_PER_CLASS = 5       # stratified proxy: 클래스별 최소 보장 (tail 소멸 방지)
 ```
 
-### GridSampler 구성
+> **stratified proxy (v2)**: 기존 `np.random.choice` 랜덤 추출은 CIFAR-100처럼
+> 클래스가 많고 tail 샘플(4~5개)이 희박하면 proxy에서 tail 클래스가 사라져
+> (P(0개)≈41%) Optuna가 항상 가장 약한 α(≈CE)를 선택하는 문제가 있었음.
+> v2는 클래스별 `max(0.2·n_c, min(n_c, 5))`개를 stratified 추출해 tail을 보존함.
+> 체크포인트는 `*_v2.json`으로 분리 (v1 결과와 독립).
+
+### GridSampler 구성 (탐색 범위는 tabular/network 노트북과 통일)
 
 #### pwce (alpha)
 ```
 N_TRIALS_PWCE = 20
-alphas = [0.5, 1.0] + linspace(0.5, 5.0, 18)
+alphas = linspace(0.3, 5.0, 20)   # α<1 (약한 가중치)부터 탐색
 GridSampler({'alpha': alphas})
 ```
 
 #### plwce (alpha)
 ```
 N_TRIALS_PLWCE = 20
-alphas = [0.5, 1.0] + linspace(2.0, 15.0, 18)
+alphas = linspace(0.5, 6.0, 20)   # α=0.5(LWCE보다 약함) ~ 6.0(공격적)
 GridSampler({'alpha': alphas})
 ```
 
 #### focal (gamma)
 ```
 N_TRIALS_FOCAL = 20
-gammas = linspace(0.5, 5.0, 20)
+gammas = linspace(1.0, 5.0, 20)   # γ≥1 — γ<1은 NaN 붕괴 (아래 버그표 참조)
 GridSampler({'gamma': gammas})
 ```
 
@@ -283,6 +290,14 @@ for ir in IR_LIST:
 | Trial 필터 | `if t.value:` | `if t.value is not None:` |
 | study 시각화 순서 | study 정의 전 plot 코드 | study 정의 후 plot 코드 |
 | Pruner | GridSampler + MedianPruner 병행 | GridSampler 단독 사용 |
+| proxy 서브셋 | `np.random.choice` 랜덤 (tail 클래스 소멸 → α≈CE로 degenerate) | 클래스별 `min(n_c, 5)` 보장 stratified 추출 |
+| focal gamma 하한 | `linspace(0.5, ...)` (γ<1) | `linspace(1.0, ...)` — γ<1은 NaN 붕괴 |
+
+> **Focal γ<1 NaN 붕괴**: softmax focal의 `(1−pt)^γ` gradient `−γ(1−pt)^(γ−1)`는 γ<1일 때
+> `pt→1`에서 발산 → 다수 클래스가 confident해지면 gradient 폭발 → NaN → 전 샘플 class 0 예측
+> (`argmax(NaN)=0`). 증상: focal F1≈`F1_class0/K`, std=0, Few/Tail=0. Optuna proxy(짧은 학습)는
+> γ<1을 잘못 "최적"으로 뽑으므로, grid 하한을 반드시 `1.0`으로 둘 것 (γ=0은 CE라 안전, 0<γ<1만 위험).
+> Network 통합 노트북에서 2026-06 확인. medical_data의 `plwce_focal_dice`는 Dice 결합이라 별개.
 
 ### 학습 관련
 | 항목 | 주의 |

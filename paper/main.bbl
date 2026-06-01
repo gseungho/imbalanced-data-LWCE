@@ -1,0 +1,38 @@
+\begin{thebibliography}{5}
+\expandafter\ifx\csname natexlab\endcsname\relax\def\natexlab#1{#1}\fi
+\providecommand{\url}[1]{\texttt{#1}}
+\providecommand{\href}[2]{#2}
+\providecommand{\path}[1]{#1}
+\providecommand{\DOIprefix}{doi:}
+\providecommand{\ArXivprefix}{arXiv:}
+\providecommand{\URLprefix}{URL: }
+\providecommand{\Pubmedprefix}{pmid:}
+\providecommand{\doi}[1]{\href{http://dx.doi.org/#1}{\path{#1}}}
+\providecommand{\Pubmed}[1]{\href{pmid:#1}{\path{#1}}}
+\providecommand{\bibinfo}[2]{#2}
+\ifx\xfnm\relax \def\xfnm[#1]{\unskip,\space#1}\fi
+%Type = Inproceedings
+\bibitem[{Cao et~al.(2019)Cao, Wei, Gaidon, Ar{\'{e}}chiga and Ma}]{cao2019}
+\bibinfo{author}{Cao, K.}, \bibinfo{author}{Wei, C.}, \bibinfo{author}{Gaidon, A.}, \bibinfo{author}{Ar{\'{e}}chiga, N.}, \bibinfo{author}{Ma, T.}, \bibinfo{year}{2019}.
+\newblock \bibinfo{title}{Learning imbalanced datasets with label-distribution-aware margin loss}, in: \bibinfo{booktitle}{NeurIPS}.
+%Type = Article
+\bibitem[{Chawla et~al.(2002)Chawla, Bowyer, Hall and Kegelmeyer}]{chawla2002}
+\bibinfo{author}{Chawla, N.V.}, \bibinfo{author}{Bowyer, K.W.}, \bibinfo{author}{Hall, L.O.}, \bibinfo{author}{Kegelmeyer, W.P.}, \bibinfo{year}{2002}.
+\newblock \bibinfo{title}{{SMOTE}: Synthetic minority over-sampling technique}.
+\newblock \bibinfo{journal}{Journal of Artificial Intelligence Research} \bibinfo{volume}{16}, \bibinfo{pages}{321--357}.
+%Type = Inproceedings
+\bibitem[{Drummond and Holte(2003)}]{drummond2003}
+\bibinfo{author}{Drummond, C.}, \bibinfo{author}{Holte, R.C.}, \bibinfo{year}{2003}.
+\newblock \bibinfo{title}{{C4.5}, class imbalance, and cost sensitivity: Why under-sampling beats over-sampling}, in: \bibinfo{booktitle}{Workshop on Learning from Imbalanced Datasets, ICML}.
+%Type = Article
+\bibitem[{He and Garcia(2009)}]{he2009}
+\bibinfo{author}{He, H.}, \bibinfo{author}{Garcia, E.A.}, \bibinfo{year}{2009}.
+\newblock \bibinfo{title}{Learning from imbalanced data}.
+\newblock \bibinfo{journal}{IEEE Transactions on Knowledge and Data Engineering} \bibinfo{volume}{21}, \bibinfo{pages}{1263--1284}.
+%Type = Article
+\bibitem[{Johnson and Khoshgoftaar(2019)}]{johnson2019}
+\bibinfo{author}{Johnson, J.M.}, \bibinfo{author}{Khoshgoftaar, T.M.}, \bibinfo{year}{2019}.
+\newblock \bibinfo{title}{Survey on deep learning with class imbalance}.
+\newblock \bibinfo{journal}{Journal of Big Data} \bibinfo{volume}{6}, \bibinfo{pages}{27}.
+
+\end{thebibliography}

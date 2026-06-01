@@ -1,0 +1,24 @@
+Class imbalance is a pervasive obstacle in machine learning, arising whenever a
+few majority categories dominate the training data while critically important
+minority categories remain severely underrepresented. Among algorithm-level
+remedies, Weighted Cross-Entropy (WCE) is the most direct: it scales the loss of
+each class by the inverse of its frequency. However, these inverse-frequency
+weights grow without bound as the imbalance becomes more severe, producing
+unstable optimization. More elaborate alternatives such as Class-Balanced (CB)
+Loss and Focal Loss introduce additional hyperparameters and, in our experiments,
+behave inconsistently across datasets---occasionally falling below ordinary
+Cross-Entropy (CE). We propose Logarithmic Weighted Cross-Entropy (LWCE), which
+replaces the inverse-frequency weight with a logarithmically compressed
+counterpart that keeps a meaningful boost for rare classes while bounding weight
+growth, and which introduces no additional hyperparameters. We further generalize
+it to Power-Log Weighted Cross-Entropy (PLWCE) through a single exponent that
+adjusts the focusing strength and is selected automatically on a small proxy
+subset. To assess generality, we evaluate the proposed losses across three
+distinct application domains that together span a wide range of imbalance
+severity: long-tailed image classification, tabular classification benchmarks,
+and network intrusion detection. Across these domains, LWCE and PLWCE improve
+over Cross-Entropy as the imbalance grows and, unlike the competing re-weighting
+losses, never collapse to substantially worse performance on any dataset. These
+results indicate that logarithmic weight compression offers a simple, stable, and
+parameter-efficient alternative to existing re-weighting strategies for
+class-imbalanced classification.
