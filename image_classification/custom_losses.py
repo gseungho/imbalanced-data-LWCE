@@ -6,6 +6,7 @@ calculate_weights()와 FocalLoss만 사용 (세그멘테이션 손실 제외).
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+
 import numpy as np
 
 
@@ -18,8 +19,8 @@ def calculate_weights(class_counts, mode='ce', alpha=1.0, beta=0.9999):
 
     Args:
         class_counts: 각 클래스의 샘플 수 리스트
-        mode: 'ce' (균일), 'wce' (역빈도), 'lwce' (로그 가중치),
-              'plwce' (파워 로그 가중치), 'cb' (클래스 균형)
+        mode: 'ce' (균일), 'wce' (역빈도), 'sqce' (역제곱근 빈도),
+              'lwce' (로그 가중치), 'plwce' (파워 로그 가중치), 'cb' (클래스 균형)
         alpha: plwce 지수
         beta: cb 베타 파라미터
 
@@ -36,6 +37,8 @@ def calculate_weights(class_counts, mode='ce', alpha=1.0, beta=0.9999):
         weights = total / safe_counts
     elif mode == 'pwce':
         weights = np.power(total / safe_counts, alpha)
+    elif mode == 'sqce':
+        weights = np.sqrt(total / safe_counts)
     elif mode == 'lwce':
         weights = 1.0 / np.log1p(safe_counts)
     elif mode == 'plwce':
@@ -86,6 +89,7 @@ class ClassificationLoss(nn.Module):
         'ce'           → CrossEntropyLoss (가중치 없음)
         'wce'          → 가중 CE (역빈도)
         'pwce'         → 파워 가중 CE (alpha 파라미터)
+        'sqce'         → 역제곱근 빈도 가중 CE (w ∝ 1/√n, 파라미터 없음)
         'lwce'         → 로그 가중 CE
         'plwce'        → 파워-로그 가중 CE (alpha 파라미터)
         'cb'           → 클래스 균형 CE (beta 파라미터)
@@ -109,6 +113,8 @@ class ClassificationLoss(nn.Module):
             weight_mode = 'lwce'
         elif 'pwce' in loss_name:
             weight_mode = 'pwce'
+        elif 'sqce' in loss_name:
+            weight_mode = 'sqce'
         elif 'wce' in loss_name:
             weight_mode = 'wce'
         elif 'cb' in loss_name:

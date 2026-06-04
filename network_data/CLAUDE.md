@@ -4,9 +4,10 @@
 PyTorch MLP 기반.
 
 > **두 가지 실험 트랙이 공존한다:**
-> 1. **통합 노트북 (ESWA 논문용, 권장)** — `Network_MLP.ipynb` + `scr/data_handler.py`.
->    tabular `Tabular_MLP.ipynb`와 동일한 구조: **6 losses**(ce/pwce/lwce/plwce/cb/focal, **WCE 제외**),
->    **통일된 Optuna 범위**(PWCE 0.3–5.0, PLWCE 0.5–6.0, **Focal 1.0–5.0**), 5 seeds.
+> 1. **통합 노트북 (ASC 논문용, 권장)** — `Network_MLP.ipynb` + `scr/data_handler.py`.
+>    tabular `Tabular_MLP.ipynb`와 동일한 구조: **7 losses**(ce/pwce/sqce/lwce/plwce/cb/focal, **WCE 제외**),
+>    **통일된 Optuna 범위**(PWCE 0.3–5.0, PLWCE 0.5–6.0, **Focal 1.0–5.0**; sqce=√-CE는 α=0.5 고정·Optuna 없음), 5 seeds.
+>    **논문 역할**: `lwce`/`plwce` = **proposed**, `sqce` = reported baseline, `pwce` = **분석/이론 섹션용**(α-sweep foil, main 비교 아님), `ce`/`cb`/`focal` = baseline.
 >    한 노트북에서 8개 데이터셋을 `load → Optuna → 학습 → 저장 → 메모리 해제` 루프로 처리.
 >    결과: `results/mlp/`. tabular/CIFAR와 cross-domain 비교표를 위해 손실/범위를 통일함.
 > 2. **레거시 8개 개별 노트북 (KICS 학술대회용)** — `{Dataset}.ipynb`.
@@ -54,10 +55,10 @@ PyTorch MLP 기반.
 | CICIDS2017 | `chethuhn/network-intrusion-dataset` | 15 | ~8750:1 | 요일별 CSV 8개, `TARGET_TOTAL=300K`, `BENIGN_MAX=100K` |
 | UNSW-NB15 | `mrwellsdavid/unsw-nb15` | 10 | 극심 | training/testing-set CSV, `attack_cat` 기반, `id`·`label` 컬럼 제거 |
 | CIC-DDoS2019 | `dhoogla/cicddos2019` | ~18 | ~1957:1 | Parquet 다중 파일, `TARGET_TOTAL=300K`, `BENIGN_MAX=100K` |
-| Bot-IoT | `tapadhirdas/bot-iot-dataset` *(확인 필요)* | ~5 | 극심 | `category` 컬럼 우선, 대용량 → 서브샘플링 |
-| TON_IoT | `dhoogla/ton-iot` *(확인 필요)* | ~10 | 극심 | Network_dataset 파일 우선, `type` 컬럼 |
-| CICIDS2018 | `solarmainframe/ids-intrusion-csv` *(확인 필요)* | ~15 | 극심 | 요일별 CSV, `Label` 컬럼 strip() 필수 |
-| RT-IoT2022 | `dhoogla/rt-iot2022` *(확인 필요)* | ~10 | 중간 | `Attack_type` 컬럼, ~123K rows → 전체 사용 가능 |
+| Bot-IoT | `vigneshvenkateswaran/bot-iot` | 4 | ~1366:1 | `category` 컬럼(DDoS/DoS/Normal/Reconnaissance), 75 CSV 대용량 → 서브샘플링. Normal 54 최소 |
+| TON_IoT | `arnobbhowmik/ton-iot-network-dataset` | 10 | ~48:1 | `train_test_network.csv`, `type` 컬럼(10-class). normal 35K가 최다, mitm 730이 최소 |
+| CICIDS2018 | `solarmainframe/ids-intrusion-csv` | 15 | ~17,500:1 | 요일별 CSV, `Label` 컬럼 strip() 필수. Benign 70K vs SQL Injection 4 |
+| RT-IoT2022 | `supplejade/rt-iot2022real-time-internet-of-things` | 12 | ~3,313:1 | `RT_IOT2022.csv`, `Attack_type` 컬럼, ~123K rows 전체 사용. DOS_SYN_Hping 76.9% 지배(IR 높아도 분류 쉬움) |
 
 ## Bot-IoT / TON_IoT / CICIDS2018 / RT-IoT2022 공통 주의사항
 
@@ -66,7 +67,8 @@ PyTorch MLP 기반.
 - `_detect_files()` / `_load_files()` / `_stratified_subset()` 헬퍼 함수가 Cell 1 상단에 정의됨
 
 ### Bot-IoT 전처리 주의사항
-- `category` 컬럼 우선 (5-class: Normal, DDoS, DoS, Reconnaissance, Theft)
+- `category` 컬럼 우선. 전체 라벨은 5종(Normal, DDoS, DoS, Reconnaissance, Theft)이나
+  Theft가 극소수라 서브샘플(592K)에선 누락 → **실측 4-class**(Normal, DDoS, DoS, Reconnaissance)
 - `attack` 컬럼(이진)이 선택되면 경고 출력 → `category`/`sub_category` 확인 필요
 - 파일명에 `feature` 포함된 CSV는 로딩 제외 (피처명 정의 파일)
 
@@ -114,7 +116,10 @@ PyTorch MLP 기반.
 /content/gdrive/MyDrive/imbalanced-data-LWCE/network_data/results/{Dataset}/
 ```
 
-## 실험 결과 요약 (2026-05-06 기준, N=5 seeds)
+## (레거시·아카이브) 실험 결과 — KICS 8노트북 트랙 (wce 포함, 2026-05-06, N=5)
+
+> 아래는 레거시 8개 개별 노트북(wce 포함, 옛 전처리) 결과. **ASC 논문은 맨 아래 "통합 노트북 트랙"을 사용**하며,
+> 두 트랙은 전처리·클래스 수·불균형비가 달라 수치가 직접 비교되지 않는다(예: TON_IoT legacy F1 ~0.69 vs 통합 ~0.39).
 
 ### 전체 요약 (F1-Macro 기준)
 
@@ -125,9 +130,9 @@ PyTorch MLP 기반.
 | UNSW-NB15 | 10 | ~850:1 | `wce` (0.4579) | +0.046 | focal Tail_F1=0.000 붕괴 |
 | CIC-DDoS2019 | 18 | ~1957:1 | `cb` (0.5026) | +0.051 | wce Bal_Acc 최우수 (0.6012) |
 | Bot-IoT | 4 | ~1366:1 | `wce` (0.9151) | +0.090 | wce Tail_F1도 최우수 (0.6635) |
-| TON_IoT | ~10 | 극심 | `pwce` (0.7302) | +0.036 | lwce Tail_F1 최우수 (0.3516) |
-| CICIDS2018 | ~15 | 극심 | `lwce` (0.7846) | +0.063 | lwce Tail_F1도 최우수 (0.6148) |
-| RT-IoT2022 | ~10 | 중간 | `lwce` (0.9632) | +0.006 | 전반적으로 고성능 |
+| TON_IoT | 10 | ~48:1 | `pwce` (0.7302) | +0.036 | lwce Tail_F1 최우수 (0.3516) |
+| CICIDS2018 | 15 | ~17,500:1 | `lwce` (0.7846) | +0.063 | lwce Tail_F1도 최우수 (0.6148) |
+| RT-IoT2022 | 12 | ~3,313:1 | `lwce` (0.9632) | +0.006 | IR 높아도 다수 클래스 76.9% 지배 → 분리 쉬워 전반 고성능 |
 
 ### 상세 결과 (mean ± std)
 
@@ -226,3 +231,29 @@ PyTorch MLP 기반.
 - **focal 불안정**: UNSW-NB15에서 Tail_F1=0.000 완전 붕괴, CIC-DDoS2019·NSL-KDD에서도 중위권
 - **wce 강세**: Bot-IoT(4-class 단순 구조)에서 wce가 압도적 우위 (+0.090)
 - **불균형 ≤ 중간(RT-IoT2022)**: 모든 손실 함수가 0.93+ F1-Macro로 차이 미미
+
+## 실험 결과 요약 — 통합 노트북 트랙 (ASC 논문용, 2026-06, N=5)
+
+수치 출처: `_checkpoint_network.json` (7 losses, wce 제외, sqce 포함). **lwce/plwce가 proposed.**
+F1-Macro 기준 7종 중 순위(`n/7`)로 표기. 통합 IR 알려진 값: CIC-DDoS2019 1957:1, Bot-IoT 1366:1, TON_IoT 48:1, CICIDS2018 17,500:1, RT-IoT2022 3313:1.
+
+| 데이터셋 | 🥇 최우수 (F1) | **lwce** | **plwce** | 소수클래스(Tail) |
+|---------|---------------|----------|-----------|------------------|
+| NSL-KDD | lwce 0.6349 | **0.6349 (1/7) 🥇** | 0.6343 (2/7) | **plwce Tail 0.5457 최우수** |
+| UNSW-NB15 | pwce 0.4624 | 0.4439 (4/7) | 0.4594 (2/7) | pwce Tail 0.2498 최상 |
+| CICIDS2017 | plwce 0.7866 | 0.7829 (2/7) | **0.7866 (1/7) 🥇** | pwce Tail 0.4888 최상 |
+| CICIDS2018 | pwce 0.8046 | 0.8042 (2/7) | 0.8031 (3/7) | **lwce·plwce Tail 0.6760 공동 최상** |
+| CIC-DDoS2019 | sqce 0.4708 | 0.4471 (6/7) | 0.4626 (4/7) | **plwce Tail 0.1869 최우수** |
+| Bot-IoT | pwce/sqce 0.9182 | 0.9147 (5/7) | 0.9106 (6/7) | 전부 노이즈 내(±0.01) |
+| TON_IoT | ce 0.3933 | 0.3590 (5/7) | 0.3887 (2/7) | plwce Tail 0.5508 최상(고분산) |
+| RT-IoT2022 | ce 0.9544 | 0.9512 (3/7) | 0.9292 (5/7) | ce Tail 0.8838 최상 |
+
+**제안 손실 소견 (lwce/plwce)**
+- **상위권 다수**: 단독 1위 2/8(NSL-KDD lwce, CICIDS2017 plwce), **top-2 진입 4/8**(+UNSW-NB15 plwce, CICIDS2018 lwce). CICIDS2018은 pwce/lwce/plwce가 0.803~0.805로 사실상 동률.
+- **Tail(소수 클래스)이 핵심 강점**: plwce가 NSL-KDD(0.5457)·CIC-DDoS2019(0.1869) Tail 최우수, lwce·plwce가 CICIDS2018 Tail 공동 최상(0.6760). F1-Macro에서 안 보여도 소수 클래스 회복은 제안 손실이 자주 1위.
+- **lwce vs plwce 상보적**: plwce는 Tail·중간 불균형(UNSW/TON_IoT 2위)에서, lwce는 다클래스 균형 F1(NSL-KDD 1위)에서 우위.
+- **약세 케이스**: 극단 few-class 불균형(CIC-DDoS2019·Bot-IoT)은 sqce/pwce에 밀림 / ce가 이미 강한 TON_IoT·RT-IoT2022는 ce 우위.
+
+> **세 도메인 통합 narrative**: 제안 손실(특히 plwce)의 강점은 **소수 클래스 Tail 회복**과 **다클래스·중간 불균형**.
+> 파라미터 없는 √-CE(sqce)는 **few-class 극단 불균형**(CIC-DDoS2019, CIFAR-10 고IR)에서 빛남 → 역할 구분.
+> CB는 다수 도메인에서 변동성·최하위 빈번. cf. `image_classification/CLAUDE.md`, `tabular_data/CLAUDE.md` 동일 결론.
