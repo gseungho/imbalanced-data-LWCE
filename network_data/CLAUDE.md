@@ -5,9 +5,10 @@ PyTorch MLP 기반.
 
 > **두 가지 실험 트랙이 공존한다:**
 > 1. **통합 노트북 (ASC 논문용, 권장)** — `Network_MLP.ipynb` + `scr/data_handler.py`.
->    tabular `Tabular_MLP.ipynb`와 동일한 구조: **7 losses**(ce/pwce/sqce/lwce/plwce/cb/focal, **WCE 제외**),
->    **통일된 Optuna 범위**(PWCE 0.3–5.0, PLWCE 0.5–6.0, **Focal 1.0–5.0**; sqce=√-CE는 α=0.5 고정·Optuna 없음), 5 seeds.
->    **논문 역할**: `lwce`/`plwce` = **proposed**, `sqce` = reported baseline, `pwce` = **분석/이론 섹션용**(α-sweep foil, main 비교 아님), `ce`/`cb`/`focal` = baseline.
+>    tabular `Tabular_MLP.ipynb`와 동일한 구조: **8 losses**(ce/wce/pwce/sqce/lwce/plwce/cb/focal, **WCE 포함**),
+>    **통일된 Optuna 범위**(PWCE 0.3–5.0, PLWCE 0.5–6.0, **Focal 1.0–5.0**; wce·sqce는 파라미터 없음, sqce=√-CE α=0.5 고정), 5 seeds.
+>    **논문 역할**: `lwce`/`plwce` = **proposed**, `sqce` = reported baseline, `pwce` = **분석/이론 섹션용**(α-sweep foil, main 비교 아님), `ce`/`wce`/`cb`/`focal` = baseline.
+>    **⚠️ wce 추가 (2026-06, 전 도메인)**: weight-explosion 동기가 정조준하는 표준 IDS 베이스라인이라 비교군에 포함. `wce = pwce(α=1.0)` 특수해(`total/n_i`). **전 도메인 완료 (network·tabular·CIFAR-10·100)**: network·tabular는 wce가 F1 최악(6.12/8·7.18/8, 분리 쉬운 도메인). image LT는 wce가 **IR 의존 붕괴** — CIFAR-10은 IR=10 **rank 1/8(최우수)→IR=100 8/8(꼴찌)** 완벽 단조, CIFAR-100은 5/8→7/8. 모두 weight explosion 실증.
 >    한 노트북에서 8개 데이터셋을 `load → Optuna → 학습 → 저장 → 메모리 해제` 루프로 처리.
 >    결과: `results/mlp/`. tabular/CIFAR와 cross-domain 비교표를 위해 손실/범위를 통일함.
 > 2. **레거시 8개 개별 노트북 (KICS 학술대회용)** — `{Dataset}.ipynb`.
@@ -120,6 +121,13 @@ PyTorch MLP 기반.
 
 > 아래는 레거시 8개 개별 노트북(wce 포함, 옛 전처리) 결과. **ASC 논문은 맨 아래 "통합 노트북 트랙"을 사용**하며,
 > 두 트랙은 전처리·클래스 수·불균형비가 달라 수치가 직접 비교되지 않는다(예: TON_IoT legacy F1 ~0.69 vs 통합 ~0.39).
+>
+> **⚠️ 레거시 focal UNSW-NB15 Tail_F1=0.000 = γ<1 NaN 붕괴 아티팩트** (원인·해결은 위 L42–47 참조). 레거시는
+> focal γ 탐색 하한이 1.0 미만이라 이 버그가 그대로 박혀 있음. 통합 트랙에서 γ≥1.0으로 정정 → UNSW focal Tail_F1≈0.153.
+> **KICS 프로시딩(`KICS 하계학술대회/2026 KICS_하계학술대회_proceeding_고승호.pdf`)은 이미 0.000 수치로 제출 완료** —
+> 따라서 **포스터(`KICS2026_LWCE_poster.tex`)는 레거시 트랙·손실 세트(WCE 포함)를 그대로 유지**하되,
+> 방어 불가능한 "0.000" 문구만 제거하고 *"Focal은 γ-민감, tail에서 최저"* 로 정성 서술함(2026-06 결정, Option B).
+> 별개 run인 통합 트랙의 0.153을 레거시 표에 끼워넣지 않음(손실 세트 WCE↔sqce 상이로 혼입 시 부정직).
 
 ### 전체 요약 (F1-Macro 기준)
 
@@ -234,25 +242,27 @@ PyTorch MLP 기반.
 
 ## 실험 결과 요약 — 통합 노트북 트랙 (ASC 논문용, 2026-06, N=5)
 
-수치 출처: `_checkpoint_network.json` (7 losses, wce 제외, sqce 포함). **lwce/plwce가 proposed.**
-F1-Macro 기준 7종 중 순위(`n/7`)로 표기. 통합 IR 알려진 값: CIC-DDoS2019 1957:1, Bot-IoT 1366:1, TON_IoT 48:1, CICIDS2018 17,500:1, RT-IoT2022 3313:1.
+수치 출처: `_checkpoint_network.json` (**8 losses, wce 포함**, sqce 포함, 2026-06 재실행). **lwce/plwce가 proposed.**
+F1-Macro 기준 8종 중 순위(`n/8`)로 표기. 통합 IR: NSL-KDD 1295:1, UNSW 841:1, CICIDS2017 8750:1, CICIDS2018 17,500:1, CIC-DDoS2019 1957:1, Bot-IoT 1366:1, TON_IoT 48:1, RT-IoT2022 3313:1.
 
-| 데이터셋 | 🥇 최우수 (F1) | **lwce** | **plwce** | 소수클래스(Tail) |
-|---------|---------------|----------|-----------|------------------|
-| NSL-KDD | lwce 0.6349 | **0.6349 (1/7) 🥇** | 0.6343 (2/7) | **plwce Tail 0.5457 최우수** |
-| UNSW-NB15 | pwce 0.4624 | 0.4439 (4/7) | 0.4594 (2/7) | pwce Tail 0.2498 최상 |
-| CICIDS2017 | plwce 0.7866 | 0.7829 (2/7) | **0.7866 (1/7) 🥇** | pwce Tail 0.4888 최상 |
-| CICIDS2018 | pwce 0.8046 | 0.8042 (2/7) | 0.8031 (3/7) | **lwce·plwce Tail 0.6760 공동 최상** |
-| CIC-DDoS2019 | sqce 0.4708 | 0.4471 (6/7) | 0.4626 (4/7) | **plwce Tail 0.1869 최우수** |
-| Bot-IoT | pwce/sqce 0.9182 | 0.9147 (5/7) | 0.9106 (6/7) | 전부 노이즈 내(±0.01) |
-| TON_IoT | ce 0.3933 | 0.3590 (5/7) | 0.3887 (2/7) | plwce Tail 0.5508 최상(고분산) |
-| RT-IoT2022 | ce 0.9544 | 0.9512 (3/7) | 0.9292 (5/7) | ce Tail 0.8838 최상 |
+**🔑 wce(역빈도) = 8종 중 최악** — 평균순위 F1 **6.12/8**, Tail **7.00/8(사실상 꼴찌)**. 극심 불균형일수록 붕괴: CICIDS2018(17,500:1)·CICIDS2017(8750:1)·RT-IoT2022(3313:1)·Bot-IoT(1366:1)에서 **F1·Tail 모두 단독 8/8**. Tail-F1이 NSL 0.1445(vs lwce 0.5256)·RT22 0.6415(vs lwce 0.8742)로 붕괴. **weight explosion을 실증** — bounded reweighting(lwce/plwce/sqce/pwce)이 unbounded wce를 일관 상회. 유일 예외 CIC-DDoS2019(wce F1 1위 0.4753, but Tail 5/8). 8종 평균순위: pwce 3.00 / plwce 3.25 / lwce 3.75 / sqce 4.25 / focal 4.75 / ce 5.00 / cb 5.75 / **wce 6.12**.
+
+| 데이터셋 | 🥇 최우수 (F1) | **lwce** | **plwce** | wce | 소수클래스(Tail) |
+|---------|---------------|----------|-----------|-----|------------------|
+| NSL-KDD | lwce 0.6349 | **0.6349 (1/8) 🥇** | 0.6343 (2/8) | 0.5778 (6/8) | **plwce Tail 0.5457 최우수** |
+| UNSW-NB15 | pwce 0.4624 | 0.4439 (4/8) | 0.4594 (2/8) | 0.4399 (5/8) | pwce Tail 0.2498 최상 |
+| CICIDS2017 | plwce 0.7866 | 0.7829 (2/8) | **0.7866 (1/8) 🥇** | 0.6482 (8/8) | pwce Tail 0.4888 최상 |
+| CICIDS2018 | pwce 0.8046 | 0.8042 (2/8) | 0.8031 (3/8) | 0.6741 (8/8) | **lwce·plwce Tail 0.6760 공동 최상** |
+| CIC-DDoS2019 | **wce 0.4753** | 0.4471 (7/8) | 0.4626 (5/8) | **0.4753 (1/8)** | **plwce Tail 0.1869 최우수** |
+| Bot-IoT | pwce/sqce 0.9182 | 0.9147 (5/8) | 0.9106 (6/8) | 0.9070 (8/8) | 전부 노이즈 내(±0.01) |
+| TON_IoT | ce 0.3933 | 0.3590 (6/8) | 0.3887 (2/8) | 0.3593 (5/8) | plwce Tail 0.5508 최상(고분산) |
+| RT-IoT2022 | ce 0.9544 | 0.9512 (3/8) | 0.9292 (5/8) | 0.8696 (8/8) | ce Tail 0.8838 최상 |
 
 **제안 손실 소견 (lwce/plwce)**
 - **상위권 다수**: 단독 1위 2/8(NSL-KDD lwce, CICIDS2017 plwce), **top-2 진입 4/8**(+UNSW-NB15 plwce, CICIDS2018 lwce). CICIDS2018은 pwce/lwce/plwce가 0.803~0.805로 사실상 동률.
 - **Tail(소수 클래스)이 핵심 강점**: plwce가 NSL-KDD(0.5457)·CIC-DDoS2019(0.1869) Tail 최우수, lwce·plwce가 CICIDS2018 Tail 공동 최상(0.6760). F1-Macro에서 안 보여도 소수 클래스 회복은 제안 손실이 자주 1위.
 - **lwce vs plwce 상보적**: plwce는 Tail·중간 불균형(UNSW/TON_IoT 2위)에서, lwce는 다클래스 균형 F1(NSL-KDD 1위)에서 우위.
-- **약세 케이스**: 극단 few-class 불균형(CIC-DDoS2019·Bot-IoT)은 sqce/pwce에 밀림 / ce가 이미 강한 TON_IoT·RT-IoT2022는 ce 우위.
+- **약세 케이스**: 극단 few-class 불균형(CIC-DDoS2019는 wce, Bot-IoT는 pwce/sqce)에 밀림 / ce가 이미 강한 TON_IoT·RT-IoT2022는 ce 우위.
 
 > **세 도메인 통합 narrative**: 제안 손실(특히 plwce)의 강점은 **소수 클래스 Tail 회복**과 **다클래스·중간 불균형**.
 > 파라미터 없는 √-CE(sqce)는 **few-class 극단 불균형**(CIC-DDoS2019, CIFAR-10 고IR)에서 빛남 → 역할 구분.

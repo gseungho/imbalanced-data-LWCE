@@ -7,7 +7,7 @@ medical_data 세그멘테이션 실험을 이미지 분류 도메인으로 확�
 
 **구조**: 
 - 인공 불균형 생성 (지수 감소 분포, IR=10/50/100)
-- 7가지 손실함수 비교 (ce, pwce, sqce, lwce, plwce, cb, focal)
+- 8가지 손실함수 비교 (ce, wce, pwce, sqce, lwce, plwce, cb, focal)
 - Optuna hyperparameter 탐색 (pwce/plwce alpha, focal gamma)
 - ResNet-32 backbone (CIFAR 전용 아키텍처)
 
@@ -35,13 +35,14 @@ image_classification/
 
 ---
 
-## 손실함수 (7종)
+## 손실함수 (8종)
 
-`custom_losses.py`에서 제공하는 7가지 손실함수:
+`custom_losses.py`에서 제공하는 8가지 손실함수:
 
 | loss_name | 가중치 방식 | 파라미터 | Optuna | 범위 | 역할 |
 |-----------|-----------|---------|--------|------|------|
 | `ce` | 균일 (가중치 없음) | — | × | — | baseline |
+| `wce` | `total / n` (역빈도) | — | × | — | baseline (`= pwce α=1`) |
 | `pwce` | `(total / n)^alpha` | alpha | ○ | [0.3, 5.0] | 분석/이론 (α-sweep foil, main 비교 아님) |
 | `sqce` | `√(total / n)` (역제곱근 빈도, ∝ 1/√n) | — | × | — | reported baseline |
 | `lwce` | `1 / log1p(n)` | — | × | — | **proposed** |
@@ -259,7 +260,7 @@ per_class_acc = [정확도_클래스0, 정확도_클래스1, ..., 정확도_클�
 
 ### Cell 6: 전체 실험
 ```python
-LOSS_CONFIGS = ['ce', 'pwce', 'sqce', 'lwce', 'plwce', 'cb', 'focal']  # sqce=√-CE(1/√n), Optuna 없이 α=0.5 고정
+LOSS_CONFIGS = ['ce', 'wce', 'pwce', 'sqce', 'lwce', 'plwce', 'cb', 'focal']  # wce=역빈도(=pwce α=1), sqce=√-CE(1/√n) α=0.5 고정
 
 for ir in IR_LIST:
     for loss_name in LOSS_CONFIGS:
@@ -354,12 +355,17 @@ results/
 
 그룹 정의: training count 기준 상위/중위/하위 1/3 (tertile split)
 수치 출처: `results_checkpoint_cifar{10,100}_v2.json` (2026-06 재실행, focal γ≥1.0 하한 + stratified proxy v2, sqce 포함). **lwce/plwce가 proposed.**
+**wce 추가 (2026-06, `wce=pwce α=1`, ✅ CIFAR-10·100 모두 완료)**: wce가 **IR 의존적으로 붕괴** — image LT에서 가장 깨끗하게 보임.
+- **CIFAR-10 (가장 극적)**: wce가 **IR=10 rank 1/8(전체 최우수 F1 0.7268, Few-acc도 1위) → IR=50 5/8 → IR=100 8/8(꼴찌, F1 0.3935·Few 0.1850 최하)**. 완벽 단조 best→worst = weight explosion 교과서 시연.
+- **CIFAR-100**: IR=10 rank 5/8(Few-acc 0.2472 최고) → IR=50·100 7/8.
+- network/tabular(거의 항상 꼴찌)와 대조: image LT는 **저IR 경쟁력→고IR 붕괴**의 IR 의존성. α-sweep(image LT는 가중 레버리지 큼)과 정합.
 
 ### CIFAR-10-LT
 
 | Loss  | IR=10 F1 | IR=50 F1 | IR=100 F1 | IR=100 Few |
 |-------|----------|----------|-----------|------------|
 | ce    | 0.7058±0.0057 | 0.5026±0.0285 | 0.4282±0.0318 | 0.2018 |
+| wce   | **0.7268±0.0138** | 0.5404±0.0222 | 0.3935±0.0410 | 0.1850 |
 | pwce  | 0.7131±0.0099 | 0.5638±0.0369 | 0.4711±0.0194 | 0.2576 |
 | sqce  | 0.7201±0.0120 | 0.5677±0.0184 | 0.4772±0.0129 | 0.2634 |
 | **lwce** | 0.7139±0.0035 | 0.5468±0.0192 | 0.4498±0.0135 | 0.2264 |
@@ -372,6 +378,7 @@ results/
 | Loss  | IR=10 F1 | IR=50 F1 | IR=100 F1 | IR=100 Few |
 |-------|----------|----------|-----------|------------|
 | ce    | 0.3466±0.0092 | 0.2185±0.0069 | 0.1818±0.0013 | 0.0432 |
+| wce   | 0.3557±0.0216 | 0.1935±0.0030 | 0.1580±0.0054 | 0.0421 |
 | pwce  | 0.3589±0.0157 | 0.2179±0.0060 | 0.1778±0.0072 | 0.0441 |
 | sqce  | 0.3585±0.0093 | 0.2110±0.0054 | 0.1709±0.0025 | 0.0361 |
 | **lwce** | 0.3637±0.0142 | 0.2170±0.0055 | 0.1781±0.0057 | 0.0464 |
@@ -384,7 +391,7 @@ results/
 - **CIFAR-100(100클래스)에서 제안 손실 강세**: **lwce가 IR=10 단독 1위**(0.3637), **plwce가 IR=100 단독 1위**(0.1869, Few도 0.0495 최상). 클래스 수가 많을수록 LWCE 계열 이점 부각 — tabular 다중 클래스(glass/steel/page_blocks)·network 다클래스와 동일 경향.
 - **CIFAR-10(10클래스)**: IR=50/100에서 reweighting 전반(sqce/pwce/plwce/lwce)이 CE를 뚜렷이 상회. 제안 손실은 상위권 내 중위 — plwce가 pwce 다음(IR=50 0.5586 / IR=100 0.4635), lwce는 그 아래.
 - **IR=10**: 전 손실 차이 미미(노이즈). CIFAR-10 cb 근소 1위, CIFAR-100 lwce 근소 1위.
-- **CB 최하위 반복**: 두 데이터셋 모두 IR↑일수록 cb가 단독 최하위(다수 클래스 과억제).
+- **고IR 최하위 = cb 또는 wce**: IR↑일수록 다수클래스 과억제 손실이 최하위. CIFAR-100 IR=100은 cb(0.1563) 최하, **CIFAR-10 IR=100은 wce(0.3935)가 cb(0.4062)를 제치고 단독 최하** — wce는 IR=10 최우수였다가 폭발(위 wce 주석 참조).
 - **PWCE**: CIFAR-10 강세지만 CIFAR-100 IR=100에서 CE 수준(0.1778)으로 하락 — 고불균형·다클래스 불안정.
 - **Focal**: γ≥1 수정 후 collapse 없음(std≠0, Few≠0). 중간 IR에서만 CE 상회.
 
@@ -400,6 +407,34 @@ results/
 | CIFAR-100 | 10  | 0.547 | 3.105 | 1.000 |
 | CIFAR-100 | 50  | 0.300 | 0.789 | 1.421 |
 | CIFAR-100 | 100 | 0.300 | 0.500 | 1.000 |
+
+---
+
+## α-sweep 분석 — PLWCE α* vs IR (CIFAR-LT, 분석/이론 섹션용)
+
+CIFAR-10-LT에서 IR을 고정 grid(10/20/50/100/200)로 두고 **각 IR마다 PLWCE α를 스윕**해 test-F1 peak 지점 α\*를 측정한 controlled 실험. (CIFAR-LT는 같은 데이터에서 IR만 변경 가능 → 교란변수 통제됨.)
+
+| IR | 10 | 20 | 50 | 100 | 200 |
+|----|----|----|----|----|----|
+| **α\*** | 5.559 | 5.010 | 4.420 | 3.519 | 2.410 |
+
+**핵심: 불균형↑ → 최적 α↓ (덜 공격적).** 극심 IR에서 공격적 가중(높은 α)이 다수 클래스를 과억제 → 최적이 후퇴. network/tabular의 "극단 IR서 wce·pwce 붕괴"와 동일 메커니즘.
+
+**Fit (2026-06):**
+- raw-IR 선형: `α* = −0.01572·IR + 5.378`, R²=0.9582
+- **log-IR 선형: `α* = −1.017·ln(IR) + 8.071`, R²=0.9633** ← 채택
+
+> ⚠️ **log-IR 채택 근거는 R²가 아님**: ΔR²=0.0052, n=5 → 두 fit은 통계적으로 동등(구분 불가). 채택 사유는 **PLWCE가 log(n) 가중을 쓰므로 α\*를 log(IR)에 선형 표현하는 게 차원적으로 일관**하기 때문. 논문엔 "두 형식 동등하게 적합, log-IR를 보고" 로 정직하게.
+>
+> ⚠️ **외삽 금지 — CIFAR 범위(IR 10–200) 한정**: log-IR 법칙은 α\*=1(=LWCE) at **IR≈1047**, α\*=0 at **IR≈2798**, IR>2800에선 **음수**(소수클래스 down-weight = 무의미). network/tabular 극단 IR(1366~17,500)엔 적용 불가.
+
+**관측적 정합 (정량 법칙 아님)**: 법칙이 IR>~1047에서 α\*<1을 예측 = "극단 IR에선 더 부드러운 가중이 최적"이라는 **방향**은, network 실측(극단 IR서 wce 꼴찌 붕괴)과 **질적으로 일치**. 단 이는 *"aggressive weighting은 mild~moderate 불균형 전용"* 이라는 **정성적 결론**까지만 — α\*(IR) **정량 법칙 자체는 image LT 밖에서 재현 안 됨**(아래 cross-domain null 참조). 논문에서 "법칙이 도메인 간 일반화"로 과장 금지.
+
+**🔁 cross-domain 재현 (2026-06, 결과: ❌ 법칙 재현 안 됨 — null)**: `alpha_sweep_crossdomain.ipynb` (repo root). 같은 controlled 설계(train만 지수 LT 프로파일로 IR∈{10,20,50,100,200} 통제, test 자연분포 고정)를 tabular credit_card_fraud(binary, N_HEAD=3440)·network CICIDS2018(≥1000 필터→10-class, N_HEAD=8000)에서 PLWCE α(0.3~6.0, 16점) 스윕. **두 도메인 모두 α\*(IR) 법칙 비재현:**
+> - **ccf (binary, 깨끗한 null)**: α\* = **0.3(grid 최저)로 전 IR 고정** → IR 무관 + CIFAR와 반대(저IR도 최소 α 선호). fraud는 공격적 reweighting 자체를 안 원함(α→0=CE 쪽). 필터 없이 tail 17개까지 가도 동일 → 신뢰 높음.
+> - **CICIDS2018**: α\* = [0.3,6.0,4.1,2.2,4.1] **무작위**(R²=0.02~0.07), **F1이 α 전체에서 0.859~0.871(~1%)로 평탄** → α 레버리지 거의 없음. ⚠️ 단, IR 통제용 ≥1000 필터가 hard tail(α가 먹히는 곳)을 제거한 교란 가능 → ccf null이 더 깨끗한 증거.
+>
+> **결론: α\*(IR) 법칙은 image LT 특이적, universal 아님.** 의미 = **reweighting 레버리지가 도메인 의존** — image LT는 강(α 민감), IDS/fraud는 약(클래스 분리 쉬움·F1 포화 → "less-is-more"). 이는 network/tabular에서 **wce 최악·제안 손실 gap 작음**과 정합(α-sweep이 인과적으로 확증). **논문**: 위 α\*(IR) 법칙을 universal로 주장 금지 — CIFAR 분석으로 한정하고 *"tabular/IDS에선 F1이 α에 둔감해 재현 안 됨(실측)"* 명시가 정직·방어적. 결과: `network_data/results/mlp/alpha_sweep_{domain}.json`.
 
 ---
 

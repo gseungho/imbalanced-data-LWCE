@@ -4,7 +4,7 @@
 
 > **두 가지 실험 트랙이 공존한다:**
 > 1. **통합 노트북 (ASC 논문용, 권장)** — `Tabular_MLP.ipynb`.
->    `network_data/Network_MLP.ipynb`·CIFAR 실험과 동일한 구조: **PyTorch MLP**, **7 losses**(ce/pwce/sqce/lwce/plwce/cb/focal, **WCE 제외**),
+>    `network_data/Network_MLP.ipynb`·CIFAR 실험과 동일한 구조: **PyTorch MLP**, **8 losses**(ce/wce/pwce/sqce/lwce/plwce/cb/focal, **WCE 포함**),
 >    **통일된 Optuna 범위**(PWCE 0.3–5.0, PLWCE 0.5–6.0, **Focal 1.0–5.0**; sqce=√-CE는 α=0.5 고정·Optuna 없음), 5 seeds.
 >    한 노트북에서 11개 데이터셋을 `load → Optuna → 학습 → 저장` 루프로 처리. 결과: `results/mlp/`.
 > 2. **레거시 XGBoost 트랙 (KISS 추계학술대회용)** — `Imbalanced_Data_Loss.ipynb` + `scr/` 전체.
@@ -17,8 +17,9 @@
 
 ### 모델 및 공통 설정
 - **모델**: MLP (256→128→64, BatchNorm, ReLU, Dropout=0.3) — network_data와 동일
-- **손실 함수 7종**: `ce`, `pwce`, `sqce`, `lwce`, `plwce`, `cb`, `focal` (WCE 제외)
-  - **논문 역할**: `lwce`/`plwce` = **proposed**, `sqce` = reported baseline(√-CE, w ∝ 1/√n, **α=0.5 고정·Optuna 없음**), `pwce` = **분석/이론 섹션용**(α-sweep foil, main 비교 아님), `ce`/`cb`/`focal` = baseline
+- **손실 함수 8종**: `ce`, `wce`, `pwce`, `sqce`, `lwce`, `plwce`, `cb`, `focal` (WCE 포함)
+  - **논문 역할**: `lwce`/`plwce` = **proposed**, `sqce` = reported baseline(√-CE, w ∝ 1/√n, **α=0.5 고정·Optuna 없음**), `pwce` = **분석/이론 섹션용**(α-sweep foil, main 비교 아님), `ce`/`wce`/`cb`/`focal` = baseline
+  - **⚠️ wce 추가 (2026-06, 완료)**: weight-explosion 동기가 정조준하는 표준 베이스라인. `wce = pwce(α=1.0)` 특수해(`total/n_i`), 파라미터·Optuna 없음(Cell 6 resume이 wce×5×11=55 run만 신규 학습). **결과: wce가 F1 최악(7.18/8), 극심 불균형서 붕괴** — 아래 결과 표 참조.
 - **손실 생성**: `image_classification/custom_losses.py`의 `get_clf_loss()` 공유 (sys.path에 `IMG_CLF_PATH` 추가)
 - **데이터 로드**: `scr/data_handler.py`의 `load_dataset(ds, DATA_PATH, test_size=0.3, random_state=42)`
 - **옵티마이저**: Adam(lr=1e-3, weight_decay=1e-4) + CosineAnnealingLR(eta_min=1e-5)
@@ -75,21 +76,23 @@
 
 ### 실험 결과 요약 — 제안 손실 위치 (2026-06, N=5 seeds, F1-Macro)
 
-**lwce / plwce가 우리의 proposed.** 7종 중 순위(`n/7`)로 표기.
+**lwce / plwce가 우리의 proposed.** 8종(wce 포함) 중 순위(`n/8`)로 표기.
 
-| 데이터셋 | 클래스 | 🥇 최우수 | **lwce** | **plwce** |
-|---------|-------|----------|----------|-----------|
-| credit_card_fraud | 2 (극심) | plwce 0.9097 | 0.9075 (3/7) | **0.9097 (1/7) 🥇** |
-| aps_failure | 2 | pwce 0.9076 | 0.9062 (4/7) | 0.9063 (3/7) |
-| bank_marketing | 2 | pwce 0.7778 | 0.7753 (3/7) | 0.7767 (2/7) |
-| telco_churn | 2 | focal 0.7264 | 0.7246 (2/7) | 0.7187 (5/7) |
-| german_credit | 2 | lwce 0.6994 | **0.6994 (1/7) 🥇** | 0.6875 (6/7) |
-| secom | 2 | cb 0.5867 | 0.5676 (4/7) | 0.5567 (5/7) |
-| credit_card_default | 2 | cb 0.7027 | 0.6829 (5/7) | 0.7017 (3/7) |
-| glass | 6 | pwce 0.6794 | 0.6775 (2/7) | 0.6227 (4/7) |
-| steel_faults | 7 | lwce 0.7684 | **0.7684 (1/7) 🥇** | 0.7556 (5/7) |
-| yeast | 10 | focal 0.5174 | 0.5031 (3/7) | 0.5006 (4/7) |
-| page_blocks | 5 | lwce 0.8142 | **0.8142 (1/7) 🥇** | 0.7860 (4/7) |
+**🔑 wce(역빈도) = F1 최악 (평균순위 7.18/8, 11개 중 8개서 단독 꼴찌)** — 극심 불균형서 붕괴(credit_card_fraud 578:1: wce F1 0.7634 vs lwce 0.9075, Tail 0.5281 vs 0.8153). 8종 **F1 평균순위: lwce 2.73 (1위)** / pwce 3.45 / plwce 3.91 / sqce 4.09 / focal 4.55 / ce 4.73 / cb 5.36 / **wce 7.18**. Tail 평균순위: pwce 2.82 / lwce 3.45 / sqce 3.55 / plwce 3.73 / cb 3.91 / **wce 5.55** / focal 6.09 / ce 6.55 (tabular tail은 focal·ce가 더 약함, wce는 고IR ccf·aps서만 꼴찌).
+
+| 데이터셋 | 클래스 | 🥇 최우수 | **lwce** | **plwce** | wce |
+|---------|-------|----------|----------|-----------|-----|
+| credit_card_fraud | 2 (극심) | plwce 0.9097 | 0.9075 (3/8) | **0.9097 (1/8) 🥇** | 0.7634 (8/8) |
+| aps_failure | 2 | pwce 0.9076 | 0.9062 (4/8) | 0.9063 (3/8) | 0.8887 (8/8) |
+| bank_marketing | 2 | pwce 0.7778 | 0.7753 (3/8) | 0.7767 (2/8) | 0.7442 (8/8) |
+| telco_churn | 2 | focal 0.7264 | 0.7246 (2/8) | 0.7187 (5/8) | 0.6997 (8/8) |
+| german_credit | 2 | lwce 0.6994 | **0.6994 (1/8) 🥇** | 0.6875 (6/8) | 0.6834 (8/8) |
+| secom | 2 | cb 0.5867 | 0.5676 (5/8) | 0.5567 (6/8) | 0.5780 (2/8) |
+| credit_card_default | 2 | cb 0.7027 | 0.6829 (5/8) | 0.7017 (3/8) | 0.6811 (6/8) |
+| glass | 6 | pwce 0.6794 | 0.6775 (2/8) | 0.6227 (4/8) | 0.6050 (7/8) |
+| steel_faults | 7 | lwce 0.7684 | **0.7684 (1/8) 🥇** | 0.7556 (5/8) | 0.7233 (8/8) |
+| yeast | 10 | focal 0.5174 | 0.5031 (3/8) | 0.5006 (4/8) | 0.4503 (8/8) |
+| page_blocks | 5 | lwce 0.8142 | **0.8142 (1/8) 🥇** | 0.7860 (4/8) | 0.7028 (8/8) |
 
 **제안 손실 소견**
 - **lwce 강세**: 11개 중 **단독 1위 3개**(german_credit, steel_faults, page_blocks) + **2위 3개**(bank_marketing, telco_churn, glass). 특히 **다중 클래스(glass/steel_faults/page_blocks)에서 최상위권**.
