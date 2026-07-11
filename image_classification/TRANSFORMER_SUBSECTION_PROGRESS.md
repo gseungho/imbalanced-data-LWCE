@@ -40,7 +40,7 @@
 3. ResNet32 + es_ace(ES-LWCE)를 200 epoch/5 seed로 별도 실행 — 기존 40개 baseline엔 es_ace가
    없어서, 같은 조건으로 채워 넣어야 ResNet32 vs ViT 비교표 완성 가능
 4. **이름 통일**: 코드/노트북에서는 `es_ace`, 논문 Section 3.2에서는 **ES-LWCE**로 표기됨 —
-   최종 논문/코드 어디서든 하나로 통일 필요 (승호와 확인)
+   최종 논문/코드 어디서든 하나로 통일 필요 
 
 ## 참고 — 2차 논문 피드백 반영 (별도 트랙, 아직 미착수)
 Transformer 실험과 별개로, 2026-07-05 피드백의 Major Comments 3가지는 아직 반영 안 됨:
@@ -48,4 +48,22 @@ Transformer 실험과 별개로, 2026-07-05 피드백의 Major Comments 3가지�
 - ES-LWCE의 존재 이유를 "boundedness"가 아니라 "희귀 클래스 안정성 + 사용자 조절 가능한 cap"으로 재설명
 - PLWCE의 hyperparameter 여부 명확히 구분 (LWCE=parameter-free, PLWCE=1-parameter)
 
-이 부분은 Section 1-3(이론) 수정이라 실험과 독립적으로 진행 가능 — 시간 되면 병행.
+## 논문 추가 내용 (Section 4)
+\begin{table}[t]
+\centering
+\caption{ViT-Lite pilot results on CIFAR-10-LT, IR=100 (40 epochs, n=2 seeds).}
+\label{tab:vit_ir100}
+\begin{tabular}{lccc}
+\toprule
+Loss & F1-Macro & Few-Acc & Rank (F1) \\
+\midrule
+LWCE   & 0.3843 $\pm$ 0.0038 & 0.1894 & 1 \\
+WCE    & 0.3791 $\pm$ 0.0033 & \textbf{0.2616} & 2 \\
+PLWCE  & 0.3783 $\pm$ 0.0048 & 0.1762 & 3 \\
+Focal  & 0.3767 $\pm$ 0.0058 & 0.1797 & 4 \\
+CE     & 0.3752 $\pm$ 0.0000 & 0.1684 & 5 \\
+ES-LWCE& 0.3739 $\pm$ 0.0038 & 0.1750 & 6 \\
+CB     & 0.3652 $\pm$ 0.0005 & 0.1953 & 7 \\
+\bottomrule
+\end{tabular}
+\end{table}
