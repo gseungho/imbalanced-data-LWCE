@@ -49,6 +49,33 @@ Transformer 실험과 별개로, 2026-07-05 피드백의 Major Comments 3가지�
 - PLWCE의 hyperparameter 여부 명확히 구분 (LWCE=parameter-free, PLWCE=1-parameter)
 
 ## 논문 추가 내용 (Section 4)
+\subsection{Transformer Architecture: A Pilot Study}
+
+To assess whether the proposed re-weighting losses generalize beyond
+convolutional architectures, we conduct a pilot study on a compact
+Vision Transformer (ViT-Lite; patch size 4, embedding dimension 192,
+depth 6, 3 attention heads) adapted for CIFAR-scale 32$\times$32 inputs.
+Due to time constraints, this pilot uses a reduced training budget
+(40 epochs, 2 seeds) at the most severe imbalance ratio (IR=100) on
+CIFAR-10-LT, in contrast to the standard budget (200 epochs, 5 seeds)
+used for the ResNet-32 experiments in Section~4.X. We therefore report
+within-architecture loss rankings rather than cross-architecture
+accuracy comparisons.
+
+Table~\ref{tab:vit_ir100} summarizes the results. LWCE achieves the
+highest F1-Macro (0.3843$\pm$0.0038) among the seven losses evaluated,
+consistent with the trend observed for the CNN backbone. Notably, the
+severe degradation of WCE observed for ResNet-32 at IR=100 (rank 8/8,
+F1=0.3935) is not clearly reproduced under this reduced training
+budget (WCE ranks 2nd, F1=0.3791, with the highest Few-shot accuracy
+among all losses). We hypothesize that the weight-explosion effect
+of WCE may compound over a longer training horizon, or that
+Transformer training dynamics (e.g., normalization, gradient flow)
+respond differently to the same class-frequency weighting. A
+full-budget replication (200 epochs, 5 seeds, all three IR levels)
+is left for future work to confirm whether this discrepancy persists
+or is an artifact of the shortened schedule.
+
 \begin{table}[t]
 \centering
 \caption{ViT-Lite pilot results on CIFAR-10-LT, IR=100 (40 epochs, n=2 seeds).}
