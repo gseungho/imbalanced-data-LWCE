@@ -3,17 +3,18 @@
 
 \usepackage[authoryear,longnamesfirst]{natbib}
 \usepackage{amsmath,amssymb}
+\usepackage{booktabs}
 
 \begin{document}
 \let\WriteBookmarks\relax
 \def\floatpagepagefraction{1}
 \def\textpagefraction{.001}
 
-\shorttitle{Logarithmic Weighted Cross-Entropy for Imbalanced Classification}
+\shorttitle{Log-Weighted Cross-Entropy Framework for Imbalanced Classification}
 \shortauthors{S.~H.~Go et~al.}
 
-\title[mode=title]{Logarithmic Weighted Cross-Entropy: A Stable and
-Parameter-Efficient Re-weighting Loss for Class-Imbalanced Classification}
+\title[mode=title]{Log-Weighted Cross-Entropy Framework for Imbalanced
+Classification}
 
 \author[1]{Seung Ho Go}
 \ead{gseungho999@gmail.com}
@@ -43,18 +44,24 @@ weights grow without bound as the imbalance becomes more severe, producing
 unstable optimization. More elaborate alternatives such as Class-Balanced (CB)
 Loss and Focal Loss introduce additional hyperparameters and, in our experiments,
 behave inconsistently across datasets---occasionally falling below ordinary
-Cross-Entropy (CE). We propose Logarithmic Weighted Cross-Entropy (LWCE), which
+Cross-Entropy (CE). We propose Log-Weighted Cross-Entropy (LWCE), which
 replaces the inverse-frequency weight with a logarithmically compressed
 counterpart that keeps a meaningful boost for rare classes while bounding weight
 growth, and which introduces no additional hyperparameters. We further generalize
 it to Power-Log Weighted Cross-Entropy (PLWCE) through a single exponent that
 adjusts the focusing strength and is selected automatically on a small proxy
-subset. To assess generality, we evaluate the proposed losses across three
+subset, and we introduce a complementary $\varepsilon$-smoothed variant
+(ES-LWCE) that adds a small constant to the logarithmic denominator, providing an
+explicit, user-controlled cap on the per-class weight and keeping it well defined
+even for vanishing class counts, such as classes absent from a mini-batch. To
+assess generality, we evaluate the
+proposed losses across three
 distinct application domains that together span a wide range of imbalance
 severity: long-tailed image classification, tabular classification benchmarks,
 and network intrusion detection. Across these domains, LWCE and PLWCE improve
 over Cross-Entropy as the imbalance grows and, unlike the competing re-weighting
-losses, never collapse to substantially worse performance on any dataset. These
+losses, avoid the severe degradation below plain Cross-Entropy that these
+baselines occasionally exhibit. These
 results indicate that logarithmic weight compression offers a simple, stable, and
 parameter-efficient alternative to existing re-weighting strategies for
 class-imbalanced classification.
@@ -63,13 +70,14 @@ class-imbalanced classification.
 \begin{highlights}
 \item A logarithmic re-weighting loss that bounds the weight explosion of weighted cross-entropy.
 \item A single-parameter generalization tuned automatically on a small proxy subset.
+\item An $\varepsilon$-smoothed variant keeps per-class weights bounded and well defined for the rarest classes.
 \item Evaluation spans image, tabular, and network-intrusion domains of varying imbalance.
-\item The proposed losses improve as imbalance grows and never collapse on any dataset.
+\item The proposed losses improve as imbalance grows and avoid the severe degradation of competing re-weighting losses.
 \end{highlights}
 
 \begin{keywords}
 Class imbalance \sep Long-tailed learning \sep Cross-entropy loss \sep
-Cost-sensitive learning \sep Network intrusion detection
+Cost-sensitive learning \sep Weight smoothing \sep Network intrusion detection
 \end{keywords}
 
 \maketitle
@@ -111,38 +119,67 @@ methods instead modify the training objective. These include margin-based losses
 that enlarge the decision boundary around minority
 classes~\citep{cao2019}, logit-adjustment techniques that calibrate class priors,
 and loss re-weighting methods that scale the per-class loss by class-dependent
-weights. Among these, re-weighting is especially attractive because it is
-architecture-agnostic, modality-independent, and requires only a minimal change
-to the loss function; this paper focuses on the re-weighting family.
+weights. Among these, re-weighting is especially attractive for three practical
+reasons. Unlike resampling, it leaves the training data untouched and therefore
+introduces neither synthetic artifacts nor information loss; unlike
+architecture-level remedies, it adds no parameters and can be dropped into
+virtually any network without altering the model; and it requires only a minimal,
+modality-independent change to the loss function. Indeed, although many
+sophisticated long-tailed learning methods have since been proposed, re-weighting
+remains one of the few approaches that can be applied to almost any architecture
+without modifying the model itself. For these reasons this paper focuses on the
+re-weighting family.
 
 Despite its appeal, re-weighting remains unsatisfying in practice. Weighted
 Cross-Entropy (WCE), the most direct re-weighting scheme, assigns each class a
-weight inversely proportional to its frequency; as the imbalance grows more
-severe these weights grow without bound, producing extreme gradients that
-destabilize training. More sophisticated alternatives were designed to soften
+weight inversely proportional to its frequency,
+\begin{equation}
+w_c^{\mathrm{WCE}} \propto \frac{1}{n_c}.
+\end{equation}
+As a minority class becomes rarer and $n_c$ shrinks, this inverse-frequency weight
+grows without bound relative to the majority, so the corresponding gradients
+become disproportionately large and destabilize optimization under extreme
+imbalance. More sophisticated alternatives were designed to soften
 this behavior but bring their own drawbacks. Focal Loss reduces the influence of
 easy, typically majority, examples through a tunable focusing term, but it
 operates on per-sample confidence rather than class frequency and therefore
 behaves inconsistently across imbalance levels. Class-Balanced (CB) Loss
 re-weights by an effective number of samples governed by an additional
 hyperparameter, yet that hyperparameter is sensitive and, in our experiments, CB
-Loss degrades below plain Cross-Entropy under severe imbalance. In short, the
+Loss degrades below plain Cross-Entropy under severe imbalance. Existing methods thus
+attempt to alleviate this instability through additional mechanisms, yet none
+directly addresses the uncontrolled growth of the inverse-frequency weight while
+preserving the simplicity of WCE. In short, the
 field still lacks a re-weighting loss that is simultaneously simple,
 hyperparameter-light, numerically stable, and dependable across both the level of
 imbalance and the application domain.
 
-To address this gap, we propose Logarithmic Weighted Cross-Entropy (LWCE). The
+To address this gap, we propose Log-Weighted Cross-Entropy (LWCE). The
 key idea is to replace the inverse-frequency weight of WCE with a logarithmically
-compressed counterpart. The logarithm fundamentally bounds the growth of the
-weights, so the explosive behavior of WCE is removed while a meaningful emphasis
-on rare classes is preserved; crucially, the resulting loss introduces no
-additional hyperparameters and can be used as a drop-in replacement for
-Cross-Entropy. We further generalize LWCE to Power-Log Weighted Cross-Entropy
-(PLWCE) by introducing a single exponent that continuously controls the focusing
-strength, ranging from near-uniform weighting to an aggressive emphasis on the
-tail. This exponent is the only free parameter, and it is selected automatically
-through a lightweight grid search on a small proxy subset, adding negligible
-computational overhead.
+compressed counterpart, applying a logarithm to the class count before inverting
+it. This preserves a meaningful emphasis on rare classes---the weight still
+decreases with class size---but fundamentally bounds how fast that emphasis can
+grow, so the explosive behavior of WCE is removed. Crucially, the resulting loss
+introduces no additional hyperparameters and can be used as a drop-in replacement
+for Cross-Entropy. We further develop LWCE in two complementary directions. The
+first, Power-Log Weighted Cross-Entropy (PLWCE), controls \emph{how strongly}
+rare classes are emphasized: it introduces a single exponent that continuously
+adjusts the focusing strength, ranging from near-uniform weighting to an
+aggressive emphasis on the tail. This exponent is the only free parameter, and
+it is selected automatically through a lightweight grid search on a small proxy
+subset, adding negligible computational overhead. The second,
+$\varepsilon$-Smoothed Log-Weighted Cross-Entropy (ES-LWCE), instead adds a small
+constant $\varepsilon$ to the logarithmic denominator. The base LWCE weight is
+already bounded for every class that appears at least once, so the role of ES-LWCE
+is not to make an otherwise unbounded weight finite, but to provide an
+\emph{explicit, user-controlled} cap of $1/\varepsilon$ on the per-class weight and
+to keep it well defined in the degenerate case where a class is temporarily
+absent---for example, when class frequencies are estimated per mini-batch---without
+changing the relative ordering of class weights. The two extensions are therefore
+orthogonal: PLWCE adjusts the \emph{strength} of the re-weighting, whereas ES-LWCE
+controls its \emph{maximum weight} and smooths the extreme tail. Although the two
+can in principle be combined into a single power-log-smoothed weight, we study them
+separately to isolate the effect of focusing strength from that of smoothing.
 
 We assess the proposed losses through a deliberately broad empirical study rather
 than a single benchmark. To test whether the benefit of logarithmic compression
@@ -159,17 +196,28 @@ more extreme.
 
 The main contributions of this paper are as follows.
 \begin{enumerate}
-  \item We identify and characterize the weight-explosion failure mode of Weighted
-        Cross-Entropy and motivate logarithmic compression as a principled remedy.
-  \item We propose Logarithmic Weighted Cross-Entropy, a parameter-free drop-in
-        replacement for Weighted Cross-Entropy, together with its single-parameter
-        generalization, Power-Log Weighted Cross-Entropy, whose only exponent is
-        tuned automatically on a small proxy subset.
+  \item We propose Log-Weighted Cross-Entropy (LWCE), a parameter-free drop-in
+        replacement for Weighted Cross-Entropy that substitutes the
+        inverse-frequency weight with a logarithmically compressed one, removing
+        the weight-explosion failure mode while retaining a meaningful emphasis on
+        rare classes.
+  \item We develop two complementary extensions of LWCE: Power-Log Weighted
+        Cross-Entropy (PLWCE), whose single exponent---tuned automatically on a
+        small proxy subset---controls the focusing strength, and
+        $\varepsilon$-Smoothed Log-Weighted Cross-Entropy (ES-LWCE), whose smoothing
+        constant imposes an explicit, user-controlled cap on the per-class weight
+        and keeps it well defined even for vanishing or mini-batch-level class
+        counts.
+  \item We analyze the theoretical properties of the proposed weighting functions,
+        showing that their rare-to-frequent weight ratio grows only logarithmically
+        with the imbalance ratio---in contrast to the linear growth of WCE---and
+        that the resulting weights remain bounded and numerically stable even for
+        the rarest classes.
   \item We provide a controlled cross-domain evaluation spanning image, tabular,
         and network intrusion detection data, showing that the proposed losses
         improve over Cross-Entropy as imbalance grows and, unlike Class-Balanced
-        Loss and Focal Loss, never collapse to substantially worse performance on
-        any dataset.
+        Loss and Focal Loss, avoid the severe degradation below plain Cross-Entropy
+        that these baselines occasionally exhibit.
 \end{enumerate}
 
 The remainder of this paper is organized as follows.
@@ -181,7 +229,269 @@ Section~\ref{sec:conclusion} concludes and discusses limitations and future work
 
 \section{Related Work}\label{sec:related}
 
+Methods for learning under class imbalance can be organized by the level at which
+the imbalance is addressed: the \emph{data}, by reshaping the training
+distribution; the \emph{loss}, by making the training objective cost-sensitive;
+the \emph{representation}, by rebalancing the learned feature space or classifier;
+and the \emph{architecture}, by restructuring the model
+itself~\citep{he2009,johnson2019,krawczyk2016,branco2016,zhang2023,chen2024}.
+Table~\ref{tab:taxonomy} summarizes this taxonomy with representative methods. Our
+proposal is a loss-level method and, more specifically, a frequency-based
+re-weighting loss. We review all four levels for context and then position
+logarithmic re-weighting among existing cost-sensitive losses.
+
+\begin{table}[pos=h]
+\centering
+\caption{A taxonomy of approaches to class-imbalanced learning, organized by the
+level at which the imbalance is addressed. The proposed losses are loss-level,
+frequency-based re-weighting methods.}
+\label{tab:taxonomy}
+\begin{tabular}{ll}
+\toprule
+Level & Representative methods \\
+\midrule
+Data-level          & SMOTE, ADASYN, under-/over-sampling \\
+Loss-level          & WCE, CB Loss, Focal Loss, \textbf{LWCE (ours)} \\
+Representation-level & Decoupled training, distribution alignment \\
+Architecture-level  & Multi-branch, multi-expert models \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Data-level resampling}
+Resampling rebalances the class distribution before or during training.
+Oversampling synthesizes additional minority instances---the Synthetic Minority
+Over-sampling Technique (SMOTE) interpolates between neighbouring minority
+samples~\citep{chawla2002}, and ADASYN adapts the amount of synthesis to local
+difficulty~\citep{he2008}---whereas undersampling discards majority examples and
+can outperform oversampling on classical learners~\citep{drummond2003}. Although
+effective and classifier-agnostic, synthetic oversampling may introduce noisy or
+unrealistic samples and encourage overfitting, while undersampling discards
+potentially informative data~\citep{buda2018,branco2016}. These trade-offs
+motivate objective-level alternatives that leave the data untouched.
+
+\subsection{Cost-sensitive and re-weighting losses}
+Algorithm-level methods instead make the loss itself imbalance-aware. We group
+them by the signal that drives the re-weighting into frequency-based,
+difficulty-based, and margin- or logit-based methods.
+\emph{Frequency-based} methods scale each class loss by a function of its count.
+The most direct instance is Weighted Cross-Entropy, which sets $w_c \propto 1/n_c$
+so that the weight is inversely proportional to class count~\citep{wang2019};
+these weights, however, grow without bound under extreme imbalance and
+destabilize optimization, and the benefit of such importance weighting is known to
+diminish for over-parameterized networks driven to low training
+error~\citep{byrd2019}. Class-Balanced Loss softens this by weighting with an
+effective number of samples, $w_c \propto (1-\beta)/(1-\beta^{n_c})$, but this
+introduces an extra hyperparameter $\beta \in [0,1)$~\citep{cui2019}.
+\emph{Difficulty-based} methods modulate each example by its own hardness rather
+than by its class: Focal Loss down-weights easy, mostly majority, samples by a factor
+$(1-p_t)^{\gamma}$, where $p_t$ is the predicted probability of the true class and
+$\gamma$ a tunable focusing exponent~\citep{lin2017}, and the Gradient Harmonizing
+Mechanism flattens the distribution of gradient norms so that both easy samples
+and hard outliers are suppressed~\citep{li2019ghm}.
+\emph{Margin- and logit-based} methods reshape the decision geometry rather than
+the per-class loss magnitude: they enlarge minority margins~\citep{cao2019},
+equalize gradients across frequencies~\citep{tan2020}, adjust logits by class
+priors~\citep{menon2021}, or learn the weights themselves through meta-learning
+and cost-sensitive representation learning~\citep{ren2018,ren2020,khan2018}, with
+recent work casting weight learning as an optimal-transport problem between the
+imbalanced and a balanced distribution~\citep{guo2022}.
+These losses improve over plain Cross-Entropy in many settings, but they
+introduce additional, often sensitive, hyperparameters and can behave
+inconsistently across datasets. Our logarithmic family belongs to the
+frequency-based group and is therefore complementary to the difficulty- and
+margin-based axes; it targets the central weakness of frequency-based
+re-weighting by bounding the frequency weight without introducing sensitive
+hyperparameters.
+
+\subsection{Representation learning and decoupling}
+A complementary line of work argues that imbalance harms the classifier more
+than the feature extractor. Decoupling representation and classifier
+learning~\citep{kang2020} and distribution alignment~\citep{zhang2021} rebalance
+only at the classification stage, while open long-tailed recognition addresses
+imbalance jointly with open-set and few-shot effects~\citep{liu2019}; recent
+surveys provide a broad taxonomy of these directions~\citep{zhang2023}. This concern
+extends to the era of large pretrained and foundation models, where the
+fine-tuning strategy itself interacts with the long tail and must be adapted to
+avoid harming the rarest classes~\citep{shi2024}. Such methods are largely
+orthogonal to the choice of loss and can be combined with re-weighting, so our
+contribution---confined to the loss term---composes with them rather than
+competing.
+
+\subsection{Architecture-level and multi-expert methods}
+A third family addresses imbalance by restructuring the network rather than the
+data or the loss. Multi-branch designs train separate pathways for the head and
+tail of the distribution and fuse them through cumulative, bilateral
+learning~\citep{zhou2020}. Mixture-of-experts and multi-expert approaches extend
+this idea by training several diverse, distribution-aware experts and then
+routing or aggregating their predictions: RIDE routes inputs to complementary
+experts~\citep{wang2021}, ACE assembles ally-complementary experts in a single
+stage~\citep{cai2021}, LFME distils knowledge from multiple experts trained on
+balanced subsets~\citep{xiang2020}, and test-agnostic aggregation adapts the
+expert ensemble to an unknown test distribution~\citep{zhang2022}. Such designs
+can deliver strong tail accuracy, but they increase parameter count and inference
+cost, and---like the resampling and representation methods above---they are
+orthogonal to the training objective: a re-weighting loss such as ours can be
+applied within each branch or expert rather than replacing the architecture.
+
+\subsection{Positioning of the proposed losses}
+Within the re-weighting family, existing schemes face a dilemma: inverse-frequency
+weighting is parameter-free but explodes, whereas more stable variants regain
+control only by adding sensitive hyperparameters~\citep{lin2017,cui2019}.
+Logarithmic compression offers a middle ground that, to our knowledge, has not
+been systematically studied as a re-weighting principle across application
+domains. LWCE realizes it without any additional hyperparameter, PLWCE adds a
+single exponent that tunes the focusing strength, and ES-LWCE adds an
+$\varepsilon$ term that keeps the weight bounded and well defined for the rarest
+classes. Table~\ref{tab:positioning} contrasts these properties with the main
+cost-sensitive baselines: WCE is parameter-free but its weights are unbounded,
+Focal and CB Loss regain stability only at the cost of an extra hyperparameter,
+whereas LWCE is a frequency-based, parameter-free scheme whose weights stay
+bounded. We evaluate this family against the representative cost-sensitive losses
+above under a unified protocol spanning image, tabular, and network-intrusion
+domains---each of which sustains its own active line of imbalance research, from
+dedicated tabular benchmarks~\citep{climb2025} to intrusion detection under
+severe class skew~\citep{abdelkhalek2023}.
+
+\begin{table}[pos=h]
+\centering
+\caption{Positioning of LWCE against representative cost-sensitive losses.
+``Frequency''/``Difficulty'' denote the re-weighting signal; ``Param.-free''
+means no loss hyperparameter is required; ``Bounded weight'' refers to whether the
+multiplicative weighting factor is prevented from unbounded growth under extreme
+class imbalance. For Focal Loss this factor is the per-sample difficulty modulation
+$(1-p_t)^{\gamma}$, which is inherently confined to $[0,1]$ rather than a
+class-frequency weight; LWCE instead compresses the class-frequency weight itself.}
+\label{tab:positioning}
+\begin{tabular}{lcccc}
+\toprule
+Loss & Frequency & Difficulty & Param.-free & Bounded weight \\
+\midrule
+WCE                  & \checkmark & --         & \checkmark & -- \\
+Focal Loss           & --         & \checkmark & --         & \checkmark \\
+CB Loss              & \checkmark & --         & --         & \checkmark \\
+\textbf{LWCE (ours)} & \checkmark & --         & \checkmark & \checkmark \\
+\bottomrule
+\end{tabular}
+\end{table}
+
 \section{Proposed Method}\label{sec:method}
+
+We study a single family of re-weighting losses built on logarithmic weight
+compression. All three members replace the inverse-frequency weight of WCE with
+a logarithmically compressed counterpart and differ only in how that base weight
+is subsequently shaped. The three formulations and the distinct role of each are
+summarized in Table~\ref{tab:losses} and defined precisely below.
+
+\subsection{The logarithmic re-weighting family}
+Consider a classification problem with $C$ classes, where class $c$ contains $n_c$
+training samples. All three losses re-weight the standard cross-entropy objective
+by a class-dependent factor $w_c$,
+\begin{equation}\label{eq:weighted-ce}
+\mathcal{L} = -\frac{1}{N}\sum_{i=1}^{N} w_{y_i}\,\log p_{i,y_i},
+\end{equation}
+where $p_{i,y_i}$ is the predicted probability of the true class $y_i$ of sample
+$i$ and $N$ is the number of samples; the members differ only in the choice of
+$w_c$. Log-Weighted Cross-Entropy (LWCE) uses the parameter-free weight
+\begin{equation}\label{eq:lwce}
+w_c^{\mathrm{LWCE}} = \frac{1}{\log(1+n_c)}.
+\end{equation}
+Power-Log Weighted Cross-Entropy (PLWCE) raises the logarithmic denominator to a
+single exponent $\alpha>0$,
+\begin{equation}\label{eq:plwce}
+w_c^{\mathrm{PLWCE}} = \frac{1}{\big(\log(1+n_c)\big)^{\alpha}},
+\end{equation}
+which continuously tunes how strongly rare classes are emphasized and reduces to
+LWCE at $\alpha=1$. $\varepsilon$-Smoothed Log-Weighted Cross-Entropy (ES-LWCE)
+adds a small constant $\varepsilon>0$ to the denominator,
+\begin{equation}\label{eq:eslwce}
+w_c^{\mathrm{ES\text{-}LWCE}} = \frac{1}{\log(1+n_c)+\varepsilon},
+\end{equation}
+which caps the weight at $1/\varepsilon$.
+
+\begin{table}[pos=h]
+\centering
+\caption{The proposed logarithmic re-weighting family. $n_c$ denotes the number
+of training samples in class $c$; $\alpha>0$ and $\varepsilon>0$ are the only
+free parameters, belonging to PLWCE and ES-LWCE respectively.}
+\label{tab:losses}
+\begin{tabular}{lcl}
+\toprule
+Loss & Class weight $w_c$ & Role \\
+\midrule
+LWCE   & $\dfrac{1}{\log(1+n_c)}$             & Parameter-free base weight \\[1.4ex]
+PLWCE  & $\dfrac{1}{\big(\log(1+n_c)\big)^{\alpha}}$ & Exponent $\alpha$ tunes emphasis strength \\[1.4ex]
+ES-LWCE & $\dfrac{1}{\log(1+n_c)+\varepsilon}$ & Constant $\varepsilon$ bounds and smooths the weight \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Theoretical properties}
+We now make precise the sense in which logarithmic compression tames the weight
+explosion of WCE. Throughout, let $\rho = n_{\max}/n_{\min} \ge 1$ denote the
+imbalance ratio between the most and least frequent classes, and let the
+subscripts $\min$ and $\max$ index the rarest and the most frequent class,
+respectively. Four properties characterize the proposed family.
+
+\paragraph{Proposition 1 (Monotonicity).}
+For LWCE, PLWCE, and ES-LWCE, the weight $w_c$ is strictly decreasing in the class
+count $n_c$. Consequently a rarer class always receives a larger weight, which
+preserves the qualitative behaviour of inverse-frequency weighting.
+\emph{Proof.} $\log(1+n_c)$ is strictly increasing in $n_c$, so its reciprocal,
+any positive power of its reciprocal, and the reciprocal of its $\varepsilon$-shift
+are all strictly decreasing in $n_c$. $\hfill\square$
+
+\paragraph{Proposition 2 (Boundedness).}
+For $n_c \ge 1$ the individual weights are bounded:
+$0 < w_c^{\mathrm{LWCE}} \le 1/\log 2$ and
+$0 < w_c^{\mathrm{PLWCE}} \le 1/(\log 2)^{\alpha}$. The ES-LWCE weight is bounded
+even without this assumption: $0 < w_c^{\mathrm{ES\text{-}LWCE}} \le 1/\varepsilon$
+for every $n_c \ge 0$.
+\emph{Proof.} Each weight is maximized at its smallest admissible count by
+Proposition~1. For LWCE and PLWCE this is $n_c = 1$, giving $1/\log 2$ and
+$1/(\log 2)^{\alpha}$. For ES-LWCE the denominator is at least $\varepsilon$,
+attained as $n_c \to 0$, so the weight never exceeds $1/\varepsilon$.
+$\hfill\square$
+
+This proposition also clarifies the distinct role of ES-LWCE. LWCE is already
+bounded for every class that appears at least once; what ES-LWCE adds is
+robustness at $n_c = 0$, where the LWCE denominator $\log(1+n_c)$ vanishes and the
+weight diverges. Such vanishing counts arise, for instance, when class frequencies
+are estimated per mini-batch. ES-LWCE turns the implicit bound of LWCE into an
+explicit, user-controlled cap of $1/\varepsilon$.
+
+\paragraph{Proposition 3 (Dynamic-range compression).}
+The rare-to-frequent weight ratio grows \emph{linearly} in $\rho$ under WCE but
+only \emph{logarithmically} under the proposed family. Under WCE,
+\begin{equation}\label{eq:ratio-wce}
+\frac{w_{\min}^{\mathrm{WCE}}}{w_{\max}^{\mathrm{WCE}}}
+   = \frac{n_{\max}}{n_{\min}} = \rho,
+\end{equation}
+whereas under LWCE and PLWCE,
+\begin{equation}\label{eq:ratio-lwce}
+\frac{w_{\min}^{\mathrm{LWCE}}}{w_{\max}^{\mathrm{LWCE}}}
+   = \frac{\log(1+n_{\max})}{\log(1+n_{\min})} = O(\log \rho),
+\qquad
+\frac{w_{\min}^{\mathrm{PLWCE}}}{w_{\max}^{\mathrm{PLWCE}}}
+   = \left(\frac{\log(1+n_{\max})}{\log(1+n_{\min})}\right)^{\!\alpha}
+   = O\big((\log \rho)^{\alpha}\big).
+\end{equation}
+Comparing Eqs.~\eqref{eq:ratio-wce} and~\eqref{eq:ratio-lwce}, the compression
+reduces the dynamic range of the weights from linear to logarithmic in $\rho$
+while preserving the ordering that favours rare classes. Note that this is a
+statement about the \emph{ratio}: unlike the individual weights of
+Proposition~2, the ratio is not constant-bounded but grows without limit as
+$\rho \to \infty$---only much more slowly than the linear growth of WCE.
+
+\paragraph{Proposition 4 (Gradient-scale control).}
+In weighted cross-entropy the per-sample gradient equals the unweighted
+cross-entropy gradient scaled by the class weight $w_{y_i}$ (Eq.~\eqref{eq:weighted-ce}).
+Hence the ratio between the minority and majority gradient magnitudes inherits the
+weight ratio of Proposition~3: it is $O(\rho)$ under WCE but $O(\log\rho)$ under
+LWCE. Logarithmic compression therefore prevents minority gradients from
+overwhelming the majority under extreme imbalance, which is the mechanism by which
+LWCE removes the optimization instability of WCE while ES-LWCE additionally caps
+the worst-case gradient scale at $1/\varepsilon$.
 
 \section{Experiments}\label{sec:experiments}
 

@@ -1,4 +1,4 @@
-\begin{thebibliography}{5}
+\begin{thebibliography}{33}
 \expandafter\ifx\csname natexlab\endcsname\relax\def\natexlab#1{#1}\fi
 \providecommand{\url}[1]{\texttt{#1}}
 \providecommand{\href}[2]{#2}
@@ -11,28 +11,246 @@
 \providecommand{\Pubmed}[1]{\href{pmid:#1}{\path{#1}}}
 \providecommand{\bibinfo}[2]{#2}
 \ifx\xfnm\relax \def\xfnm[#1]{\unskip,\space#1}\fi
+%Type = Article
+\bibitem[{Abdelkhalek and Mashaly(2023)}]{abdelkhalek2023}
+\bibinfo{author}{Abdelkhalek, A.}, \bibinfo{author}{Mashaly, M.},
+  \bibinfo{year}{2023}.
+\newblock \bibinfo{title}{Addressing the class imbalance problem in network
+  intrusion detection systems using data resampling and deep learning}.
+\newblock \bibinfo{journal}{The Journal of Supercomputing}
+  \bibinfo{volume}{79}, \bibinfo{pages}{10611--10644}.
+%Type = Article
+\bibitem[{Branco et~al.(2016)Branco, Torgo and Ribeiro}]{branco2016}
+\bibinfo{author}{Branco, P.}, \bibinfo{author}{Torgo, L.},
+  \bibinfo{author}{Ribeiro, R.P.}, \bibinfo{year}{2016}.
+\newblock \bibinfo{title}{A survey of predictive modeling on imbalanced
+  domains}.
+\newblock \bibinfo{journal}{ACM Computing Surveys} \bibinfo{volume}{49},
+  \bibinfo{pages}{1--50}.
+%Type = Article
+\bibitem[{Buda et~al.(2018)Buda, Maki and Mazurowski}]{buda2018}
+\bibinfo{author}{Buda, M.}, \bibinfo{author}{Maki, A.},
+  \bibinfo{author}{Mazurowski, M.A.}, \bibinfo{year}{2018}.
+\newblock \bibinfo{title}{A systematic study of the class imbalance problem in
+  convolutional neural networks}.
+\newblock \bibinfo{journal}{Neural Networks} \bibinfo{volume}{106},
+  \bibinfo{pages}{249--259}.
+%Type = Inproceedings
+\bibitem[{Byrd and Lipton(2019)}]{byrd2019}
+\bibinfo{author}{Byrd, J.}, \bibinfo{author}{Lipton, Z.C.},
+  \bibinfo{year}{2019}.
+\newblock \bibinfo{title}{What is the effect of importance weighting in deep
+  learning?}, in: \bibinfo{booktitle}{ICML}.
+%Type = Inproceedings
+\bibitem[{Cai et~al.(2021)Cai, Wang and Hwang}]{cai2021}
+\bibinfo{author}{Cai, J.}, \bibinfo{author}{Wang, Y.}, \bibinfo{author}{Hwang,
+  J.N.}, \bibinfo{year}{2021}.
+\newblock \bibinfo{title}{{ACE}: Ally complementary experts for solving
+  long-tailed recognition in one-shot}, in: \bibinfo{booktitle}{ICCV}.
 %Type = Inproceedings
 \bibitem[{Cao et~al.(2019)Cao, Wei, Gaidon, Ar{\'{e}}chiga and Ma}]{cao2019}
-\bibinfo{author}{Cao, K.}, \bibinfo{author}{Wei, C.}, \bibinfo{author}{Gaidon, A.}, \bibinfo{author}{Ar{\'{e}}chiga, N.}, \bibinfo{author}{Ma, T.}, \bibinfo{year}{2019}.
-\newblock \bibinfo{title}{Learning imbalanced datasets with label-distribution-aware margin loss}, in: \bibinfo{booktitle}{NeurIPS}.
+\bibinfo{author}{Cao, K.}, \bibinfo{author}{Wei, C.}, \bibinfo{author}{Gaidon,
+  A.}, \bibinfo{author}{Ar{\'{e}}chiga, N.}, \bibinfo{author}{Ma, T.},
+  \bibinfo{year}{2019}.
+\newblock \bibinfo{title}{Learning imbalanced datasets with
+  label-distribution-aware margin loss}, in: \bibinfo{booktitle}{NeurIPS}.
 %Type = Article
 \bibitem[{Chawla et~al.(2002)Chawla, Bowyer, Hall and Kegelmeyer}]{chawla2002}
-\bibinfo{author}{Chawla, N.V.}, \bibinfo{author}{Bowyer, K.W.}, \bibinfo{author}{Hall, L.O.}, \bibinfo{author}{Kegelmeyer, W.P.}, \bibinfo{year}{2002}.
+\bibinfo{author}{Chawla, N.V.}, \bibinfo{author}{Bowyer, K.W.},
+  \bibinfo{author}{Hall, L.O.}, \bibinfo{author}{Kegelmeyer, W.P.},
+  \bibinfo{year}{2002}.
 \newblock \bibinfo{title}{{SMOTE}: Synthetic minority over-sampling technique}.
-\newblock \bibinfo{journal}{Journal of Artificial Intelligence Research} \bibinfo{volume}{16}, \bibinfo{pages}{321--357}.
+\newblock \bibinfo{journal}{Journal of Artificial Intelligence Research}
+  \bibinfo{volume}{16}, \bibinfo{pages}{321--357}.
+%Type = Article
+\bibitem[{Chen et~al.(2024)Chen, Yang, Yu, Shi and Chen}]{chen2024}
+\bibinfo{author}{Chen, W.}, \bibinfo{author}{Yang, K.}, \bibinfo{author}{Yu,
+  Z.}, \bibinfo{author}{Shi, Y.}, \bibinfo{author}{Chen, C.L.P.},
+  \bibinfo{year}{2024}.
+\newblock \bibinfo{title}{A survey on imbalanced learning: Latest research,
+  applications and future directions}.
+\newblock \bibinfo{journal}{Artificial Intelligence Review}
+  \bibinfo{volume}{57}, \bibinfo{pages}{137}.
+%Type = Inproceedings
+\bibitem[{Cui et~al.(2019)Cui, Jia, Lin, Song and Belongie}]{cui2019}
+\bibinfo{author}{Cui, Y.}, \bibinfo{author}{Jia, M.}, \bibinfo{author}{Lin,
+  T.Y.}, \bibinfo{author}{Song, Y.}, \bibinfo{author}{Belongie, S.},
+  \bibinfo{year}{2019}.
+\newblock \bibinfo{title}{Class-balanced loss based on effective number of
+  samples}, in: \bibinfo{booktitle}{CVPR}.
 %Type = Inproceedings
 \bibitem[{Drummond and Holte(2003)}]{drummond2003}
-\bibinfo{author}{Drummond, C.}, \bibinfo{author}{Holte, R.C.}, \bibinfo{year}{2003}.
-\newblock \bibinfo{title}{{C4.5}, class imbalance, and cost sensitivity: Why under-sampling beats over-sampling}, in: \bibinfo{booktitle}{Workshop on Learning from Imbalanced Datasets, ICML}.
+\bibinfo{author}{Drummond, C.}, \bibinfo{author}{Holte, R.C.},
+  \bibinfo{year}{2003}.
+\newblock \bibinfo{title}{{C4.5}, class imbalance, and cost sensitivity: Why
+  under-sampling beats over-sampling}, in: \bibinfo{booktitle}{Workshop on
+  Learning from Imbalanced Datasets, ICML}.
+%Type = Inproceedings
+\bibitem[{Guo et~al.(2022)Guo, Li, Zheng, Zhao, Zhou and Zha}]{guo2022}
+\bibinfo{author}{Guo, D.}, \bibinfo{author}{Li, Z.}, \bibinfo{author}{Zheng,
+  M.}, \bibinfo{author}{Zhao, H.}, \bibinfo{author}{Zhou, M.},
+  \bibinfo{author}{Zha, H.}, \bibinfo{year}{2022}.
+\newblock \bibinfo{title}{Learning to re-weight examples with optimal transport
+  for imbalanced classification}, in: \bibinfo{booktitle}{NeurIPS}.
+%Type = Inproceedings
+\bibitem[{He et~al.(2008)He, Bai, Garcia and Li}]{he2008}
+\bibinfo{author}{He, H.}, \bibinfo{author}{Bai, Y.}, \bibinfo{author}{Garcia,
+  E.A.}, \bibinfo{author}{Li, S.}, \bibinfo{year}{2008}.
+\newblock \bibinfo{title}{{ADASYN}: Adaptive synthetic sampling approach for
+  imbalanced learning}, in: \bibinfo{booktitle}{International Joint Conference
+  on Neural Networks (IJCNN)}, pp. \bibinfo{pages}{1322--1328}.
 %Type = Article
 \bibitem[{He and Garcia(2009)}]{he2009}
 \bibinfo{author}{He, H.}, \bibinfo{author}{Garcia, E.A.}, \bibinfo{year}{2009}.
 \newblock \bibinfo{title}{Learning from imbalanced data}.
-\newblock \bibinfo{journal}{IEEE Transactions on Knowledge and Data Engineering} \bibinfo{volume}{21}, \bibinfo{pages}{1263--1284}.
+\newblock \bibinfo{journal}{IEEE Transactions on Knowledge and Data
+  Engineering} \bibinfo{volume}{21}, \bibinfo{pages}{1263--1284}.
 %Type = Article
 \bibitem[{Johnson and Khoshgoftaar(2019)}]{johnson2019}
-\bibinfo{author}{Johnson, J.M.}, \bibinfo{author}{Khoshgoftaar, T.M.}, \bibinfo{year}{2019}.
+\bibinfo{author}{Johnson, J.M.}, \bibinfo{author}{Khoshgoftaar, T.M.},
+  \bibinfo{year}{2019}.
 \newblock \bibinfo{title}{Survey on deep learning with class imbalance}.
-\newblock \bibinfo{journal}{Journal of Big Data} \bibinfo{volume}{6}, \bibinfo{pages}{27}.
+\newblock \bibinfo{journal}{Journal of Big Data} \bibinfo{volume}{6},
+  \bibinfo{pages}{27}.
+%Type = Inproceedings
+\bibitem[{Kang et~al.(2020)Kang, Xie, Rohrbach, Yan, Gordo, Feng and
+  Kalantidis}]{kang2020}
+\bibinfo{author}{Kang, B.}, \bibinfo{author}{Xie, S.},
+  \bibinfo{author}{Rohrbach, M.}, \bibinfo{author}{Yan, Z.},
+  \bibinfo{author}{Gordo, A.}, \bibinfo{author}{Feng, J.},
+  \bibinfo{author}{Kalantidis, Y.}, \bibinfo{year}{2020}.
+\newblock \bibinfo{title}{Decoupling representation and classifier for
+  long-tailed recognition}, in: \bibinfo{booktitle}{ICLR}.
+%Type = Article
+\bibitem[{Khan et~al.(2018)Khan, Hayat, Bennamoun, Sohel and
+  Togneri}]{khan2018}
+\bibinfo{author}{Khan, S.H.}, \bibinfo{author}{Hayat, M.},
+  \bibinfo{author}{Bennamoun, M.}, \bibinfo{author}{Sohel, F.A.},
+  \bibinfo{author}{Togneri, R.}, \bibinfo{year}{2018}.
+\newblock \bibinfo{title}{Cost-sensitive learning of deep feature
+  representations from imbalanced data}.
+\newblock \bibinfo{journal}{IEEE Transactions on Neural Networks and Learning
+  Systems} \bibinfo{volume}{29}, \bibinfo{pages}{3573--3587}.
+%Type = Article
+\bibitem[{Krawczyk(2016)}]{krawczyk2016}
+\bibinfo{author}{Krawczyk, B.}, \bibinfo{year}{2016}.
+\newblock \bibinfo{title}{Learning from imbalanced data: Open challenges and
+  future directions}.
+\newblock \bibinfo{journal}{Progress in Artificial Intelligence}
+  \bibinfo{volume}{5}, \bibinfo{pages}{221--232}.
+%Type = Inproceedings
+\bibitem[{Li et~al.(2019)Li, Liu and Wang}]{li2019ghm}
+\bibinfo{author}{Li, B.}, \bibinfo{author}{Liu, Y.}, \bibinfo{author}{Wang,
+  X.}, \bibinfo{year}{2019}.
+\newblock \bibinfo{title}{Gradient harmonized single-stage detector}, in:
+  \bibinfo{booktitle}{AAAI}.
+%Type = Inproceedings
+\bibitem[{Lin et~al.(2017)Lin, Goyal, Girshick, He and Doll{\'a}r}]{lin2017}
+\bibinfo{author}{Lin, T.Y.}, \bibinfo{author}{Goyal, P.},
+  \bibinfo{author}{Girshick, R.}, \bibinfo{author}{He, K.},
+  \bibinfo{author}{Doll{\'a}r, P.}, \bibinfo{year}{2017}.
+\newblock \bibinfo{title}{Focal loss for dense object detection}, in:
+  \bibinfo{booktitle}{ICCV}.
+%Type = Inproceedings
+\bibitem[{Liu et~al.(2025)Liu, Li, Yang, Wei, Kang, Zhu, Hamann, He and
+  Tong}]{climb2025}
+\bibinfo{author}{Liu, Z.}, \bibinfo{author}{Li, Z.}, \bibinfo{author}{Yang,
+  Z.}, \bibinfo{author}{Wei, T.}, \bibinfo{author}{Kang, J.},
+  \bibinfo{author}{Zhu, Y.}, \bibinfo{author}{Hamann, H.}, \bibinfo{author}{He,
+  J.}, \bibinfo{author}{Tong, H.}, \bibinfo{year}{2025}.
+\newblock \bibinfo{title}{{CLIMB}: Class-imbalanced learning benchmark on
+  tabular data}, in: \bibinfo{booktitle}{NeurIPS Datasets and Benchmarks
+  Track}.
+%Type = Inproceedings
+\bibitem[{Liu et~al.(2019)Liu, Miao, Zhan, Wang, Gong and Yu}]{liu2019}
+\bibinfo{author}{Liu, Z.}, \bibinfo{author}{Miao, Z.}, \bibinfo{author}{Zhan,
+  X.}, \bibinfo{author}{Wang, J.}, \bibinfo{author}{Gong, B.},
+  \bibinfo{author}{Yu, S.X.}, \bibinfo{year}{2019}.
+\newblock \bibinfo{title}{Large-scale long-tailed recognition in an open
+  world}, in: \bibinfo{booktitle}{CVPR}.
+%Type = Inproceedings
+\bibitem[{Menon et~al.(2021)Menon, Jayasumana, Rawat, Jain, Veit and
+  Kumar}]{menon2021}
+\bibinfo{author}{Menon, A.K.}, \bibinfo{author}{Jayasumana, S.},
+  \bibinfo{author}{Rawat, A.S.}, \bibinfo{author}{Jain, H.},
+  \bibinfo{author}{Veit, A.}, \bibinfo{author}{Kumar, S.},
+  \bibinfo{year}{2021}.
+\newblock \bibinfo{title}{Long-tail learning via logit adjustment}, in:
+  \bibinfo{booktitle}{ICLR}.
+%Type = Inproceedings
+\bibitem[{Ren et~al.(2020)Ren, Yu, Sheng, Ma, Zhao, Yi and Li}]{ren2020}
+\bibinfo{author}{Ren, J.}, \bibinfo{author}{Yu, C.}, \bibinfo{author}{Sheng,
+  S.}, \bibinfo{author}{Ma, X.}, \bibinfo{author}{Zhao, H.},
+  \bibinfo{author}{Yi, S.}, \bibinfo{author}{Li, H.}, \bibinfo{year}{2020}.
+\newblock \bibinfo{title}{Balanced meta-softmax for long-tailed visual
+  recognition}, in: \bibinfo{booktitle}{NeurIPS}.
+%Type = Inproceedings
+\bibitem[{Ren et~al.(2018)Ren, Zeng, Yang and Urtasun}]{ren2018}
+\bibinfo{author}{Ren, M.}, \bibinfo{author}{Zeng, W.}, \bibinfo{author}{Yang,
+  B.}, \bibinfo{author}{Urtasun, R.}, \bibinfo{year}{2018}.
+\newblock \bibinfo{title}{Learning to reweight examples for robust deep
+  learning}, in: \bibinfo{booktitle}{ICML}.
+%Type = Inproceedings
+\bibitem[{Shi et~al.(2024)Shi, Wei, Zhou, Shao, Han and Li}]{shi2024}
+\bibinfo{author}{Shi, J.X.}, \bibinfo{author}{Wei, T.}, \bibinfo{author}{Zhou,
+  Z.}, \bibinfo{author}{Shao, J.J.}, \bibinfo{author}{Han, X.Y.},
+  \bibinfo{author}{Li, Y.F.}, \bibinfo{year}{2024}.
+\newblock \bibinfo{title}{Long-tail learning with foundation model: Heavy
+  fine-tuning hurts}, in: \bibinfo{booktitle}{ICML}.
+%Type = Inproceedings
+\bibitem[{Tan et~al.(2020)Tan, Wang, Li, Li, Ouyang, Yan and Yan}]{tan2020}
+\bibinfo{author}{Tan, J.}, \bibinfo{author}{Wang, C.}, \bibinfo{author}{Li,
+  B.}, \bibinfo{author}{Li, Q.}, \bibinfo{author}{Ouyang, W.},
+  \bibinfo{author}{Yan, C.}, \bibinfo{author}{Yan, J.}, \bibinfo{year}{2020}.
+\newblock \bibinfo{title}{Equalization loss for long-tailed object
+  recognition}, in: \bibinfo{booktitle}{CVPR}.
+%Type = Article
+\bibitem[{Wang et~al.(2019)Wang, Liu, Wu, Cao, Meng and Chen}]{wang2019}
+\bibinfo{author}{Wang, S.}, \bibinfo{author}{Liu, W.}, \bibinfo{author}{Wu,
+  L.}, \bibinfo{author}{Cao, L.}, \bibinfo{author}{Meng, Q.},
+  \bibinfo{author}{Chen, W.}, \bibinfo{year}{2019}.
+\newblock \bibinfo{title}{Learning from imbalanced data sets with weighted
+  cross-entropy function}.
+\newblock \bibinfo{journal}{Pattern Recognition Letters} .
+%Type = Inproceedings
+\bibitem[{Wang et~al.(2021)Wang, Lian, Miao, Liu and Yu}]{wang2021}
+\bibinfo{author}{Wang, X.}, \bibinfo{author}{Lian, L.}, \bibinfo{author}{Miao,
+  Z.}, \bibinfo{author}{Liu, Z.}, \bibinfo{author}{Yu, S.X.},
+  \bibinfo{year}{2021}.
+\newblock \bibinfo{title}{Long-tailed recognition by routing diverse
+  distribution-aware experts}, in: \bibinfo{booktitle}{ICLR}.
+%Type = Inproceedings
+\bibitem[{Xiang et~al.(2020)Xiang, Ding and Han}]{xiang2020}
+\bibinfo{author}{Xiang, L.}, \bibinfo{author}{Ding, G.}, \bibinfo{author}{Han,
+  J.}, \bibinfo{year}{2020}.
+\newblock \bibinfo{title}{Learning from multiple experts: Self-paced knowledge
+  distillation for long-tailed classification}, in: \bibinfo{booktitle}{ECCV}.
+%Type = Inproceedings
+\bibitem[{Zhang et~al.(2021)Zhang, Li, Yan, He and Sun}]{zhang2021}
+\bibinfo{author}{Zhang, S.}, \bibinfo{author}{Li, Z.}, \bibinfo{author}{Yan,
+  S.}, \bibinfo{author}{He, X.}, \bibinfo{author}{Sun, J.},
+  \bibinfo{year}{2021}.
+\newblock \bibinfo{title}{Distribution alignment: A unified framework for
+  long-tail visual recognition}, in: \bibinfo{booktitle}{CVPR}.
+%Type = Inproceedings
+\bibitem[{Zhang et~al.(2022)Zhang, Hooi, Hong and Feng}]{zhang2022}
+\bibinfo{author}{Zhang, Y.}, \bibinfo{author}{Hooi, B.}, \bibinfo{author}{Hong,
+  L.}, \bibinfo{author}{Feng, J.}, \bibinfo{year}{2022}.
+\newblock \bibinfo{title}{Self-supervised aggregation of diverse experts for
+  test-agnostic long-tailed recognition}, in: \bibinfo{booktitle}{NeurIPS}.
+%Type = Article
+\bibitem[{Zhang et~al.(2023)Zhang, Kang, Hooi, Yan and Feng}]{zhang2023}
+\bibinfo{author}{Zhang, Y.}, \bibinfo{author}{Kang, B.}, \bibinfo{author}{Hooi,
+  B.}, \bibinfo{author}{Yan, S.}, \bibinfo{author}{Feng, J.},
+  \bibinfo{year}{2023}.
+\newblock \bibinfo{title}{Deep long-tailed learning: A survey}.
+\newblock \bibinfo{journal}{IEEE Transactions on Pattern Analysis and Machine
+  Intelligence} \bibinfo{volume}{45}, \bibinfo{pages}{10795--10816}.
+%Type = Inproceedings
+\bibitem[{Zhou et~al.(2020)Zhou, Cui, Wei and Chen}]{zhou2020}
+\bibinfo{author}{Zhou, B.}, \bibinfo{author}{Cui, Q.}, \bibinfo{author}{Wei,
+  X.S.}, \bibinfo{author}{Chen, Z.M.}, \bibinfo{year}{2020}.
+\newblock \bibinfo{title}{{BBN}: Bilateral-branch network with cumulative
+  learning for long-tailed visual recognition}, in: \bibinfo{booktitle}{CVPR}.
 
 \end{thebibliography}

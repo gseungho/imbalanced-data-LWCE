@@ -1,0 +1,334 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage{kotex}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{geometry}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\usepackage{tcolorbox}
+\usepackage{hyperref}
+\usepackage{longtable}
+
+\geometry{margin=25mm}
+
+\definecolor{mainblue}{RGB}{45,72,96}
+\definecolor{lightbluegray}{RGB}{232,238,243}
+\definecolor{darkgray}{RGB}{55,60,65}
+\definecolor{softgreen}{RGB}{230,240,235}
+\definecolor{softyellow}{RGB}{247,242,225}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=mainblue,
+    urlcolor=mainblue,
+    citecolor=mainblue
+}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.7em}
+
+\setlist[itemize]{leftmargin=2em}
+\setlist[enumerate]{leftmargin=2em}
+
+\tcbset{
+    colback=lightbluegray,
+    colframe=mainblue,
+    coltitle=white,
+    colbacktitle=mainblue,
+    fonttitle=\bfseries,
+    arc=2mm,
+    boxrule=0.7pt
+}
+
+\title{\textbf{Log-Weighted Cross-Entropy Framework for Imbalanced Classification}\\
+\vspace{5mm}
+\large 2차 논문 작성 피드백}
+\author{고승호, 이현석}
+\date{July 5, 2026}
+
+\begin{document}
+
+\maketitle
+
+\section{전체 평가}
+
+수정된 원고는 피드백을 상당히 잘 반영하고 했음. 특히 Introduction에서 Loss Re-weighting의 실용적 장점을 명시적으로 강조했고, Research Gap을 ``simple, hyperparameter-light, numerically stable, dependable''이라는 문장으로 정리한 점이 매우 좋아졌음. 또한 Contribution에 Theoretical Analysis가 추가되었고, Related Work에는 Taxonomy Table과 Positioning Table이 새로 들어가면서 논문의 위치가 훨씬 명확해졌음.
+
+이전 피드백의 핵심은 다음 네 가지였음.
+
+\begin{itemize}
+\item Introduction에서 Research Gap을 더 명확히 제시할 것.
+\item WCE의 Weight Explosion 문제를 더 직관적이고 수학적으로 설명할 것.
+\item Contribution에서 Theory Contribution을 명시할 것.
+\item Related Work가 단순한 Literature Summary가 아니라 Proposed Method의 Positioning으로 연결되도록 할 것.
+\end{itemize}
+
+현재 원고는 이 네 가지를 전반적으로 잘 반영함. 다만 상위 SCI Journal 기준에서는 아직 몇 가지 중요한 보완점이 남아 있음. 특히 다음 세 가지는 2차 수정에서 반드시 검토하는 것이 좋음.
+
+\begin{tcolorbox}[title=2차 수정의 핵심 방향]
+\begin{itemize}
+\item LWCE의 ``bounded'' 표현이 수학적으로 정확한지 다시 점검해야 함.
+\item PLWCE와 ES-LWCE의 역할이 서로 독립적인지, 또는 결합 가능한지 더 명확히 설명해야 함.
+\item 실험과 Method Section이 아직 Outline 수준에 가까우므로, 실제 논문 완성도를 위해 Section 3--4의 구체화가 필요함.
+\end{itemize}
+\end{tcolorbox}
+
+\section{이전 피드백 반영 여부 점검}
+
+\subsection{Motivation 강화 여부}
+
+이전 피드백에서는 Loss Re-weighting이 왜 Sampling이나 Architecture-level Method보다 실용적인지 Introduction에서 더 명확히 설명하라고 했음. 수정된 원고에서는 다음과 같은 장점을 명시함.
+
+\begin{itemize}
+\item Resampling과 달리 Training Data를 변형하지 않음.
+\item Architecture-level Method와 달리 Model 구조를 바꾸지 않음.
+\item 거의 모든 Network에 Drop-in 방식으로 적용 가능함.
+\item Modality-independent한 Loss Function 수정만 필요함.
+\end{itemize}
+
+\begin{tcolorbox}[title=반영 평가]
+매우 잘 반영됨. 이전보다 Motivation이 훨씬 선명해졌음. 특히 ``re-weighting remains one of the few approaches that can be applied to almost any architecture without modifying the model itself''라는 문장은 이전 피드백의 핵심을 잘 반영한 문장임.
+\end{tcolorbox}
+
+\subsection{Research Gap 명확화 여부}
+
+이전 피드백에서는 기존 방법의 단점 나열에 그치지 말고 Literature Gap으로 정리해야 한다고 했음. 수정된 원고에서는 다음과 같은 Gap이 제시됨.
+
+\begin{quote}
+Existing methods thus attempt to alleviate this instability through additional mechanisms, yet none directly addresses the uncontrolled growth of the inverse-frequency weight while preserving the simplicity of WCE.
+\end{quote}
+
+또한 다음 문장도 Gap을 잘 요약함.
+
+\begin{quote}
+The field still lacks a re-weighting loss that is simultaneously simple, hyperparameter-light, numerically stable, and dependable across both the level of imbalance and the application domain.
+\end{quote}
+
+\begin{tcolorbox}[title=반영 평가]
+잘 반영됨. 단순히 WCE, Focal Loss, CB Loss의 단점을 나열하는 수준에서 벗어나, ``WCE의 단순성을 유지하면서 Weight Explosion을 직접 제어하는 방법이 부족하다''는 Literature Gap으로 정리되었음.
+\end{tcolorbox}
+
+\subsection{Weight Explosion 설명 보완 여부}
+
+이전 피드백에서는 WCE의 Weight Explosion을 수식 또는 직관으로 보여주라고 했음. 수정된 원고에서는 WCE가 \(w_c \propto 1/n_c\)로 표현되어 있고, Section 3.1에서는 imbalance ratio \(\rho=n_{\max}/n_{\min}\)를 이용해 WCE의 rare-to-frequent weight ratio가 \(\rho\)로 선형 증가함을 제시함.
+
+\begin{equation}
+\frac{w^{\mathrm{WCE}}_{\min}}{w^{\mathrm{WCE}}_{\max}} = \frac{n_{\max}}{n_{\min}} = \rho.
+\end{equation}
+
+반면 LWCE는 다음과 같이 제시됨.
+
+\begin{equation}
+\frac{w^{\mathrm{LWCE}}_{\min}}{w^{\mathrm{LWCE}}_{\max}}
+=
+\frac{\log(1+n_{\max})}{\log(1+n_{\min})}
+=O(\log \rho).
+\end{equation}
+
+\begin{tcolorbox}[title=반영 평가]
+잘 반영됨. Introduction에서는 직관적으로 설명하고, Section 3.1에서는 수학적으로 dynamic range를 비교한 점이 좋음. 다만 아래에서 설명하듯이 \(O(\log \rho)\) 표현은 조건에 따라 더 엄밀히 다듬을 필요가 있음.
+\end{tcolorbox}
+
+\subsection{Contribution 구성 개선 여부}
+
+이전 피드백에서는 Contribution에 Method, Extension, Theory, Experiment가 균형 있게 드러나야 한다고 했음. 수정된 원고에서는 Contribution이 다음 네 가지로 정리됨.
+
+\begin{enumerate}
+\item LWCE 제안
+\item PLWCE와 ES-LWCE 확장
+\item Theoretical Properties 분석
+\item Cross-domain Evaluation
+\end{enumerate}
+
+\begin{tcolorbox}[title=반영 평가]
+매우 잘 반영됨. 이전보다 Contribution이 훨씬 논문답게 정리되었음. 특히 Theoretical Analysis가 독립 Contribution으로 들어간 점이 좋음.
+\end{tcolorbox}
+
+\subsection{Related Work 구조화 여부}
+
+이전 피드백에서는 Related Work를 나열형으로 쓰지 말고 Taxonomy와 Positioning 중심으로 재구성하라고 했음. 수정된 원고에서는 Table 1에 Data-level, Loss-level, Representation-level, Architecture-level Taxonomy가 제시되었고, Table 2에 WCE, Focal Loss, CB Loss, LWCE의 Positioning이 제시됨.
+
+\begin{tcolorbox}[title=반영 평가]
+매우 잘 반영됨. Related Work의 목적이 단순 Citation 나열이 아니라 Proposed Method의 위치를 보여주는 방향으로 개선되었음. 특히 Table 1과 Table 2는 Reviewer가 논문의 차별성을 빠르게 파악하는 데 도움이 됨.
+\end{tcolorbox}
+
+\section{2차 Major Comments}
+
+\subsection{LWCE의 ``bounded'' 표현을 더 엄밀하게 다듬을 필요 있음}
+
+현재 논문은 LWCE가 Weight Explosion을 제거하고 Weight를 bounded하게 만든다고 설명함. 그러나 여기서 ``bounded''의 의미가 두 가지로 혼용될 수 있음.
+
+\begin{enumerate}
+\item 개별 weight \(w_c\)가 bounded인지
+\item rare-to-frequent weight ratio가 bounded인지
+\end{enumerate}
+
+LWCE weight가
+\begin{equation}
+w_c^{\mathrm{LWCE}} = \frac{1}{\log(1+n_c)}
+\end{equation}
+이라면 \(n_c\geq 1\)에서 개별 weight는
+\begin{equation}
+0 < w_c^{\mathrm{LWCE}} \leq \frac{1}{\log 2}
+\end{equation}
+로 bounded임. 이 점은 맞음.
+
+하지만 rare-to-frequent ratio는
+\begin{equation}
+\frac{w_{\min}^{\mathrm{LWCE}}}{w_{\max}^{\mathrm{LWCE}}}
+= \frac{\log(1+n_{\max})}{\log(1+n_{\min})}
+\end{equation}
+이므로 \(n_{\min}\)이 고정되어 있고 \(n_{\max}\to\infty\)이면 이 비율은 천천히 증가함. 즉, WCE처럼 선형으로 폭발하지는 않지만 ratio 자체가 완전히 상수로 bounded된다고 말하기는 어려움.
+
+\begin{tcolorbox}[title=수정 권장]
+``LWCE bounds the individual per-class weights''와 ``LWCE compresses the rare-to-frequent weight ratio from linear to logarithmic growth''를 구분해서 써야 함. ``bounded weight''라는 표현은 개별 weight에 대해서는 맞지만, weight ratio에 대해서는 ``logarithmically compressed''라고 표현하는 것이 더 정확함.
+\end{tcolorbox}
+
+\subsection{ES-LWCE 설명에서 수학적 역할을 더 명확히 해야 함}
+
+현재 ES-LWCE는 \(\epsilon\)을 logarithmic denominator에 추가하여 rarest class의 weight를 \(1/\epsilon\)으로 cap한다고 설명함. 그런데 LWCE 자체도 \(n_c\geq1\)이면 이미 \(1/\log 2\)로 bounded임. 따라서 Reviewer는 다음 질문을 할 수 있음.
+
+\begin{quote}
+LWCE already has bounded weights. Then ES-LWCE is why necessary?
+\end{quote}
+
+이 부분은 반드시 명확히 해야 함. ES-LWCE가 필요한 이유는 단순히 boundedness가 아니라 다음 중 하나여야 함.
+
+\begin{itemize}
+\item 극단적으로 작은 effective count 또는 smoothed count를 사용하는 경우 안정성을 강화함.
+\item \(n_c=0\) 또는 mini-batch 기반 class count에서 denominator가 불안정해지는 상황을 처리함.
+\item maximum weight를 사용자가 \(\epsilon\)으로 조절할 수 있게 함.
+\item Gradient scale을 더 보수적으로 제어함.
+\end{itemize}
+
+\begin{tcolorbox}[title=수정 권장]
+ES-LWCE를 ``LWCE가 bounded하지 않아서 보완하는 방법''처럼 보이게 하면 안 됨. ``LWCE is already bounded for positive class counts, while ES-LWCE provides an explicit user-controlled cap and additional smoothing under extremely rare or mini-batch-level class frequencies''처럼 설명하는 것이 더 타당함.
+\end{tcolorbox}
+
+\subsection{PLWCE의 hyperparameter-light 주장에 주의 필요}
+
+논문은 LWCE를 parameter-free로 제안하고, PLWCE는 single exponent \(\alpha\)를 small proxy subset에서 자동 선택한다고 설명함. 이 방향은 좋지만, ``hyperparameter-light''와 ``automatic tuning''의 차이를 명확히 해야 함.
+
+PLWCE는 분명히 hyperparameter \(\alpha\)를 가짐. 따라서 PLWCE까지 포함한 proposed family 전체를 ``no hyperparameter''처럼 설명하면 문제가 될 수 있음.
+
+\begin{tcolorbox}[title=수정 권장]
+LWCE는 parameter-free이고, PLWCE는 one-parameter extension이라고 명확히 구분해야 함. Abstract와 Contribution에서는 ``LWCE introduces no additional hyperparameters, while PLWCE provides a single automatically selected exponent''라고 일관되게 표현하는 것이 좋음.
+\end{tcolorbox}
+
+\subsection{Table 2의 ``Bounded weight'' 표기가 약간 단순화되어 있음}
+
+Table 2에서 Focal Loss와 CB Loss가 bounded weight를 갖는 것으로 표시되어 있음. 이 표는 Positioning을 보여주는 데 유용하지만, ``bounded weight''의 의미가 method마다 다름.
+
+\begin{itemize}
+\item Focal Loss는 class-frequency weight가 아니라 sample difficulty modulation \((1-p_t)^\gamma\)를 사용함.
+\item CB Loss는 effective number 기반 weight를 사용하지만, \(\beta\) 설정과 normalization 방식에 따라 scale이 달라질 수 있음.
+\item LWCE는 class-count 기반 frequency weight 자체를 logarithmically compress함.
+\end{itemize}
+
+따라서 Table 2의 ``Bounded weight''는 reviewer에게 다소 단순화되어 보일 수 있음.
+
+\begin{tcolorbox}[title=수정 권장]
+Table caption 또는 본문에 ``Bounded weight refers to whether the multiplicative weighting factor is prevented from unbounded growth under extreme class imbalance''라고 명시하는 것이 좋음. 또한 Focal Loss의 경우 frequency weight가 아니라 difficulty modulation임을 표 아래 Note로 적는 것이 좋음.
+\end{tcolorbox}
+
+\subsection{Section 3.1의 이론 분석은 좋지만 아직 많이 짧고 갑자기 나옴}
+
+현재 Section 3.1은 WCE와 LWCE의 dynamic range를 비교하는 수준임. 이는 좋은 시작이지만, Theoretical Contribution으로 독립적으로 제시하기에는 약간 짧아 보일 수 있음.
+
+보완 가능한 분석은 다음과 같음.
+
+\begin{itemize}
+\item Monotonicity: \(n_c\)가 증가할수록 \(w_c\)가 감소함을 명시.
+\item Dynamic range compression: WCE는 \(O(\rho)\), LWCE는 \(O(\log \rho)\)임을 명확히 정리.
+\item Boundedness: \(0<w_c\leq 1/\log 2\) for \(n_c\geq1\).
+\item Gradient scaling: CE gradient에 \(w_c\)가 곱해지므로 LWCE가 minority gradient 폭주를 어떻게 완화하는지 설명.
+\item PLWCE에서 \(\alpha\)에 따른 ratio 변화: \(O((\log \rho)^\alpha)\).
+\item ES-LWCE에서 maximum weight cap과 smoothness 역할.
+\end{itemize}
+
+\begin{tcolorbox}[title=수정 권장]
+Theoretical Properties를 3--4개의 Proposition 또는 Lemma로 정리하면 논문의 신뢰도가 올라감. 예를 들어 ``Proposition 1: Monotonicity'', ``Proposition 2: Boundedness'', ``Proposition 3: Dynamic-range Compression'', ``Proposition 4: Gradient-scale Control''처럼 구성하면 좋음.
+\end{tcolorbox}
+
+
+\section{2차 Minor Comments}
+
+\subsection{Abstract의 표현을 조금 더 조심할 필요 있음}
+
+Abstract에서 ``never collapse on any dataset''이라는 표현은 매우 강함. 실제 실험이 충분히 강력하지 않으면 Reviewer가 공격할 수 있음.
+
+\begin{tcolorbox}[title=수정 권장]
+``never collapse'' 대신 ``does not exhibit severe degradation in our experiments'' 또는 ``shows no substantial collapse across the evaluated datasets''처럼 조금 더 논문다운 표현을 사용하는 것이 안전함.
+\end{tcolorbox}
+
+\subsection{Introduction에서 WCE 수식을 한 번 직접 제시하면 더 좋음}
+
+현재 WCE를 \(w_c\propto1/n_c\)로 Related Work에서 제시하지만, Introduction의 Weight Explosion 설명 부분에도 간단히 수식이 들어가면 더 직관적임.
+
+\begin{equation}
+w_c^{\mathrm{WCE}}\propto\frac{1}{n_c}.
+\end{equation}
+
+\begin{tcolorbox}[title=수정 권장]
+Introduction에서 WCE의 inverse-frequency weight를 한 줄 수식으로 제시하고, 바로 다음 문장에서 \(n_c\to0\) 또는 \(n_c\)가 매우 작아질 때 gradient scale이 커진다고 설명하면 독자가 더 쉽게 이해함.
+\end{tcolorbox}
+
+\subsection{Related Work의 Citation은 좋아졌지만 최신 Citation의 정확성 확인 필요}
+
+수정 원고에는 2023--2025년 Citation이 추가되어 최신성이 개선되었음. 다만 일부 Citation은 실제 논문 제목, venue, publication status가 정확한지 확인해야 함. 예를 들어 2025년 NeurIPS Datasets and Benchmarks Track 논문은 아직 실제 출판 여부나 표기 방식이 불확실할 수 있으므로 bibliographic accuracy를 확인해야 함.
+
+\begin{tcolorbox}[title=수정 권장]
+최신 Citation은 좋지만, 실제 존재 여부, venue, arXiv 여부, 저자명, 연도 표기를 반드시 확인해야 함. Reviewer가 reference 오류를 발견하면 논문의 신뢰도가 떨어질 수 있음.
+\end{tcolorbox}
+
+\subsection{PLWCE와 ES-LWCE의 결합 가능성 명시 필요}
+
+현재 본문은 두 extension이 orthogonal이라고 설명함. 그렇다면 다음 질문이 생김.
+
+\begin{quote}
+Can PLWCE and ES-LWCE be combined into a single power-log-smoothed variant?
+\end{quote}
+
+예를 들어 다음 형태가 가능할 수 있음.
+
+\begin{equation}
+w_c = \frac{1}{(\log(1+n_c))^\alpha + \epsilon}.
+\end{equation}
+
+\begin{tcolorbox}[title=수정 권장]
+결합형을 제안하지 않더라도, ``Although the two extensions can in principle be combined, we study them separately to isolate the effect of focusing strength and smoothing'' 같은 문장을 넣으면 좋음.
+\end{tcolorbox}
+
+\subsection{Table 3의 수식 표기 정리 필요}
+
+Table 3에서 PLWCE와 ES-LWCE의 분모 괄호와 \(\epsilon\) 위치가 독자에게 혼동될 수 있음. 특히 PDF 변환 과정에서 line break가 들어가면 수식이 보기 어려움.
+
+\begin{tcolorbox}[title=수정 권장]
+Table 3에는 간단한 형태만 넣고, 본문에서 명확한 display equation으로 다시 정의하는 것이 좋음. 예를 들어 LWCE, PLWCE, ES-LWCE를 각각 numbered equation으로 제시하면 좋음.
+\end{tcolorbox}
+
+\section{반영 여부 요약표}
+
+\begin{center}
+\begin{tabular}{p{0.36\textwidth}p{0.18\textwidth}p{0.34\textwidth}}
+\toprule
+이전 피드백 항목 & 반영 정도 & 2차 평가 \\
+\midrule
+Motivation 강화 & 매우 잘 반영 & Re-weighting의 실용적 장점이 명확히 추가됨 \\
+Research Gap 명확화 & 매우 잘 반영 & WCE의 단순성과 안정성 사이의 공백이 잘 제시됨 \\
+Weight Explosion 수식 설명 & 잘 반영 & Section 3.1에서 ratio 분석 추가됨. 다만 bounded 표현은 정밀화 필요 \\
+Contribution에 Theory 추가 & 매우 잘 반영 & Contribution 3번으로 이론 분석이 명시됨 \\
+Related Work 구조화 & 매우 잘 반영 & Taxonomy Table과 Positioning Table 추가됨 \\
+Cost-sensitive Loss 분류 & 잘 반영 & Frequency/Difficulty/Margin-Logit 기반으로 정리됨 \\
+최신 Citation 보완 & 반영됨 & 2023--2025 Citation 추가됨. 정확성 확인 필요 \\
+Positioning Table 추가 & 잘 반영 & Table 2 추가됨. 다만 bounded weight의 의미 설명 필요 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+
+
+\end{document}
+

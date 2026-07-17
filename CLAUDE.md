@@ -4,6 +4,71 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ---
 
+# ⚠️ ASC 논문 실험 (2026-07 재구성) — 먼저 읽을 것
+
+논문에 들어가는 도메인은 **4개뿐**: `image_classification`, `tabular_data`, `network_data`, `text_classification`.
+(`medical_data`·`image_detection`은 이 논문 범위 밖 — 아래 규칙 적용 안 됨.)
+
+## 공유 모듈은 리포 루트
+
+```
+imbalanced-data-LWCE/           ← Colab: /content/drive/MyDrive/imbalanced-data-LWCE
+├── custom_losses.py            # 분류용 손실 11종 (4개 도메인 공유)
+├── experiment_utils.py         # GradLogger / extended_metrics / OPTUNA_GRIDS (4개 도메인 공유)
+├── image_classification/       # resnet32.py (도메인 전용 백본)
+├── text_classification/        # transformer_text.py (도메인 전용 백본)
+├── network_data/src/           # data_handler.py     ← 'scr' 아님 (2026-07 rename)
+└── tabular_data/src/           # data_handler.py + custom_losses.py(XGBoost 레거시)
+```
+
+**모든 노트북 Cell 0은 Colab 전용**(로컬 분기 없음):
+```python
+from google.colab import drive; drive.mount('/content/drive')
+REPO = '/content/drive/MyDrive/imbalanced-data-LWCE'
+sys.path.insert(0, f'{REPO}/<domain>/src')   # 또는 백본 폴더
+sys.path.insert(0, REPO)                     # ← 마지막에 insert해야 루트가 우선
+```
+
+> ⚠️ **`tabular_data/src/custom_losses.py`는 XGBoost 레거시판으로 루트와 이름이 충돌한다.**
+> `insert(0)`은 나중 호출이 앞에 오므로 **REPO를 반드시 마지막에 insert**할 것.
+
+## 손실 11종 (전 도메인 동일)
+
+`ce, wce, pwce, sqce, lwce, plwce, eslwce, combined, cb, focal, logitadj`
+**proposed = lwce / plwce / eslwce**, `combined`는 §4.5 ablation 전용, `logitadj`는 §4.2 baseline.
+
+**파싱 우선순위**: `combined > plwce > eslwce > lwce > pwce > sqce > wce > cb > ce`
+> `'eslwce'`가 `'lwce'`를 부분문자열로 포함 → 반드시 `lwce`보다 먼저 검사.
+
+## Optuna (전 도메인 통일)
+
+`experiment_utils.OPTUNA_GRIDS` 하나로 관리. **1D 30 trials, `combined`만 2D 10×6=60**.
+→ 데이터셋당 proxy 학습 210회. `n_trials`는 grid 크기와 **정확히** 일치해야 함(`grid_n_trials()`).
+목적함수는 **F1-Macro** (balanced_acc 아님 — 옛 문서의 오기 주의).
+
+## 3차 피드백 §4.7 gradient 계측 — 사후 복구 불가
+
+`GradLogger`로 epoch별 `grad_norm` / `grad_ratio(Few/Many)` 기록. **반드시 학습 루프 안**:
+```python
+logits = model(xb); logits.retain_grad()      # ← 없으면 GradLogger가 즉시 RuntimeError
+loss.backward(); glog.update(logits, yb, model); optimizer.step()
+```
+나머지(G-Mean·Worst-class·Minority Recall·Weight Distribution·통계검정)는 **전부 사후 계산 가능**.
+
+## Weight Normalization — 이미 충족
+
+3차 §3.3이 명시를 요구한 `w̃_c = C·w_c/Σⱼwⱼ`가 `calculate_weights()`의 `weights/np.mean(weights)`와
+**수학적으로 동일**하고 **모든 모드에 무조건 적용**됨 → WCE·CB도 동일 scale convention(공정 비교 충족).
+**논문에 문장만 추가하면 됨. 코드 수정 불필요.**
+
+## ⚠️ 결과 파일
+
+**버전 접미사 없이 기존 위치에 저장**. 11종 + gradient/per-class/history라 **옛 8종 파일과 스키마가 다름**
+→ Drive의 기존 결과를 정리(보관)한 뒤 실행할 것. **각 도메인 CLAUDE.md의 결과표는 옛 8종 수치이므로
+재실행 후 전부 갱신 필요.**
+
+---
+
 # 프로젝트 컨텍스트
 
 불균형 클래스 환경에서 의료 이미지 세그멘테이션 성능을 검증하는 연구 프로젝트.

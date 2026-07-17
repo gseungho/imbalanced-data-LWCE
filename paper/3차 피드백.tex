@@ -1,0 +1,333 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage{kotex}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{geometry}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\usepackage{tcolorbox}
+\usepackage{hyperref}
+\usepackage{longtable}
+
+\geometry{margin=25mm}
+
+\definecolor{mainblue}{RGB}{45,72,96}
+\definecolor{lightbluegray}{RGB}{232,238,243}
+\definecolor{darkgray}{RGB}{55,60,65}
+\definecolor{softgreen}{RGB}{230,240,235}
+\definecolor{softyellow}{RGB}{247,242,225}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=mainblue,
+    urlcolor=mainblue,
+    citecolor=mainblue
+}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.7em}
+
+\setlist[itemize]{leftmargin=2em}
+\setlist[enumerate]{leftmargin=2em}
+
+\tcbset{
+    colback=lightbluegray,
+    colframe=mainblue,
+    coltitle=white,
+    colbacktitle=mainblue,
+    fonttitle=\bfseries,
+    arc=2mm,
+    boxrule=0.7pt
+}
+
+\title{\textbf{Log-Weighted Cross-Entropy Framework for Imbalanced Classification}\\
+\vspace{5mm}
+\large 3차 논문 작성 피드백}
+\author{고승호, 이현석}
+\date{July 12, 2026}
+
+\begin{document}
+
+\maketitle
+
+\section{전체 평가}
+
+수정된 원고는 2차 피드백을 전반적으로 매우 잘 반영했음. 특히 Introduction에서 WCE의 Weight Explosion을 직접 수식으로 제시했고, LWCE, PLWCE, ES-LWCE의 역할을 서로 구분했으며, Related Work에는 Taxonomy와 Positioning Table이 들어가 논문의 위치가 명확해졌음. 또한 Section 3.2에서는 Monotonicity, Boundedness, Dynamic-range Compression, Gradient-scale Control을 Proposition 형태로 정리하여 이전보다 Theory Contribution이 크게 강화되었음.
+
+현재 원고는 다음의 세 축이 비교적 선명해졌음.
+
+\begin{center}
+WCE의 Weight Explosion
+
+$\Downarrow$
+
+Logarithmic Compression
+
+$\Downarrow$
+
+Parameter-free LWCE와 두 Extension
+\end{center}
+
+특히 이전 피드백에서 강조했던 ``개별 Weight의 Boundedness''와 ``Rare-to-frequent Weight Ratio의 Logarithmic Compression''을 구분한 점이 좋음. ES-LWCE 역시 LWCE가 Positive Class Count에서 이미 bounded하다는 점을 인정하고, \(n_c=0\) 또는 Mini-batch-level Vanishing Count에 대한 Explicit Cap이라는 역할로 다시 설명한 점이 적절함.
+
+\begin{tcolorbox}[title=종합 판단]
+2차 피드백의 핵심은 대부분 잘 반영되었음. 현재까지는 Introduction, Related Work, Method Definition, Theoretical Properties의 흐름이 안정적임. 이제 논문의 완성도는 3.3 이후의 Method 세부화와 Section 4의 Experiment Design에 의해 결정될 것으로 판단됨.
+\end{tcolorbox}
+
+\section{이전 피드백 반영 여부}
+
+\subsection{Boundedness 표현의 정밀화}
+
+이전 피드백에서는 개별 Weight가 bounded하다는 사실과 Weight Ratio가 logarithmically compressed된다는 사실을 구분하라고 했음. 수정본은 이를 다음과 같이 정확히 구분함.
+
+\[
+0<w_c^{\mathrm{LWCE}}\leq \frac{1}{\log 2},
+\qquad n_c\geq 1,
+\]
+반면
+\[
+\frac{w_{\min}^{\mathrm{LWCE}}}{w_{\max}^{\mathrm{LWCE}}}
+=
+\frac{\log(1+n_{\max})}{\log(1+n_{\min})}
+=
+O(\log \rho)
+\]
+로 설명하여, Ratio 자체는 constant-bounded가 아니라 WCE보다 훨씬 느리게 증가함을 명시함.
+
+\begin{tcolorbox}[title=반영 평가]
+매우 잘 반영됨. 이전 버전의 가장 큰 수학적 모호성이 해소되었음.
+\end{tcolorbox}
+
+\subsection{ES-LWCE의 역할 재정의}
+
+수정본은 ES-LWCE의 역할을 \(n_c=0\)에서도 well-defined하고, Maximum Weight를 \(1/\epsilon\)으로 명시적으로 통제하며, Mini-batch-level Vanishing Count를 처리하는 Extension으로 정리함.
+
+\begin{tcolorbox}[title=반영 평가]
+잘 반영됨. ES-LWCE를 ``LWCE가 bounded하지 않아서 필요한 방법''이 아니라 ``Explicit, User-controlled Cap''을 제공하는 방법으로 Positioning한 점이 좋음.
+\end{tcolorbox}
+
+\subsection{PLWCE와 ES-LWCE의 Orthogonality}
+
+수정본은 PLWCE가 Focusing Strength를 조절하고, ES-LWCE는 Maximum Weight와 Extreme-tail Smoothing을 담당한다고 명시함. 또한 두 방법이 결합 가능하지만 각 효과를 분리해서 보기 위해 독립적으로 평가한다고 설명함.
+
+\begin{tcolorbox}[title=반영 평가]
+잘 반영됨. 다만 실제 Experiment에서 이 설명을 뒷받침하는 Ablation이 반드시 필요함.
+\end{tcolorbox}
+
+\subsection{Theoretical Properties의 강화}
+
+현재는 Monotonicity, Boundedness, Dynamic-range Compression, Gradient-scale Control의 네 개 Proposition으로 확장되었음. 특히 Proposition 4는 Weight Compression이 Optimization Stability로 이어지는 Mechanism을 설명한다는 점에서 중요함.
+
+\begin{tcolorbox}[title=반영 평가]
+매우 잘 반영됨. Theory Contribution이 독립적인 논문 기여로 보일 수 있을 정도로 개선되었음.
+\end{tcolorbox}
+
+\section{현재까지의 주요 보완점}
+
+\subsection{Gradient-scale Control의 표현을 조금 더 엄밀하게 다듬을 것}
+
+실제 Gradient Magnitude는 Prediction Probability와 Feature Representation에도 의존함. 따라서 Minority-to-majority Gradient Ratio가 Weight Ratio를 그대로 ``inherits''한다고 표현하면 다소 강하게 들릴 수 있음.
+
+\begin{tcolorbox}[title=수정 권장]
+``the class-dependent multiplicative component of the gradient scale follows the same asymptotic order as the corresponding weight ratio''처럼 표현하는 것이 더 안전함.
+\end{tcolorbox}
+
+\subsection{\(O(\log \rho)\) 표현의 조건을 명시할 것}
+
+Dynamic-range Compression은 \(n_{\min}\)이 고정되거나 Lower-bounded된 상황을 암묵적으로 사용함.
+
+\begin{tcolorbox}[title=수정 권장]
+``For fixed \(n_{\min}\geq1\), the LWCE ratio grows as \(O(\log \rho)\)''와 같이 조건을 명시하는 것이 좋음.
+\end{tcolorbox}
+
+\subsection{Weight Normalization 여부를 명확히 해야 함}
+
+실제 학습에서 Raw Weight를 사용하는지, Mean-normalized Weight를 사용하는지 반드시 명시해야 함. 예를 들어
+\[
+\widetilde{w}_c
+=
+\frac{Cw_c}{\sum_{j=1}^{C}w_j}
+\]
+와 같은 Normalization을 사용할 수 있음.
+
+\begin{tcolorbox}[title=중요한 질문]
+Baseline WCE와 CB Loss도 동일한 Scale Convention으로 비교해야 공정함.
+\end{tcolorbox}
+
+\section{3.3 이후 작성 방향}
+
+\subsection{3.3 PLWCE Parameter Selection}
+
+3.3절은 PLWCE의 \(\alpha\) 선택 절차를 재현 가능하게 설명해야 함.
+
+\begin{itemize}
+\item Candidate Set
+\item Proxy Subset 구성 방식
+\item Validation Metric
+\item Selection Frequency
+\item Additional Computational Cost
+\item Test Data 미사용 명시
+\end{itemize}
+
+또한 \(\alpha\)의 의미를 다음과 같이 설명하면 좋음.
+
+\begin{itemize}
+\item \(0<\alpha<1\): Mild Re-weighting
+\item \(\alpha=1\): LWCE
+\item \(\alpha>1\): Strong Tail Emphasis
+\end{itemize}
+
+\begin{tcolorbox}[title=주의점]
+Proxy Subset이 Training Data의 일부인지 별도의 Validation Set인지 명확히 해야 하며, Test Set을 이용한 \(\alpha\) 선택은 허용되지 않음.
+\end{tcolorbox}
+
+\subsection{3.4 ES-LWCE and Practical Use Cases}
+
+ES-LWCE는 Mini-batch-level Class Frequency 또는 Dynamic/Streaming Class Count를 사용하는 경우에 초점을 맞추는 것이 좋음.
+
+\[
+w_c^{\mathrm{ES}}
+=
+\frac{1}{\log(1+n_c)+\epsilon}
+\]
+에서
+\[
+w_c^{\mathrm{ES}}\leq \frac{1}{\epsilon}
+\]
+이므로 \(\epsilon\)은 다음 Trade-off를 가짐.
+
+\begin{itemize}
+\item Small \(\epsilon\): Strong Minority Emphasis
+\item Large \(\epsilon\): Conservative Gradient Scaling
+\end{itemize}
+
+\begin{tcolorbox}[title=개선 방향]
+ES-LWCE를 Dataset-level Count에서 반드시 필요한 방법처럼 설명하기보다, Vanishing Count 또는 Batch-adaptive Count가 가능한 상황에서 유용한 Extension으로 Positioning하는 것이 좋음.
+\end{tcolorbox}
+
+\subsection{3.5 Computational Complexity and Implementation}
+
+제안 방법의 장점 중 하나는 계산량이 거의 증가하지 않는다는 점임.
+
+\begin{itemize}
+\item Weight는 Class Count로부터 한 번 계산 가능함.
+\item Per-sample Cost는 기존 WCE와 동일한 수준임.
+\item Additional Model Parameter가 없음.
+\item PLWCE의 Grid Search만 제한적인 추가 비용을 요구함.
+\end{itemize}
+
+추천 문장은 다음과 같음.
+
+\begin{quote}
+Once the class weights are precomputed, LWCE and ES-LWCE incur the same asymptotic training complexity as WCE, requiring only a scalar multiplication per sample.
+\end{quote}
+
+\subsection{그래프 추가}
+
+parameter 가 변화하면서 loss function 이 어떻게 달라지는 지 등등 그래프를 적절히 추가하면 리뷰어들의 이해를 도울 수 있을 것. (학술대회 발표자료 참고)
+
+\section{Section 4 Experiment 작성 방향}
+
+\subsection{Experiment의 핵심 질문}
+
+\begin{enumerate}
+\item Imbalance가 심해질수록 LWCE의 장점이 커지는가?
+\item LWCE는 WCE의 Optimization Instability를 실제로 줄이는가?
+\item PLWCE의 \(\alpha\)는 Tail Emphasis를 의도한 대로 조절하는가?
+\item ES-LWCE는 Vanishing Count 또는 Extreme Rare Class에서 실제로 안정적인가?
+\end{enumerate}
+
+\subsection{Baseline}
+
+최소한 CE, WCE, Focal Loss, CB Loss, LDAM 또는 Logit Adjustment, LWCE, PLWCE, ES-LWCE를 포함하는 것이 좋음.
+
+\subsection{평가지표}
+
+Overall Accuracy만 사용하면 안 되며 다음 지표를 함께 보고해야 함.
+
+\begin{itemize}
+\item Macro-F1
+\item Balanced Accuracy
+\item Geometric Mean
+\item Minority-class Recall
+\item Worst-class Accuracy
+\item Per-class Accuracy
+\end{itemize}
+
+\begin{tcolorbox}[title=핵심]
+Imbalanced Classification 논문에서는 Macro-F1과 Worst-class Accuracy를 핵심 지표로 두는 것이 좋음.
+\end{tcolorbox}
+
+\subsection{Ablation Study}
+
+\begin{center}
+\begin{tabular}{lccc}
+\toprule
+Method & Log Compression & Power \(\alpha\) & Smoothing \(\epsilon\) \\
+\midrule
+WCE & X & X & X \\
+LWCE & O & X & X \\
+PLWCE & O & O & X \\
+ES-LWCE & O & X & O \\
+Combined & O & O & O \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Combined Variant를 Main Method로 제안하지 않더라도 Supplementary Ablation으로 넣으면 Orthogonality 주장을 검증할 수 있음.
+
+\subsection{Sensitivity Analysis}
+
+\(\alpha\)와 \(\epsilon\) 변화에 따른 Macro-F1, Worst-class Accuracy, Gradient Norm을 그래프로 보여주는 것이 좋음.
+
+\subsection{Optimization Stability 분석}
+
+논문의 핵심 Claim이 Weight Explosion 완화이므로 다음 시각화가 중요함.
+
+\begin{itemize}
+\item Epoch별 Training Loss
+\item Epoch별 Gradient Norm
+\item Minority/Majority Gradient Ratio
+\item Class Weight Distribution
+\end{itemize}
+
+\begin{tcolorbox}[title=중요]
+단순 성능 향상만으로는 ``Weight Explosion을 완화했다''는 Mechanism을 충분히 증명하기 어려움. Gradient Norm과 Weight Distribution 분석을 반드시 포함하는 것이 좋음.
+\end{tcolorbox}
+
+\subsection{Statistical Analysis}
+
+Dataset이 여러 개이므로 경우 다음을 추천함 (태욱, 인준방법 말고 기존 방법).
+
+\begin{itemize}
+\item Friedman Test
+\item Post-hoc Holm Procedure
+\item Mean Rank
+\item Win/Tie/Loss Count
+\end{itemize}
+
+\section{수정 우선순위}
+
+\subsection{Priority 1}
+
+\begin{enumerate}
+\item Weight Normalization 여부 명시
+\item Proposition 4 표현 정밀화
+\item 3.3에서 PLWCE Selection Procedure 구체화
+\item 3.4에서 ES-LWCE의 Practical Use Case 명확화
+\item Experiment에 Macro-F1, Worst-class Accuracy, Gradient Norm 포함
+\end{enumerate}
+
+\subsection{Priority 2}
+
+\begin{enumerate}
+\item \(\alpha\), \(\epsilon\) Sensitivity Analysis
+\item Combined Variant Ablation
+\item Computational Cost 비교
+\item Statistical Significance Test
+\end{enumerate}
+
+
+\end{document}

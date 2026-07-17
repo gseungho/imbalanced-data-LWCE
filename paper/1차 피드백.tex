@@ -1,0 +1,305 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage{kotex}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{geometry}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\usepackage{tcolorbox}
+\usepackage{hyperref}
+
+\geometry{margin=25mm}
+
+\definecolor{mainblue}{RGB}{45,72,96}
+\definecolor{lightbluegray}{RGB}{232,238,243}
+\definecolor{darkgray}{RGB}{55,60,65}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=mainblue,
+    urlcolor=mainblue,
+    citecolor=mainblue
+}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.7em}
+
+\setlist[itemize]{leftmargin=2em}
+\setlist[enumerate]{leftmargin=2em}
+
+\tcbset{
+    colback=lightbluegray,
+    colframe=mainblue,
+    coltitle=white,
+    colbacktitle=mainblue,
+    fonttitle=\bfseries,
+    arc=2mm,
+    boxrule=0.7pt
+}
+
+\title{\textbf{Log-Weighted Cross-Entropy Framework for Imbalanced Classification}\\
+\large }
+\author{논문 작성피드백}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section{전체 평가}
+
+논문의 1장 Introduction과 2장 Related Work는 전체적으로 기본 구조가 잘 잡혀 있음. 특히 ``문제 제기 $\rightarrow$ 기존 방법의 한계 $\rightarrow$ Proposed Method $\rightarrow$ Contribution''의 흐름은 자연스러움.
+
+그러나 상위 SCI Journal 기준에서는 다음 부분을 더 강화할 필요가 있음.
+
+\begin{itemize}
+\item Introduction에서 Research Gap이 더 명확해야 함.
+\item WCE의 Weight Explosion 문제를 더 직관적이고 수학적으로 설명해야 함.
+\item Contribution에서 Theory Contribution이 충분히 드러나야 함.
+\item Related Work가 단순한 Literature Summary가 아니라 Proposed Method의 Positioning으로 연결되어야 함.
+\end{itemize}
+
+\section{Introduction 개선점}
+
+\subsection{Motivation 강화 필요}
+
+현재 Introduction은 Class Imbalance가 중요한 문제임을 설명하고, Cross-Entropy가 Majority Bias를 유발한다는 점을 제시함. 이는 논리적으로 맞지만, 대부분의 Imbalanced Classification 논문에서 공통적으로 사용하는 일반적인 시작 방식임.
+
+따라서 다음과 같은 질문에 대한 답을 초반에 더 명확히 제시할 필요가 있음.
+
+\begin{itemize}
+\item 왜 Sampling보다 Loss Function 수정이 더 일반적인 접근인지 설명 필요함.
+\item 왜 Deep Learning에서도 Loss Re-weighting이 여전히 중요한지 설명 필요함.
+\item 왜 Model Architecture를 바꾸지 않는 접근이 실용적인지 설명 필요함.
+\end{itemize}
+
+\begin{tcolorbox}[title=개선 방향]
+Loss Re-weighting은 Model 구조를 변경하지 않고 거의 모든 Neural Network에 적용 가능함. 또한 Dataset을 인위적으로 변형하지 않으므로 Sampling-based Method보다 적용성이 높음. 이 장점을 Introduction 초반에 강조하는 것이 좋음.
+\end{tcolorbox}
+
+\begin{tcolorbox}[title=추가 가능 문장 예시]
+Although many sophisticated long-tailed learning methods have been proposed, loss re-weighting remains one of the few approaches that can be applied to virtually any architecture without modifying the model itself.
+\end{tcolorbox}
+
+\subsection{Research Gap 명확화}
+
+현재는 기존 방법들의 단점이 다음과 같이 제시되어 있음.
+
+\begin{itemize}
+\item WCE는 Weight Explosion 문제가 있음.
+\item Focal Loss는 Dataset마다 성능이 불안정함.
+\item CB Loss는 Hyperparameter에 민감함.
+\end{itemize}
+
+하지만 이것은 아직 단점 나열에 가까움. Reviewer는 다음 질문을 할 가능성이 높음.
+
+\begin{quote}
+기존 연구들은 왜 이 문제를 충분히 해결하지 못했는가?
+\end{quote}
+
+따라서 단순한 Problem Statement가 아니라 Literature Gap으로 정리해야 함.
+
+\begin{tcolorbox}[title=개선 방향]
+기존 방법들은 Weight Explosion을 완전히 해결하지 못하면서 동시에 WCE의 단순성도 유지하지 못함. 즉, Simple, Stable, Hyperparameter-light Re-weighting Loss가 부족하다는 점을 명확히 제시해야 함.
+\end{tcolorbox}
+
+\begin{tcolorbox}[title=추가 가능 문장 예시]
+Existing methods attempt to alleviate instability through additional mechanisms, yet none directly addresses the uncontrolled growth of inverse-frequency weights while preserving the simplicity of WCE.
+\end{tcolorbox}
+
+\subsection{Weight Explosion 설명 보완}
+
+현재는 WCE의 Weight가 무한히 증가한다고 설명되어 있음. 그러나 독자가 왜 Weight Explosion이 발생하는지 직관적으로 이해하기 어려울 수 있음. Introduction에서도 간단한 수식 하나 정도는 제시하는 것이 좋음.
+
+\begin{equation}
+w_c=\frac{1}{n_c}
+\end{equation}
+
+여기서 \(n_c\)는 Class \(c\)의 Sample 수를 의미함. Minority Class의 Sample 수가 작아질수록 \(w_c\)가 급격히 증가함. 따라서 Gradient가 불안정해지고 Optimization이 어려워질 수 있음.
+
+\begin{tcolorbox}[title=해석]
+WCE는 Minority Class를 강조한다는 장점이 있지만, Extreme Imbalance 상황에서는 Weight가 지나치게 커져 Training Instability를 유발할 수 있음.
+\end{tcolorbox}
+
+\subsection{LWCE와의 연결 강화}
+
+WCE의 Weight는 다음과 같이 표현할 수 있음.
+
+\begin{equation}
+w_c^{\mathrm{WCE}}=\frac{1}{n_c}
+\end{equation}
+
+반면 Proposed LWCE는 다음과 같이 Logarithmic Compression을 적용함.
+
+\begin{equation}
+w_c^{\mathrm{LWCE}}=\frac{1}{\log(1+n_c)}
+\end{equation}
+
+이 구조는 Rare Class에 대한 강조를 유지하면서도 Weight 증가를 완만하게 만듦. 따라서 WCE의 Weight Explosion 문제를 완화하는 방향으로 자연스럽게 연결됨.
+
+\begin{tcolorbox}[title= 강조할 점]
+좋은 Introduction은 Proposed Method를 갑자기 제시하지 않음. 기존 방법의 한계를 충분히 설명한 뒤, 그 한계를 해결하는 가장 자연스러운 방법으로 Proposed Method가 등장해야 함.
+\end{tcolorbox}
+
+\subsection{Contribution 구성 개선}
+
+현재 Contribution의 흐름은 다음과 같이 볼 수 있음.
+
+\begin{enumerate}
+\item Weight Explosion 문제 제시
+\item LWCE 제안
+\item Experiment 수행
+\end{enumerate}
+
+하지만 더 설득력 있는 구성은 다음과 같음.
+
+\begin{enumerate}
+\item LWCE 제안
+\item PLWCE 및 ES-LWCE 확장
+\item Theoretical Analysis 제시
+\item Cross-domain Validation 수행
+\end{enumerate}
+
+Contribution은 단순히 ``무엇을 했다''가 아니라 Method, Theory, Experiment가 균형 있게 보이도록 구성해야 함.
+
+\subsection{Theory Contribution 추가 필요}
+
+본문에서는 Boundedness, Logarithmic Compression, Numerical Stability를 강조하고 있음. 그러나 Contribution에서는 이론적 기여가 충분히 드러나지 않음.
+
+다음과 같은 내용을 Contribution에 포함하면 좋음.
+
+\begin{itemize}
+\item Proposed Weight Function의 Boundedness 분석
+\item WCE와 LWCE의 Growth Rate 비교
+\item Rare Class에서의 Numerical Stability 설명
+\end{itemize}
+
+\begin{tcolorbox}[title=추가 가능 문장 예시]
+We theoretically analyze the boundedness and asymptotic behavior of the proposed logarithmic weighting functions.
+\end{tcolorbox}
+
+\section{Related Work 개선점}
+
+\subsection{나열형 구조 개선 필요}
+
+현재 Related Work는 다음과 같은 구조로 구성되어 있음.
+
+\begin{enumerate}
+\item Data-level Resampling
+\item Cost-sensitive and Re-weighting Losses
+\item Representation Learning and Decoupling
+\item Architecture-level and Multi-expert Methods
+\item Positioning of the Proposed Losses
+\end{enumerate}
+
+이 구성 자체는 적절함. 그러나 각 Subsection이 기존 연구 소개와 장단점 설명 중심으로 끝나는 경향이 있음. 즉, Proposed Method와의 차이가 각 Section에서 충분히 강조되지 않음.
+
+\begin{tcolorbox}[title=개선 방향]
+각 Subsection 마지막에 ``이 방법들이 해결한 점'', ``아직 남은 한계'', ``Proposed LWCE와의 차이''를 한 문장씩 추가하면 Related Work의 설득력이 강해짐.
+\end{tcolorbox}
+
+\begin{tcolorbox}[title=추가 가능 문장 예시]
+Unlike these methods, the proposed LWCE modifies only the loss function while leaving both the data distribution and network architecture unchanged.
+\end{tcolorbox}
+
+\subsection{Cost-sensitive Loss 부분 구조화 필요}
+
+현재 Cost-sensitive Loss 부분에는 다양한 방법이 함께 등장함.
+
+\begin{itemize}
+\item WCE
+\item CB Loss
+\item Focal Loss
+\item GHM
+\item LDAM
+\item Equalization Loss
+\item Logit Adjustment
+\item Meta Learning
+\end{itemize}
+
+이 방법들이 한 문단에 많이 등장하면 독자가 핵심 차이를 파악하기 어려움. 따라서 다음과 같이 그룹화하면 좋음.
+
+\begin{enumerate}
+\item Frequency-based Re-weighting
+\begin{itemize}
+\item WCE
+\item CB Loss
+\item Proposed LWCE
+\end{itemize}
+\item Difficulty-based Re-weighting
+\begin{itemize}
+\item Focal Loss
+\item GHM
+\end{itemize}
+\item Margin or Logit-based Methods
+\begin{itemize}
+\item LDAM
+\item Logit Adjustment
+\item Equalization Loss
+\end{itemize}
+\end{enumerate}
+
+\begin{tcolorbox}[title= 강조할 점]
+Related Work는 많이 인용하는 것이 핵심이 아님. 어떤 기준으로 기존 연구를 분류하고, 그 속에서 Proposed Method가 어디에 위치하는지를 보여주는 것이 중요함.
+\end{tcolorbox}
+
+\subsection{분류체계 Figure 또는 Table 추가}
+
+Related Work에 분류체계 를 넣으면 논문의 구조를 한눈에 보여줄 수 있음. 특히 Proposed Method가 Loss-level Method 중 Frequency-based Re-weighting에 해당한다는 점을 명확히 할 수 있음.
+
+\begin{center}
+\begin{tabular}{ll}
+\toprule
+Category & Representative Methods \\
+\midrule
+Data-level & SMOTE, ADASYN, Undersampling \\
+Loss-level & WCE, CB Loss, Focal Loss, LWCE \\
+Representation-level & Decoupled Training, Distribution Alignment \\
+Architecture-level & Multi-branch, Multi-expert Models \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{tcolorbox}[title=효과]
+Reviewer가 논문의 범위와 차별성을 빠르게 이해할 수 있음. 특히 Related Work가 단순 요약이 아니라 논문의 Positioning을 보여주는 역할을 하게 됨.
+\end{tcolorbox}
+
+\subsection{Positioning Table 추가}
+
+Loss Function들의 특성을 표로 비교하면 Proposed Method의 차별성이 더 명확해짐.
+
+\begin{center}
+\begin{tabular}{lcccc}
+\toprule
+Method & Frequency & Difficulty & Hyperparameter & Stable Weight \\
+\midrule
+WCE & O & X & X & X \\
+Focal Loss & X & O & O & O \\
+CB Loss & O & X & O & O \\
+LWCE & O & X & X & O \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{tcolorbox}[title=해석]
+WCE는 Parameter-free라는 장점이 있지만 Stable Weight를 보장하지 못함. Focal Loss와 CB Loss는 안정성을 높일 수 있으나 Hyperparameter가 필요함. LWCE는 Frequency-based Re-weighting이면서도 Parameter-free이고 Stable Weight를 지향한다는 점에서 차별성이 있음.
+\end{tcolorbox}
+
+\subsection{최신 Citation 보완 필요}
+
+현재 논문은 기본적인 Class Imbalance, Focal Loss, CB Loss, Long-tailed Recognition 관련 Citation은 포함하고 있음. 그러나 최근 Long-tailed Learning Survey나 Large-scale Imbalanced Learning 관련 Citation이 부족할 수 있음.
+
+다음 방향으로 Citation을 보완할 수 있음.
+
+\begin{itemize}
+\item 2023--2025년 Long-tailed Learning Survey 추가
+\item Large-scale Imbalanced Learning 관련 연구 추가
+\item Medical, Tabular, Network Intrusion 등 Application-specific Imbalance 연구 추가
+\item Foundation Model 시대의 Imbalance 문제와 연결 가능성 검토
+\end{itemize}
+
+
+
+\end{document}

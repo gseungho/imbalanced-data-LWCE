@@ -1,0 +1,1112 @@
+\documentclass[aspectratio=169]{beamer}
+\usetheme{metropolis}
+\usecolortheme{default}
+
+% =========================================
+%               Packages
+% =========================================
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx}
+\usepackage{amsmath, amssymb}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\usepackage{tikz}
+\usepackage{tcolorbox}
+\tcbuselibrary{skins, breakable}
+\usepackage{microtype}
+\SetTracking{encoding=*}{40}
+
+% =========================================
+%           Unicode Compatibility
+% =========================================
+\usepackage{newunicodechar}
+\newunicodechar{→}{$\rightarrow$}
+\newunicodechar{—}{\textemdash}
+\newunicodechar{≠}{$\neq$}
+\newunicodechar{≪}{$\ll$}
+
+% =========================================
+%             Custom Font Setup
+% =========================================
+\usepackage{FiraSans}
+\renewcommand*\familydefault{\sfdefault}
+
+% Slide Frame Title
+\setbeamercolor{frametitle}{bg=white, fg=black}
+\setbeamerfont{frametitle}{series=\bfseries, size=\Large}
+
+% Title
+\setbeamerfont{title}{size=\Large, series=\bfseries}
+
+% =========================================
+%        Highlight Color
+% =========================================
+\definecolor{SejongBlue}{RGB}{0,85,170}
+
+% =========================================
+%             Custom Boxes
+% =========================================
+% [MODIFIED] Applied the mybox style from the second text file.
+\newtcolorbox{mybox}[2][]{
+  colback=white,
+  colframe=SejongBlue,
+  fonttitle=\bfseries,
+  title=#2,
+  enhanced,
+  drop shadow,
+  arc=2mm,
+  #1
+}
+
+\renewcommand{\textbf}[1]{\textcolor{SejongBlue}{\sf\bfseries #1}}
+
+% =========================================
+%                 Watermark
+% =========================================
+\usebackgroundtemplate{
+  \tikz[overlay, remember picture]
+  \node[opacity=0.06, at=(current page.center)] {
+    \includegraphics[width=0.45\paperwidth]{1-1.교표.jpg}
+  };
+}
+
+% =========================================
+%             Title Information
+% =========================================
+\title{}
+\author{}
+\institute{}
+\date{}
+
+% =========================================
+%                 Document
+% =========================================
+\begin{document}
+
+% =========================================
+%         CUSTOM TITLE PAGE FRAME
+% =========================================
+\begin{frame}[plain]
+
+% --- Title ---
+\vspace{0.7em} % [MODIFIED] 제목 위 여백 추가
+{\LARGE \textcolor{SejongBlue}{\textbf{On Cross-Entropy under Class Imbalance:}}}\\[0.55em]
+{\Large Stability and Weighting Perspectives}
+
+% --- Conference Info ABOVE the line ---
+\vspace{1.2em} % [MODIFIED] 제목과 학회 정보 간격 조정
+
+\begin{center}
+  {\small \textbf{International Workshop on Advanced Neural Networks}}\\[0.35em]
+  {\small From Uncertainty-Aware Models to Hypercomplex Learning}\\[0.6em]
+  {\footnotesize April 24\textsuperscript{th}, 2026}\\[0.25em]
+\end{center}
+
+% --- Horizontal Line ---
+\vspace{1.0em}
+{\color{SejongBlue}\hrule height 0.7pt}
+
+% --- Authors CENTER aligned ---
+\vspace{0.8em}
+\begin{center}
+{\Large
+\textbf{Hyunseok Lee}$^{1}$ \quad
+\textbf{Seung Ho Go}$^{2}$ \quad
+\textbf{Jin Hee Yoon}$^{3}$
+}\\[0.8em]
+
+{\small % [MODIFIED] normlasize -> small
+$^{1}$Department of Data Science \hspace{1.0em}
+$^{2}$Department of Software \hspace{1.0em}
+$^{3}$Department of AI \& IT\\[0.35em]
+Sejong University, Korea
+}
+\end{center}
+
+\end{frame}
+
+% -------------------- Contents (All Sections) --------------------
+\begin{frame}{Contents}
+  \tableofcontents
+\end{frame}
+
+% Highlight current section in TOC (blue)
+\setbeamercolor{section in toc current}{fg=SejongBlue}
+\setbeamerfont{section in toc current}{series=\bfseries}
+
+
+% -------------------- Section-wise TOC (Current Section Highlight) --------------------
+\AtBeginSection[]{
+  \begin{frame}{Contents}
+    \tableofcontents[currentsection]
+  \end{frame}
+}
+
+% =========================================
+%   Section: Introduction
+% =========================================
+\section{Introduction}
+
+% =========================================
+%   Slide: Definition + Examples
+% =========================================
+\begin{frame}{Introduction: What is Class Imbalance?}
+
+\footnotesize
+\vspace{-0.8em}
+
+\begin{columns}[T,totalwidth=\textwidth]
+
+% ===== Left Box: Definition =====
+\column{0.48\textwidth}
+\begin{mybox}{Definition} % [MODIFIED] Converted from tcolorbox to mybox
+\begin{itemize}
+  \item Class imbalance occurs when some classes are \textbf{much rarer}.
+  \item Rare classes receive fewer updates → often ignored by training.
+\end{itemize}
+\end{mybox}
+
+% ===== Right Box: Examples =====
+\column{0.48\textwidth}
+\begin{mybox}{Examples} % [MODIFIED] Converted from tcolorbox to mybox
+\begin{itemize}
+  \item Fraud detection : 1 per 10,000 transactions
+  \item Rare diseases : <1\%
+  \item Defect detection : occurs in tens of thousands
+\end{itemize}
+\end{mybox}
+
+\end{columns}
+
+\vspace{1.2em}
+\centering
+{\Large \textit{``Rare classes define the real-world risk''}}
+
+\end{frame}
+
+% =========================================
+%   Section: Existing Loss Functions
+% =========================================
+\section{Existing Loss Functions}
+
+% --- Standard CE ---
+\begin{frame}{Existing Loss Functions: Standard CE}
+
+\begin{columns}[T, totalwidth=\textwidth]
+
+% ---- Left: Text ----
+\column{0.55\textwidth}
+{\large \textbf{Standard Cross Entropy}}
+
+{\large
+\[
+\mathcal{L}_{CE}(y,p) = - \sum_{c} y_c \log p_c
+\]
+}
+
+{\large
+\begin{itemize}
+  \item No class weighting → majority dominates training.
+  \item Minority gradients almost vanish.
+\end{itemize}
+}
+
+{\color{gray}\footnotesize Issue: No minority learning signal.}
+
+% ---- Right: Image ----
+\column{0.45\textwidth}
+\begin{center}
+\includegraphics[width=1.20\linewidth]{standard_ce_distribution.png}
+\end{center}
+
+\end{columns}
+\end{frame}
+
+% --- Weighted CE ---
+\begin{frame}{Existing Loss Functions: Weighted CE}
+
+\begin{columns}[T, totalwidth=\textwidth]
+
+% ---- Left: Text ----
+\column{0.55\textwidth}
+{\large \textbf{Weighted Cross Entropy}}
+
+{\large
+\[
+w_c = \frac{1}{n_c}
+\qquad\text{or}\qquad
+w_c = \frac{1}{\sqrt{n_c}}
+\]
+\[
+\mathcal{L}_{WCE} = - w_c \log p_c
+\]
+}
+
+{\large
+\begin{itemize}
+  \item Boosts rare-class gradients via inverse-frequency.
+  \item Overshoots under extreme imbalance.
+\end{itemize}
+}
+
+{\color{gray}\footnotesize Issue: Weight explosion.}
+
+% ---- Right: Image ----
+\column{0.45\textwidth}
+\begin{center}
+\includegraphics[width=1.20\linewidth]{weighted_ce_explosion.png}
+\end{center}
+
+\end{columns}
+\end{frame}
+
+% --- Focal Loss ---
+\begin{frame}{Existing Loss Functions: Focal Loss}
+
+\begin{columns}[T,totalwidth=\textwidth]
+
+% ---- Left: Text ----
+\column{0.55\textwidth}
+{\large \textbf{Focal Loss}}
+
+{\large
+\[
+\mathcal{L}_{focal} = - \alpha_t (1 - p_t)^\gamma \log(p_t)
+\]
+
+}
+
+{\large
+\begin{itemize}
+  \item Down-weights easy samples.
+  \item Improves minority recall with hard-sample focus.
+  \item Includes $\alpha$ for class balancing, $\gamma$ controls modulating strength
+\end{itemize}
+}
+
+{\color{gray}\footnotesize Issue: Extremely sensitive to $\gamma, \alpha$.}
+
+% ---- Right: Image ----
+\column{0.45\textwidth}
+\begin{center}
+\includegraphics[width=1.20\linewidth]{focal_loss_curves.png}
+\end{center}
+
+\end{columns}
+\end{frame}
+
+% --- CBCE ---
+\begin{frame}{Existing Loss Functions: Class-Balanced Loss}
+
+\begin{columns}[T,totalwidth=\textwidth]
+
+% ---- Left: Text ----
+\column{0.55\textwidth}
+{\large \textbf{Class-Balanced Loss}}
+
+{\large
+\[
+E(n_c)=\frac{1-\beta^{n_c}}{1-\beta}, \qquad
+w_c=\frac{1}{E(n_c)}
+\]
+}
+
+{\large
+\begin{itemize}
+  \item Uses “effective number of samples”.
+  \item More stable than WCE.
+\end{itemize}
+}
+
+{\color{gray}\footnotesize Issue: Still unstable for ultra-rare classes.}
+
+% ---- Right: Image ----
+\column{0.45\textwidth}
+\begin{center}
+\includegraphics[width=1.20\linewidth]{cbce_effective_number.png}
+\end{center}
+
+\end{columns}
+\end{frame}
+
+% =========================================
+%             Limitations
+% =========================================
+\begin{frame}{Existing Loss Functions: Limitations}
+
+\textbf{Common Problems}
+
+\begin{itemize}
+  \item Hand-crafted weights → inconsistent behavior
+  \item No smooth scaling for extremely small classes
+  \item Uncontrolled gradients → unstable convergence
+\end{itemize}
+
+\vspace{0.6em}
+\centering
+\textit{→ Motivates ALW-CE and ES-ACE}
+
+\end{frame}
+
+% =========================================
+%   Section: Proposed Methods
+% =========================================
+\section{Proposed Methods}
+
+% -------------------- ALW-CE --------------------
+\begin{frame}{Proposed: Adaptive Log-Weighted CE (ALW-CE)}
+
+\begin{columns}[T,totalwidth=\textwidth]
+
+% ----- Left Text -----
+\column{0.55\textwidth}
+
+\textbf{Weight definition}
+\[
+w_c = \frac{1}{\log(1 + n_c)}
+\]
+
+\textbf{Interpretation}
+\begin{itemize}
+  \item \( n_c \): sample count of class \( c \)
+  \item Log scaling prevents extreme weights.
+\end{itemize}
+
+\textbf{Limitation}
+\begin{itemize}
+  \item When \(n_c\) is extremely small, \(\log(1+n_c)\) is still tiny.
+  \item Weight can still grow excessively.
+\end{itemize}
+
+% ----- Right Graph -----
+\column{0.45\textwidth}
+\begin{center}
+\includegraphics[width=1.05\linewidth]{alw_ce_curve_smooth.png}
+\end{center}
+
+\end{columns}
+
+\end{frame}
+
+% -------------------- PLWCE [ADDED] --------------------
+% [MODIFIED] Split into two frames for better readability.
+
+\begin{frame}{Related Extension: PLWCE}
+
+\vspace{-0.3em}
+
+\begin{columns}[T,totalwidth=\textwidth]
+
+% ----- Left Text -----
+\column{0.60\textwidth}
+
+\textbf{Power-Scaled Log-Weighted CE (PLWCE)}
+\[
+w_c = \frac{1}{(\log(1+n_c))^{\alpha}}
+\]
+
+\textbf{Interpretation}
+\begin{itemize}
+  \item Extends ALW-CE with a tunable exponent $\alpha$.
+  \item Provides dataset-specific control of weighting strength.
+\end{itemize}
+
+\textbf{Effect of $\alpha$}
+\begin{itemize}
+  \item $\alpha > 1$: stronger emphasis on minority classes
+  \item $\alpha < 1$: more conservative weighting
+\end{itemize}
+
+\vspace{0.3em}
+{\footnotesize \textcolor{gray}{Explored as a related extension in our joint research.}}
+
+% ----- Right Summary Box -----
+\column{0.38\textwidth}
+\begin{mybox}[before skip=0pt, after skip=0pt]{Key Message}
+\small
+PLWCE introduces a tunable exponent $\alpha$ on top of the log-weighted formulation.
+
+\vspace{0.4em}
+This makes the weighting strategy more flexible across different imbalance settings.
+\end{mybox}
+
+\end{columns}
+
+\end{frame}
+
+% -------------------- PLWCE vs ES-ACE [ADDED] --------------------
+% [MODIFIED] Comparison moved to a separate frame.
+
+\begin{frame}{Two Extensions of Log-Weighted CE}
+
+\vspace{-0.5em}
+
+\begin{columns}[T,totalwidth=\textwidth]
+
+% ----- Left: PLWCE -----
+\column{0.48\textwidth}
+\begin{mybox}[before skip=0pt, after skip=0pt, top=2pt, bottom=2pt]{PLWCE}
+\[
+w_c = \frac{1}{(\log(1+n_c))^{\alpha}}
+\]
+
+\textbf{Goal}
+\begin{itemize}
+  \item Control weighting intensity
+\end{itemize}
+
+\textbf{Key parameter}
+\begin{itemize}
+  \item $\alpha$
+\end{itemize}
+
+\textbf{Main effect}
+\begin{itemize}
+  \item Adjustable focus on minority classes
+\end{itemize}
+\end{mybox}
+
+% ----- Right: ES-ACE -----
+\column{0.48\textwidth}
+\begin{mybox}[before skip=0pt, after skip=0pt, top=2pt, bottom=2pt]{ES-ACE}
+\[
+w_c = \frac{1}{\log(1+n_c) + \varepsilon}
+\]
+
+\textbf{Goal}
+\begin{itemize}
+  \item Improve stability for ultra-rare classes
+\end{itemize}
+
+\textbf{Key parameter}
+\begin{itemize}
+  \item $\varepsilon$
+\end{itemize}
+
+\textbf{Main effect}
+\begin{itemize}
+  \item Prevent excessive weights and stabilize gradients
+\end{itemize}
+\end{mybox}
+
+\end{columns}
+
+\vspace{0.25em}
+\centering
+{\small \textit{PLWCE focuses on controllable emphasis, whereas ES-ACE focuses on stable smoothing.}}
+
+\end{frame}
+
+% -------------------- ES-ACE --------------------
+\begin{frame}{Proposed: $\varepsilon$-Smoothed Adaptive Log-Weighted CE (ES-ACE)}
+
+\begin{columns}[T,totalwidth=\textwidth]
+
+% ----- Left Text -----
+\column{0.55\textwidth}
+\vspace{-0.5em}
+% [ADDED] Transition sentence from PLWCE to ES-ACE.
+{\small Alongside the $\alpha$-based PLWCE extension, we further explored an $\varepsilon$-smoothed variant for improved stability.}
+
+\textbf{Weight definition}
+\[
+w_c = \frac{1}{\log(1+n_c) + \varepsilon}
+\]
+
+\textbf{Role of $\varepsilon$}
+\begin{itemize}
+  \item Prevents weight explosion for ultra-rare classes.
+  \item Smooths the weight curve → more stable gradients.
+  \item Reduces overfitting from extremely large rare-class weights.
+\end{itemize}
+
+% ----- Right Graph -----
+\column{0.45\textwidth}
+\begin{center}
+\includegraphics[width=1.05\linewidth]{es_ace_curve_smooth.png}
+\end{center}
+
+\end{columns}
+
+\end{frame}
+
+
+
+% -------------------- Effect of epsilon range --------------------
+\begin{frame}{Effect of $\varepsilon$ Range}
+\centering
+
+\small
+\scalebox{0.90}{%
+\begin{tabular}{ccc}
+\toprule
+\textbf{$\varepsilon$ Range} & \textbf{Behavior} & \textbf{Observed Performance} \\
+\midrule
+$\varepsilon \approx 0$
+& Behaves almost like ALW-CE
+& \textcolor{gray}{Stabilized but still limited for ultra-rare classes} \\
+\midrule
+$0.1 \sim 0.5$
+& Mild smoothing, controlled weights
+& \textcolor{blue}{Best overall stability–performance trade-off} \\
+\midrule
+$0.5 \sim 1.0$
+& Stronger smoothing
+& \textcolor{blue}{Stable, beneficial on noisy datasets} \\
+\midrule
+$> 1.0$
+& Excessive smoothing
+& \textcolor{gray}{No significant performance gain observed} \\
+\bottomrule
+\end{tabular}%
+}
+\end{frame}
+
+
+% =========================================
+%   Section: Experimental Setup
+% =========================================
+\section{Experimental Setup}
+
+% -------------------- Experimental Setup --------------------
+\begin{frame}{Experimental Setup}
+
+\textbf{Datasets \& Model Setup}
+\begin{itemize}
+  \item 11 benchmark datasets (finance, biology, fault detection)
+  \item Model: XGBoost (gblinear)
+  \item Losses: CE, WCE, CB, Focal, ALW-CE, ES-ACE
+\end{itemize}
+
+\end{frame}
+
+% -------------------- Experimental Setup (2) --------------------
+\begin{frame}{Experimental Setup (2/2)}
+
+\textbf{Hyperparameter Optimization}
+\begin{itemize}
+  \item Optuna: 30 trials × 3-fold CV
+  \item Target metric: Macro F1-score
+\end{itemize}
+
+\textbf{Evaluation Metrics}
+\begin{itemize}
+  \item Macro F1 
+  \item PR-AUC 
+\end{itemize}
+
+\end{frame}
+
+% =========================================
+%   Section: Experimental Results
+% =========================================
+\section{Experimental Results}
+
+% =========================================
+%   Full Experimental Results (I)
+% =========================================
+\begin{frame}{Full Experimental Results (I)}
+\scriptsize
+\renewcommand{\arraystretch}{0.85}
+
+\begin{columns}[T, totalwidth=\textwidth]
+
+% ============================
+% Column 1
+% ============================
+\column{0.30\textwidth}
+
+% ---- Credit Card Fraud ----
+\textbf{Credit Card Fraud}
+\begin{tabular}{lrr}
+\toprule
+Loss & F1 & PR \\
+\midrule
+CE & 0.7287 & 0.7073 \\
+WCE & 0.7917 & 0.6984 \\
+WCE(sq) & \textcolor{SejongBlue}{\textbf{0.7972}} & 0.6996 \\
+Focal & 0.0037 & 0.6542 \\
+CB & 0.7883 & 0.6999 \\
+\textcolor{SejongBlue}{ALW-CE} & 0.7447 & \textcolor{red}{\textbf{0.7155}} \\
+\textcolor{SejongBlue}{ES-ACE} & 0.6988 & 0.7092 \\
+\bottomrule
+\end{tabular}
+
+\vspace{0.8em}
+
+% ---- German Credit ----
+\textbf{German Credit}
+\begin{tabular}{lrr}
+\toprule
+Loss & F1 & PR \\
+\midrule
+CE & 0.5854 & 0.6391 \\
+WCE & \textcolor{SejongBlue}{\textbf{0.6301}} & 0.6321 \\
+WCE(sq) & 0.6146 & 0.6446 \\
+Focal & 0.5138 & 0.6215 \\
+CB & 0.6070 & \textcolor{red}{\textbf{0.6450}} \\
+\textcolor{SejongBlue}{ALW-CE} & 0.5909 & 0.6398 \\
+\textcolor{SejongBlue}{ES-ACE} & 0.5802 & 0.6397 \\
+\bottomrule
+\end{tabular}
+
+% ============================
+% Column 2
+% ============================
+\column{0.30\textwidth}
+
+% ---- Aps Failure ----
+\textbf{Aps Failure}
+\begin{tabular}{lrr}
+\toprule
+Loss & F1 & PR \\
+\midrule
+CE & 0.7595 & 0.8075 \\
+WCE & 0.6447 & 0.8107 \\
+WCE(sq) & 0.7581 & 0.8242 \\
+Focal & 0.0170 & 0.0210 \\
+CB & \textcolor{SejongBlue}{\textbf{0.7688}} & \textcolor{red}{\textbf{0.8253}} \\
+\textcolor{SejongBlue}{ALW-CE} & 0.7662 & 0.8246 \\
+\textcolor{SejongBlue}{ES-ACE} & 0.7518 & 0.8018 \\
+\bottomrule
+\end{tabular}
+
+\vspace{0.8em}
+
+% ---- Bank Marketing ----
+\textbf{Bank Marketing}
+\begin{tabular}{lrr}
+\toprule
+Loss & F1 & PR \\
+\midrule
+CE & 0.4533 & 0.5482 \\
+WCE & 0.5514 & 0.5413 \\
+WCE(sq) & \textcolor{SejongBlue}{\textbf{0.5735}} & 0.5455 \\
+Focal & 0.2652 & 0.4039 \\
+CB & 0.4752 & 0.5034 \\
+\textcolor{SejongBlue}{ALW-CE} & 0.4889 & 0.5476 \\
+\textcolor{SejongBlue}{ES-ACE} & 0.4565 & \textcolor{red}{\textbf{0.5482}} \\
+\bottomrule
+\end{tabular}
+
+% ============================
+% Column 3
+% ============================
+\column{0.30\textwidth}
+
+% ---- Secom ----
+\textbf{Secom}
+\begin{tabular}{lrr}
+\toprule
+Loss & F1 & PR \\
+\midrule
+CE & 0.1667 & 0.1396 \\
+WCE & \textcolor{SejongBlue}{\textbf{0.2759}} & \textcolor{red}{\textbf{0.1748}} \\
+WCE(sq) & 0.1695 & 0.1370 \\
+Focal & 0.1469 & 0.1632 \\
+CB & 0.2264 & 0.1746 \\
+\textcolor{SejongBlue}{ALW-CE} & 0.2000 & 0.1689 \\
+\textcolor{SejongBlue}{ES-ACE} & 0.1667 & 0.1403 \\
+\bottomrule
+\end{tabular}
+
+\vspace{0.8em}
+
+% ---- Credit Card Default ----
+\textbf{Credit Card Default}
+\begin{tabular}{lrr}
+\toprule
+Loss & F1 & PR \\
+\midrule
+CE & 0.3568 & 0.4982 \\
+WCE & \textcolor{SejongBlue}{\textbf{0.5023}} & 0.4663 \\
+WCE(sq) & 0.4938 & 0.4839 \\
+Focal & 0.3859 & 0.4625 \\
+CB & 0.4873 & 0.4714 \\
+\textcolor{SejongBlue}{ALW-CE} & 0.4913 & 0.4726 \\
+\textcolor{SejongBlue}{ES-ACE} & 0.3568 & \textcolor{red}{\textbf{0.4982}} \\
+\bottomrule
+\end{tabular}
+
+\end{columns}
+\end{frame}
+
+% =========================================
+%   Full Experimental Results (II)
+% =========================================
+\begin{frame}{Full Experimental Results (II)}
+\scriptsize
+\renewcommand{\arraystretch}{0.85}
+
+\begin{columns}[T, totalwidth=\textwidth]
+
+% ============================
+% Column 1
+% ============================
+\column{0.30\textwidth}
+
+% ---- Telco Churn ----
+\textbf{Telco Churn}
+\begin{tabular}{lrr}
+\toprule
+Loss & F1 & PR \\
+\midrule
+CE & 0.5942 & 0.6399 \\
+WCE & 0.6225 & 0.6406 \\
+WCE(sq) & 0.6252 & 0.6287 \\
+Focal & 0.5402 & 0.6184 \\
+CB & \textcolor{SejongBlue}{\textbf{0.6295}} & 0.6275 \\
+\textcolor{SejongBlue}{ALW-CE} & 0.6286 & 0.6285 \\
+\textcolor{SejongBlue}{ES-ACE} & 0.6066 & \textcolor{red}{\textbf{0.6422}} \\
+\bottomrule
+\end{tabular}
+
+\vspace{0.8em}
+
+% ---- Yeast ----
+\textbf{Yeast (Multi)}
+\begin{tabular}{lrr}
+\toprule
+Loss & F1 & PR \\
+\midrule
+CE & 0.5843 & 0.5964 \\
+WCE & 0.4591 & 0.5242 \\
+WCE(sq) & 0.5212 & 0.5934 \\
+Focal & 0.4786 & 0.5132 \\
+CB & 0.5530 & 0.5975 \\
+\textcolor{SejongBlue}{ALW-CE} & 0.5445 & \textcolor{red}{\textbf{0.5980}} \\
+\textcolor{SejongBlue}{ES-ACE} & \textcolor{SejongBlue}{\textbf{0.5714}} & 0.5969 \\
+\bottomrule
+\end{tabular}
+
+% ============================
+% Column 2
+% ============================
+\column{0.30\textwidth}
+
+% ---- Page Blocks ----
+\textbf{Page Blocks (Multi)}
+\begin{tabular}{lrr}
+\toprule
+Loss & F1 & PR \\
+\midrule
+CE & 0.8292 & 0.8855 \\
+WCE & 0.7226 & 0.8587 \\
+WCE(sq) & 0.8249 & 0.8792 \\
+Focal & 0.7735 & 0.8477 \\
+CB & \textcolor{SejongBlue}{\textbf{0.8304}} & 0.8782 \\
+\textcolor{SejongBlue}{ALW-CE} & 0.8153 & 0.8916 \\
+\textcolor{SejongBlue}{ES-ACE} & 0.8153 & \textcolor{red}{\textbf{0.8922}} \\
+\bottomrule
+\end{tabular}
+
+\vspace{0.8em}
+
+% ---- Glass ----
+\textbf{Glass (Multi)}
+\begin{tabular}{lrr}
+\toprule
+Loss & F1 & PR \\
+\midrule
+CE & 0.6380 & 0.7269 \\
+WCE & 0.6734 & 0.7417 \\
+WCE(sq) & 0.6972 & 0.7309 \\
+Focal & 0.6568 & 0.7307 \\
+CB & 0.7095 & 0.7383 \\
+\textcolor{SejongBlue}{ALW-CE} & \textcolor{SejongBlue}{\textbf{0.7361}} & \textcolor{red}{\textbf{0.7391}} \\
+\textcolor{SejongBlue}{ES-ACE} & 0.6996 & 0.7384 \\
+\bottomrule
+\end{tabular}
+
+% ============================
+% Column 3
+% ============================
+\column{0.30\textwidth}
+
+% ---- Steel Faults ----
+\textbf{Steel Faults (Multi)}
+\begin{tabular}{lrr}
+\toprule
+Loss & F1 & PR \\
+\midrule
+CE & 0.6902 & 0.7270 \\
+WCE & 0.6316 & 0.7193 \\
+WCE(sq) & 0.6949 & 0.7249 \\
+Focal & 0.6569 & 0.6880 \\
+CB & 0.6997 & \textcolor{red}{\textbf{0.7322}} \\
+\textcolor{SejongBlue}{ALW-CE} & \textcolor{SejongBlue}{\textbf{0.7075}} & 0.7256 \\
+\textcolor{SejongBlue}{ES-ACE} & 0.6996 & 0.7262 \\
+\bottomrule
+\end{tabular}
+
+\end{columns}
+\end{frame}
+
+% -------------------- PLWCE RESULT SUMMARY (1/2) --------------------
+% [MODIFIED] 기존 1장짜리 결과 요약 슬라이드를 2장으로 분리
+
+\begin{frame}{Related Experimental Finding: PLWCE}
+
+\vspace{-0.4em} % [MODIFIED] 제목 아래 간격 축소
+
+\begin{mybox}[before skip=0pt, after skip=0pt, top=2pt, bottom=2pt]{Why mention PLWCE in the results?} % [MODIFIED]
+\small
+Since PLWCE was explored as a related extension in our joint research,
+we briefly summarize its empirical behavior here.
+\end{mybox}
+
+\vspace{2em} % [MODIFIED]
+
+\begin{mybox}[before skip=0pt, after skip=0pt, top=2pt, bottom=2pt]{Key Observation} % [MODIFIED]
+\small
+PLWCE, the $\alpha$-based extension of log-weighted CE, showed
+strong F1 improvements on several highly imbalanced datasets.
+
+\vspace{0.4em}
+
+In the previous joint study, PLWCE achieved higher F1 than LWCE
+in 5 out of 11 datasets, showing that tunable minority emphasis
+can be beneficial in some settings.
+\end{mybox}
+
+\end{frame}
+
+% -------------------- PLWCE RESULT SUMMARY (2/2) --------------------
+% [MODIFIED] Takeaway를 별도 슬라이드로 분리
+
+\begin{frame}{Related Experimental Finding: PLWCE}
+
+\vspace{-0.4em} % [MODIFIED]
+
+\begin{mybox}[before skip=0pt, after skip=0pt, top=2pt, bottom=2pt]{Takeaway} % [MODIFIED]
+\small
+PLWCE and ES-ACE should be viewed as complementary extensions:
+\begin{itemize}
+  \item \textbf{PLWCE}: improves controllability via $\alpha$
+  \item \textbf{ES-ACE}: improves stability via $\varepsilon$
+\end{itemize}
+\end{mybox}
+
+\vspace{2em} % [MODIFIED]
+
+\begin{mybox}[before skip=0pt, after skip=0pt, top=2pt, bottom=2pt]{Interpretation} % [MODIFIED]
+\small
+This means the two methods do not compete in exactly the same direction.
+
+\vspace{0.4em}
+
+PLWCE is useful when stronger and more flexible minority emphasis is needed,
+whereas ES-ACE is useful when stable smoothing is more important.
+\end{mybox}
+
+\end{frame}
+
+% =========================================
+%   Borda Summary Table (F1 & PR-AUC)
+% =========================================
+\begin{frame}{Borda Summary: F1 \& PR-AUC Rankings}
+
+\centering
+\small
+\renewcommand{\arraystretch}{1.15}
+
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Loss} &
+\textbf{Avg Rank (F1)} & \textbf{Borda (F1)} &
+\textbf{Avg Rank (PR)} & \textbf{Borda (PR)} \\
+\midrule
+es\_ace               & 4.36 & 40 & \textbf{2.73} & \textbf{58} \\
+alw\_ce          & 3.50 & 49 & 3.00 & 55 \\
+class\_balanced\_loss   & \textbf{2.64} & \textbf{59} & 3.55 & 49 \\
+standard\_ce          & 4.32 & 40 & 3.55 & 49 \\
+weighted\_ce\_inv     & 4.09 & 43 & 5.09 & 32 \\
+weighted\_ce\_inv\_sqrt & 3.00 & 55 & 3.91 & 45 \\
+focal\_loss           & 6.09 & 21 & 6.18 & 20 \\
+\bottomrule
+\end{tabular}
+
+\vspace{0.7em}
+
+{\footnotesize
+\textcolor{gray}{\textit{Lower Avg Rank is better. Higher Borda score is better.}}
+}
+
+\end{frame}
+
+
+% -------------------- F1 Results --------------------
+\begin{frame}{Results: Macro F1-Score}
+
+\textbf{Why ES-ACE F1 is lower?}
+\begin{itemize}
+  \item $\varepsilon$-smoothing reduces extreme class weights.
+  \item Prevents overfitting but slightly lowers recall for moderate imbalance.
+\end{itemize}
+
+\begin{center}
+  \includegraphics[width=0.55\linewidth]{borda_summary_F1-Score_e3.png}
+\end{center}
+
+\end{frame}
+
+% -------------------- PR-AUC Results --------------------
+\begin{frame}{Results: PR-AUC}
+
+\textbf{Why ES-ACE excels in PR-AUC?}
+\begin{itemize}
+  \item PR-AUC reflects minority recall under extreme imbalance.
+  \item $\varepsilon$-smoothing stabilizes gradients and avoids weight explosion.
+  \item Enables reliable detection of ultra-rare classes.
+\end{itemize}
+
+\begin{center}
+  \includegraphics[width=0.55\linewidth]{borda_summary_PR_AUC_e3.png}
+\end{center}
+
+\end{frame}
+
+% =========================================
+%   Section: Conclusion
+% =========================================
+\section{Conclusion}
+
+% =========================================
+%   Discussion (1/2)
+% =========================================
+\begin{frame}{Conclusion}
+\small
+
+\begin{mybox}{Discussion} % [MODIFIED] Converted from tcolorbox to mybox
+
+\begin{enumerate}
+
+% 1 — Proposed ALW-CE
+\item \textbf{Proposed ALW-CE:}
+Adaptive Log-Weighted CE:
+\[
+w_c = \frac{1}{\log(1+n_c)}
+\]
+which mitigates inverse-frequency instability and provides
+a smooth, more stable weighting baseline.
+
+\vspace{0.4em}
+
+% 2 — Proposed ES-ACE
+\item \textbf{Proposed ES-ACE:}
+Extended into $\varepsilon$-Smoothed ALW-CE:
+\[
+w_c = \frac{1}{\log(1+n_c) + \varepsilon}
+\]
+preventing weight explosion for extremely rare classes
+and stabilizing gradients.
+
+\end{enumerate}
+
+\end{mybox}
+
+\end{frame}
+
+% =========================================
+%   Discussion (2/2)
+% =========================================
+\begin{frame}{Conclusion}
+\small
+\vspace{-1em}
+\begin{mybox}{Discussion} % [MODIFIED] Converted from tcolorbox to mybox
+
+\begin{enumerate}
+\setcounter{enumi}{2}
+
+% 3 — Analyzed the Role of ε
+\item \textbf{Analyzed the Role of $\varepsilon$:}
+Optuna tuning showed that:
+\[
+0.1 \le \varepsilon \le 1.0
+\]
+provides the best stability–performance trade-off.
+
+\vspace{0.4em}
+
+% 4 — Validated Performance
+\item \textbf{Validated Performance:}
+Across 11 datasets, ES-ACE achieved consistently strong PR-AUC
+and competitive F1, demonstrating robustness in real imbalance tasks.
+
+\vspace{0.4em}
+
+% [ADDED] Joint research note on PLWCE.
+\item \textbf{Related Joint Extension:}
+Our joint research also explored \textbf{PLWCE} as an $\alpha$-based extension,
+while this presentation focuses on the $\varepsilon$-smoothed \textbf{ES-ACE} variant.
+
+\end{enumerate}
+
+\end{mybox}
+
+\vspace{0.6em}
+\centering
+{\large \textit{“Minimal smoothing, substantial stability, practical performance.”}}
+
+\end{frame}
+
+% =========================================
+%            References
+% =========================================
+\begin{frame}{References}
+\small
+\begin{enumerate}
+
+\item T. H. Phan and K. Yamamoto,
+\textit{“Resolving Class Imbalance in Object Detection with Weighted Cross Entropy Losses,”}
+arXiv preprint arXiv:2006.01413, 2020.
+
+\item T.-Y. Lin, P. Goyal, R. Girshick, K. He, and P. Dollár,
+\textit{“Focal Loss for Dense Object Detection,”}
+Proc. IEEE Int. Conf. Computer Vision (ICCV), pp. 2980–2988, 2017.
+
+\item Y. Cui, M. Jia, T. Lin, Y. Song, and S. Belongie,
+\textit{“Class-Balanced Loss Based on Effective Number of Samples,”}
+Proc. IEEE/CVF Conf. Computer Vision and Pattern Recognition (CVPR),
+pp. 9268–9277, 2019.
+
+\item T. H. Phan and K. Yamamoto,
+\textit{“Resolving Class Imbalance in Object Detection with Weighted Cross Entropy Losses,”}
+arXiv preprint arXiv:2006.01413, 2020.
+
+\end{enumerate}
+\end{frame}
+
+
+% =========================================
+%            Final Slide
+% =========================================
+\begin{frame}[plain]
+\centering
+
+\vspace{1.5em}
+
+{\Huge \textbf{Thank you for your attention!}}\\[1.2em]
+
+{\Large Any Questions?}\\[2.2em]
+
+% Contact Box
+\begin{mybox}[width=0.65\textwidth, center, left=10pt, right=10pt, top=10pt, bottom=10pt]{Contact Information} % [MODIFIED] Converted from tcolorbox to mybox
+
+\centering
+{\Large \textbf{Hyunseok Lee}} \\[0.5em]
+{\large \texttt{hslee901@gmail.com}} \\[0.3em]
+{\large \texttt{010-2054-2689}} \\[0.3em]
+{\large \texttt{GitHub: @HyunseokLee928}}
+
+\end{mybox}
+
+\vspace{1.2em}
+{\small \textit{Sejong University · Department of Data Science}}
+
+\end{frame}
+
+\end{document}
+m

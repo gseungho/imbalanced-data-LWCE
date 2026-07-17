@@ -49,11 +49,13 @@ image_classification/
 | `plwce` | `1 / log1p(n)^alpha` | alpha | ○ | [0.5, 6.0] | **proposed** |
 | `cb` | `(1-beta) / (1-beta^n+1e-6)` | beta=0.9999 | × | — | baseline |
 | `focal` | CE + `(1-pt)^gamma` | gamma | ○ | [1.0, 5.0] | baseline |
+| `eslwce` | `1 / (log1p(n) + eps)` | eps | ○ | [0.1, 10] 로그스케일 | **proposed** (모듈만 지원, CIFAR 노트북 미적용) |
 
 **가중치 파싱 우선순위** (substring 충돌 방지):
 ```
-plwce > lwce > pwce > sqce > wce > cb > ce
+plwce > eslwce > lwce > pwce > sqce > wce > cb > ce
 ```
+> `'eslwce'`는 `'lwce'`를 부분문자열로 포함 → **반드시 `lwce`보다 먼저** 검사할 것.
 
 **ClassificationLoss 클래스**:
 - `__init__(loss_name, class_counts, alpha=1.0, beta=0.9999, gamma=2.0)`
@@ -190,8 +192,11 @@ GridSampler({'gamma': gammas})
 ### 참고사항
 - **MedianPruner 미사용** — GridSampler와 병행 금지
 - **n_trials 정확성** — trial 수가 grid 크기와 정확히 일치해야 함
-- **Proxy metric**: `balanced_acc` (class-wise recall 평균)
+- **Proxy metric (목적함수)**: **F1-Macro** — `compute_val_acc()`가 리턴하는 값이 곧 objective
   - Top-1 Acc 대신 사용 — Few-shot 클래스 반영 필요
+  - ⚠️ **변수명 주의**: `train_model` 내부의 `val_bal_acc` / history 키 `val_balanced_acc`는
+    이름과 달리 **balanced_acc가 아니라 F1-Macro**를 담고 있음 (레거시 이름, 체크포인트 호환용).
+    `Balanced_Acc`는 `compute_val_metrics()`가 따로 계산하는 별개 지표(class-wise recall 평균).
 - **Optuna 출력 억제**: `os.environ['TQDM_DISABLE'] = '1'`
 
 ---
