@@ -16,21 +16,34 @@
 \title[mode=title]{Log-Weighted Cross-Entropy Framework for Imbalanced
 Classification}
 
-\author[1]{Seung Ho Go}
+\author[1]{Seung Ho Go}[orcid=0009-0006-8715-9592]
 \ead{gseungho999@gmail.com}
 \credit{Conceptualization, Methodology, Software, Writing -- original draft}
 
+\author[2]{Hyunseok Lee}[orcid=0009-0002-0895-8785]
+\ead{hslee901@gmail.com}
+\credit{Methodology, Validation, Writing -- review \& editing}
+
+\author[3]{Jin Hee Yoon}[orcid=0000-0002-1437-1350]
+\cormark[1]
+\ead{jin9135@sejong.ac.kr}
+\credit{Supervision, Conceptualization, Writing -- review \& editing}
+
 \affiliation[1]{organization={Sejong University},
+            department={Department of Software},
             addressline={209 Neungdong-ro, Gwangjin-gu},
             city={Seoul},
             country={Republic of Korea}}
-
-\author[1]{Hyunseok Lee}
-\credit{Methodology, Validation, Writing -- review \& editing}
-
-\author[1]{Jin Hee Yoon}
-\cormark[1]
-\credit{Supervision, Conceptualization, Writing -- review \& editing}
+\affiliation[2]{organization={Sejong University},
+            department={Department of Data Science},
+            addressline={209 Neungdong-ro, Gwangjin-gu},
+            city={Seoul},
+            country={Republic of Korea}}
+\affiliation[3]{organization={Sejong University},
+            department={Department of Artificial Intelligence and Information Technology},
+            addressline={209 Neungdong-ro, Gwangjin-gu},
+            city={Seoul},
+            country={Republic of Korea}}
 
 \cortext[1]{Corresponding author}
 
@@ -55,10 +68,11 @@ subset, and we introduce a complementary $\varepsilon$-smoothed variant
 explicit, user-controlled cap on the per-class weight and keeping it well defined
 even for vanishing class counts, such as classes absent from a mini-batch. To
 assess generality, we evaluate the
-proposed losses across three
+proposed losses across four
 distinct application domains that together span a wide range of imbalance
-severity: long-tailed image classification, tabular classification benchmarks,
-and network intrusion detection. Across these domains, LWCE and PLWCE improve
+severity and model architectures: long-tailed image classification, tabular
+classification benchmarks, network intrusion detection, and text classification
+with a Transformer encoder. Across these domains, LWCE and PLWCE improve
 over Cross-Entropy as the imbalance grows and, unlike the competing re-weighting
 losses, avoid the severe degradation below plain Cross-Entropy that these
 baselines occasionally exhibit. These
@@ -68,11 +82,11 @@ class-imbalanced classification.
 \end{abstract}
 
 \begin{highlights}
-\item A logarithmic re-weighting loss that bounds the weight explosion of weighted cross-entropy.
+\item A logarithmic re-weighting loss that bounds the weight explosion of WCE.
 \item A single-parameter generalization tuned automatically on a small proxy subset.
-\item An $\varepsilon$-smoothed variant keeps per-class weights bounded and well defined for the rarest classes.
-\item Evaluation spans image, tabular, and network-intrusion domains of varying imbalance.
-\item The proposed losses improve as imbalance grows and avoid the severe degradation of competing re-weighting losses.
+\item An $\varepsilon$-smoothed variant keeps per-class weights bounded even for the rarest classes.
+\item Evaluation spans image, text, tabular, and network-intrusion domains.
+\item The proposed losses improve as imbalance grows and avoid collapse of rival losses.
 \end{highlights}
 
 \begin{keywords}
@@ -169,16 +183,20 @@ aggressive emphasis on the tail. This exponent is the only free parameter, and
 it is selected automatically through a lightweight grid search on a small proxy
 subset, adding negligible computational overhead. The second,
 $\varepsilon$-Smoothed Log-Weighted Cross-Entropy (ES-LWCE), instead adds a small
-constant $\varepsilon$ to the logarithmic denominator. The base LWCE weight is
-already bounded for every class that appears at least once, so the role of ES-LWCE
-is not to make an otherwise unbounded weight finite, but to provide an
-\emph{explicit, user-controlled} cap of $1/\varepsilon$ on the per-class weight and
-to keep it well defined in the degenerate case where a class is temporarily
-absent---for example, when class frequencies are estimated per mini-batch---without
-changing the relative ordering of class weights. The two extensions are therefore
-orthogonal: PLWCE adjusts the \emph{strength} of the re-weighting, whereas ES-LWCE
-controls its \emph{maximum weight} and smooths the extreme tail. Although the two
-can in principle be combined into a single power-log-smoothed weight, we study them
+constant $\varepsilon$ to the logarithmic denominator and reduces to LWCE as
+$\varepsilon \to 0$. The base LWCE weight is already bounded for every class that
+appears at least once, so the role of ES-LWCE is not to make an otherwise unbounded
+weight finite, but to provide an \emph{explicit, user-controlled} cap of
+$1/\varepsilon$ on the per-class weight and to keep it well defined in the
+degenerate case where a class is temporarily absent---for example, when class
+frequencies are estimated per mini-batch or maintained online for streaming or
+growing label sets---without changing the relative ordering of class weights. It is
+therefore best viewed as a robustness extension for such vanishing- or
+drifting-count settings rather than as a separate competitor on datasets with
+fixed, strictly positive counts. The two extensions are otherwise orthogonal: PLWCE
+adjusts the \emph{strength} of the re-weighting, whereas ES-LWCE controls its
+\emph{maximum weight} and smooths the extreme tail. Although the two can in
+principle be combined into a single power-log-smoothed weight, we study them
 separately to isolate the effect of focusing strength from that of smoothing.
 
 We assess the proposed losses through a deliberately broad empirical study rather
@@ -361,7 +379,10 @@ means no loss hyperparameter is required; ``Bounded weight'' refers to whether t
 multiplicative weighting factor is prevented from unbounded growth under extreme
 class imbalance. For Focal Loss this factor is the per-sample difficulty modulation
 $(1-p_t)^{\gamma}$, which is inherently confined to $[0,1]$ rather than a
-class-frequency weight; LWCE instead compresses the class-frequency weight itself.}
+class-frequency weight; LWCE instead compresses the class-frequency weight itself.
+Logit Adjustment uses the class prior but applies it as an \emph{additive} shift to
+the logits rather than a multiplicative weight, so the bounded-weight criterion does
+not directly apply (n/a).}
 \label{tab:positioning}
 \begin{tabular}{lcccc}
 \toprule
@@ -370,6 +391,7 @@ Loss & Frequency & Difficulty & Param.-free & Bounded weight \\
 WCE                  & \checkmark & --         & \checkmark & -- \\
 Focal Loss           & --         & \checkmark & --         & \checkmark \\
 CB Loss              & \checkmark & --         & --         & \checkmark \\
+Logit Adjustment     & \checkmark & --         & --         & n/a \\
 \textbf{LWCE (ours)} & \checkmark & --         & \checkmark & \checkmark \\
 \bottomrule
 \end{tabular}
@@ -408,6 +430,21 @@ adds a small constant $\varepsilon>0$ to the denominator,
 w_c^{\mathrm{ES\text{-}LWCE}} = \frac{1}{\log(1+n_c)+\varepsilon},
 \end{equation}
 which caps the weight at $1/\varepsilon$.
+
+\paragraph{Weight normalization.}
+In all three formulations the raw weights are mean-normalized before use,
+\begin{equation}\label{eq:normalization}
+\widetilde{w}_c = \frac{C\,w_c}{\sum_{j=1}^{C} w_j},
+\end{equation}
+so that $\frac{1}{C}\sum_c \widetilde{w}_c = 1$ and the overall loss scale is
+independent of the weighting scheme; only the \emph{relative} emphasis across
+classes differs. We apply the identical normalization to every re-weighting
+baseline, including WCE and Class-Balanced loss, so that all methods share one
+scale convention and differences in performance cannot be attributed to a global
+change in effective learning rate. All properties below are stated for the raw
+weights $w_c$; since Eq.~\eqref{eq:normalization} is a single positive rescaling
+common to every class, it leaves the rare-to-frequent \emph{ratios} of
+Propositions~3 and~4 unchanged.
 
 \begin{table}[pos=h]
 \centering
@@ -461,8 +498,10 @@ are estimated per mini-batch. ES-LWCE turns the implicit bound of LWCE into an
 explicit, user-controlled cap of $1/\varepsilon$.
 
 \paragraph{Proposition 3 (Dynamic-range compression).}
-The rare-to-frequent weight ratio grows \emph{linearly} in $\rho$ under WCE but
-only \emph{logarithmically} under the proposed family. Under WCE,
+Fix the minority count $n_{\min} \ge 1$ and let $\rho = n_{\max}/n_{\min} \to \infty$
+through growth of $n_{\max}$. The rare-to-frequent weight ratio then grows
+\emph{linearly} in $\rho$ under WCE but only \emph{logarithmically} under the
+proposed family. Under WCE,
 \begin{equation}\label{eq:ratio-wce}
 \frac{w_{\min}^{\mathrm{WCE}}}{w_{\max}^{\mathrm{WCE}}}
    = \frac{n_{\max}}{n_{\min}} = \rho,
@@ -482,18 +521,196 @@ while preserving the ordering that favours rare classes. Note that this is a
 statement about the \emph{ratio}: unlike the individual weights of
 Proposition~2, the ratio is not constant-bounded but grows without limit as
 $\rho \to \infty$---only much more slowly than the linear growth of WCE.
+Figure~\ref{fig:weight-compression} makes this compression concrete: with the
+majority count fixed at $n_{\max}=10^4$, the rarest class receives a weight
+$\rho = 10^4$ times larger than the majority under WCE, but only about $13$ times
+larger under LWCE, with PLWCE and ES-LWCE interpolating between these regimes.
+
+\begin{figure}[pos=h]
+\centering
+\includegraphics[width=\linewidth]{figures/weight_compression.pdf}
+\caption{Dynamic-range compression (Proposition~3). The vertical axis is the
+rare-to-frequent weight ratio $w_{\min}/w_{\max}$ as a function of the minority
+count $n_c$, with the majority count fixed at $n_{\max}=10^4$; this ratio equals
+the imbalance ratio $\rho$ for WCE and is invariant to the mean-normalization of
+Eq.~\eqref{eq:normalization}. Inverse-frequency (WCE) weighting explodes linearly
+to $\rho=10^4$ as $n_c \to 1$, and the inverse-square-root variant to $\sqrt{\rho}$,
+whereas the logarithmic family stays within a small multiple of the majority
+baseline (LWCE peaks near $13$). ES-LWCE lies at or below LWCE, confirming that its
+$\varepsilon$ term only softens the weight rather than amplifying it.}
+\label{fig:weight-compression}
+\end{figure}
 
 \paragraph{Proposition 4 (Gradient-scale control).}
-In weighted cross-entropy the per-sample gradient equals the unweighted
-cross-entropy gradient scaled by the class weight $w_{y_i}$ (Eq.~\eqref{eq:weighted-ce}).
-Hence the ratio between the minority and majority gradient magnitudes inherits the
-weight ratio of Proposition~3: it is $O(\rho)$ under WCE but $O(\log\rho)$ under
-LWCE. Logarithmic compression therefore prevents minority gradients from
-overwhelming the majority under extreme imbalance, which is the mechanism by which
-LWCE removes the optimization instability of WCE while ES-LWCE additionally caps
-the worst-case gradient scale at $1/\varepsilon$.
+In weighted cross-entropy the per-sample gradient with respect to the logits is
+the unweighted cross-entropy gradient scaled by the class weight $w_{y_i}$
+(Eq.~\eqref{eq:weighted-ce}). The full gradient magnitude also depends on the
+predicted probabilities and the feature representation, so we do not claim that
+the minority-to-majority gradient ratio equals the weight ratio exactly. Rather,
+the \emph{class-dependent multiplicative component} of the gradient scale follows
+the same asymptotic order as the corresponding weight ratio of Proposition~3: it
+is $O(\rho)$ under WCE but $O(\log\rho)$ under LWCE. Logarithmic compression
+therefore limits the extent to which minority gradients can overwhelm the majority
+under extreme imbalance, which is the mechanism by which LWCE mitigates the
+optimization instability of WCE; ES-LWCE additionally caps the worst-case
+class-dependent factor at $1/\varepsilon$. Section~\ref{sec:experiments} tests this
+mechanism directly by tracking the per-epoch gradient norm and the empirical
+minority-to-majority gradient ratio.
+
+\subsection{Parameter selection for PLWCE}\label{sec:plwce-selection}
+LWCE and ES-LWCE require essentially no tuning: LWCE is parameter-free, and the
+$\varepsilon$ of ES-LWCE is a user-set cap rather than an accuracy knob
+(Section~\ref{sec:eslwce-use}). PLWCE, however, exposes a genuine hyperparameter
+$\alpha$ that controls the focusing strength, with three qualitatively distinct
+regimes:
+\begin{itemize}
+\item $0 < \alpha < 1$: \emph{mild} re-weighting, weaker than LWCE;
+\item $\alpha = 1$: exactly LWCE;
+\item $\alpha > 1$: \emph{strong} tail emphasis.
+\end{itemize}
+We select $\alpha$ with a reproducible, data-driven procedure that never touches
+the test set. For each dataset (and each imbalance level, where applicable) we
+draw a stratified \emph{proxy} subset from the \emph{training} split---a fixed
+fraction of the training data, with a minimum number of samples per class so that
+rare classes are never eliminated from the proxy---and hold out a validation
+portion of that proxy. A model is trained on the proxy for a reduced number of
+epochs at each candidate $\alpha$ on a fixed grid, and we retain the value that
+maximizes the macro-averaged $F_1$ on the proxy validation set. Only this single
+scalar is then used to train the final model under the full protocol. The search
+is therefore confined to the training split, is run once per dataset, and adds a
+bounded, one-time cost (the number of grid points times the reduced-epoch proxy
+budget) on top of a single full run; it introduces no per-iteration overhead and
+no test-set leakage.
+
+\subsection{ES-LWCE and practical use cases}\label{sec:eslwce-use}
+ES-LWCE is not intended to outperform LWCE on datasets whose class counts are
+fixed and strictly positive; there, LWCE is already bounded (Proposition~2) and
+the two coincide as $\varepsilon \to 0$. Its value appears when the class counts
+used to form the weights can \emph{vanish or drift}. When frequencies are
+estimated per mini-batch, or maintained online for streaming or continually
+growing label sets, a class may be momentarily absent ($n_c = 0$); the LWCE weight
+then diverges, whereas ES-LWCE remains well defined with weight at most
+$1/\varepsilon$. The constant $\varepsilon$ trades off two effects:
+\begin{itemize}
+\item small $\varepsilon$: stronger minority emphasis, closer to LWCE;
+\item large $\varepsilon$: more conservative gradient scaling, closer to uniform.
+\end{itemize}
+Because $\varepsilon$ shifts the weights monotonically from the LWCE limit toward
+the uniform (Cross-Entropy) limit and never past LWCE, it acts purely as a
+smoothing/robustness control. We therefore position ES-LWCE as an extension for
+vanishing- or batch-adaptive-count settings rather than as a method that is
+required at the dataset level.
+
+\subsection{Computational complexity}\label{sec:complexity}
+All three losses add negligible cost over plain Cross-Entropy. The class weights
+depend only on the class counts and are precomputed once from the training split;
+there are no additional model parameters and no extra backward-pass terms. Once
+the weights are precomputed, LWCE and ES-LWCE incur the same asymptotic training
+complexity as WCE, requiring only a scalar multiplication per sample. The only
+added cost specific to PLWCE is the one-time grid search of
+Section~\ref{sec:plwce-selection}, which is bounded and performed on a reduced
+proxy rather than at full training scale.
 
 \section{Experiments}\label{sec:experiments}
+Our experiments are organized around four questions:
+\begin{enumerate}
+\item Does the advantage of the logarithmic family grow as the imbalance becomes
+      more severe?
+\item Does LWCE empirically reduce the optimization instability of WCE?
+\item Does the PLWCE exponent $\alpha$ control tail emphasis as intended?
+\item Is ES-LWCE stable under vanishing or extremely rare class counts?
+\end{enumerate}
+To probe architecture- and modality-independence, we evaluate the same loss family
+across image classification (CIFAR-10/100-LT with a ResNet-32 backbone), tabular
+classification and network-intrusion detection (multilayer perceptrons), and text
+classification (a compact Transformer encoder on a long-tailed emotion benchmark).
+
+\subsection{Baselines and evaluation}\label{sec:setup}
+We compare the three proposed losses (LWCE, PLWCE, ES-LWCE) against Cross-Entropy,
+Weighted Cross-Entropy, an inverse-square-root variant, Class-Balanced
+loss~\citep{cui2019}, Focal loss~\citep{lin2017}, and Logit
+Adjustment~\citep{menon2021} as a margin/posterior-shift baseline. Because overall
+accuracy is uninformative under strong imbalance, we report macro-averaged $F_1$
+and worst-class accuracy as the primary metrics, and additionally balanced
+accuracy, the geometric mean of per-class recall, minority-class recall, and the
+full per-class accuracy vector. All results are averaged over five random seeds and
+reported as mean~$\pm$~standard deviation.
+
+\subsection{Hyperparameter selection}\label{sec:hyperparam}
+A recurring concern with re-weighting losses is that any apparent advantage may
+stem from tuning rather than from the weighting scheme itself. To rule this out,
+every baseline that exposes a free parameter is tuned under an identical, automated
+budget, while LWCE is used exactly as defined in Eq.~\eqref{eq:lwce} with \emph{no}
+search at all. Concretely, the PLWCE and inverse-power exponents, the Focal
+focusing parameter, the ES-LWCE smoothing constant, and the Logit-Adjustment
+temperature are each selected on a validation split by the procedure of
+Section~\ref{sec:plwce-selection}; Cross-Entropy, WCE, the inverse-square-root
+variant, and Class-Balanced loss are parameter-free or use their authors'
+recommended value. Search uses a deterministic grid over each parameter (with the
+Focal grid lower-bounded at $\gamma = 1$, below which the modulating factor
+$(1-p_t)^{\gamma}$ yields an unstable gradient as $p_t \to 1$), so that the entire
+admissible range is covered reproducibly, and the smoothing constant $\varepsilon$
+is searched on a logarithmic grid because its effect on the weights is
+multiplicative. LWCE therefore competes with no tuning against baselines that each
+receive a full search.
+
+% TODO(results): 아래 3개 subsection은 4개 도메인(image 포함) 결과가 모두 모인 뒤 채운다.
+%   결과 수치를 지어내지 말 것. 표/그림은 results/ 집계에서 생성.
+\subsection{Main results}\label{sec:results}
+% TODO: per-domain 표 (Macro-F1 / Worst-class / G-Mean, mean±std) + 도메인 통합 mean rank.
+
+\subsection{Optimization stability and mechanism}\label{sec:stability}
+% TODO: epoch별 (a) training loss, (b) gradient norm, (c) minority/majority gradient
+%       ratio, (d) class-weight distribution. Proposition 3-4의 실증 그림.
+
+\subsection{Ablation and sensitivity}\label{sec:ablation}
+We isolate the contribution of each ingredient of the logarithmic family---the
+logarithmic compression itself, the power exponent $\alpha$, and the smoothing
+constant $\varepsilon$---through the ablation of Table~\ref{tab:ablation}. Reading
+from WCE (no compression) to LWCE isolates the effect of logarithmic compression;
+adding $\alpha$ gives PLWCE and adding $\varepsilon$ gives ES-LWCE; the
+\emph{Combined} variant activates both extensions at once,
+$w_c \propto (\log(1+n_c)+\varepsilon)^{-\alpha}$, and is included---following the
+same design as the other rows---to probe whether the two extensions are worth
+merging into a single loss.
+
+We do not propose the Combined variant as a method. Across all domains it yields no
+improvement over PLWCE alone: the selection procedure of
+Section~\ref{sec:plwce-selection} consistently drives $\varepsilon$ to the lower end
+of its grid, so the Combined weight collapses back onto PLWCE. This is a useful
+negative result rather than a failure---it shows that, on datasets with fixed and
+strictly positive class counts, the smoothing dimension is inactive for accuracy,
+exactly as anticipated in Section~\ref{sec:eslwce-use}: $\varepsilon$ is a
+robustness control for vanishing or drifting counts, not an accuracy lever. It
+therefore supports treating PLWCE and ES-LWCE as separate tools rather than a single
+combined loss.
+
+\begin{table}[pos=h]
+\centering
+\caption{Ablation of the logarithmic family by ingredient: logarithmic
+compression, the power exponent $\alpha$, and the smoothing constant
+$\varepsilon$. The Combined variant activates both extensions and is reported only
+to test whether merging them helps; it is not proposed as a method. (Metrics
+averaged over five seeds; full per-domain numbers in the supplementary material.)}
+\label{tab:ablation}
+\begin{tabular}{lcccc}
+\toprule
+Method & Log compression & Power $\alpha$ & Smoothing $\varepsilon$ & Macro-$F_1$ \\
+\midrule
+WCE                     & --         & --         & --         & \phantom{0.000} \\
+LWCE                    & \checkmark & --         & --         & \phantom{0.000} \\
+PLWCE                   & \checkmark & \checkmark & --         & \phantom{0.000} \\
+ES-LWCE                 & \checkmark & --         & \checkmark & \phantom{0.000} \\
+Combined                & \checkmark & \checkmark & \checkmark & \phantom{0.000} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% TODO(results): 위 표의 Macro-F1 열은 4개 도메인(image 포함) 결과 집계 후 채운다.
+%   (분석 셀 analysis_summary.json의 ablation 항목에서 도메인 평균/랭크로.)
+%   추가로: (a) alpha, eps sweep vs Macro-F1 / Worst-class / gradient norm 그림
+%   (CIFAR-10 sweep + cross-domain sweep), (b) Friedman + post-hoc Holm, mean rank,
+%   win/tie/loss (데이터셋을 블록으로 — 전 도메인 결과 필요).
 
 \section{Conclusion}\label{sec:conclusion}
 

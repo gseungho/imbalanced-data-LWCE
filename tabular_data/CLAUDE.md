@@ -74,32 +74,41 @@
 | yeast | 10 | 다중 | 소규모, 분산 큼 |
 | page_blocks | 5 | 다중 | — |
 
-### 실험 결과 요약 — 제안 손실 위치 (2026-06, N=5 seeds, F1-Macro)
+### 실험 결과 요약 (11종, 2026-07 재실행, N=5 seeds, F1-Macro)
 
-**lwce / plwce가 우리의 proposed.** 8종(wce 포함) 중 순위(`n/8`)로 표기.
+수치 출처: `results/mlp/mlp_all_results.json` (**11 losses**, gradient/per-class 포함). 605 run 전부 완성.
+**proposed = lwce/plwce/eslwce**, combined는 §4.5 ablation, logitadj는 §4.2 baseline.
 
-**🔑 wce(역빈도) = F1 최악 (평균순위 7.18/8, 11개 중 8개서 단독 꼴찌)** — 극심 불균형서 붕괴(credit_card_fraud 578:1: wce F1 0.7634 vs lwce 0.9075, Tail 0.5281 vs 0.8153). 8종 **F1 평균순위: lwce 2.73 (1위)** / pwce 3.45 / plwce 3.91 / sqce 4.09 / focal 4.55 / ce 4.73 / cb 5.36 / **wce 7.18**. Tail 평균순위: pwce 2.82 / lwce 3.45 / sqce 3.55 / plwce 3.73 / cb 3.91 / **wce 5.55** / focal 6.09 / ce 6.55 (tabular tail은 focal·ce가 더 약함, wce는 고IR ccf·aps서만 꼴찌).
+**🔑 lwce = F1 평균순위 1위 (3.09/11)**, wce = 최하(10.00/11).
+평균순위: **lwce 3.09** / eslwce 4.18 / logitadj 4.82 / pwce 4.91 / sqce 5.55 / combined 6.27 /
+plwce 6.36 / ce 6.45 / focal 6.64 / cb 7.73 / **wce 10.00**.
+평균 F1: **lwce 0.730** > eslwce 0.725 > pwce 0.725 > sqce 0.723 > combined 0.721 > logitadj 0.720 >
+plwce 0.719 > focal 0.715 > ce 0.714 > cb 0.701 > **wce 0.683**.
+G-Mean은 wce 0.695·cb 0.688·pwce 0.689이 최고지만 F1은 하위 — **wce/cb는 head 희생으로 산 소수 클래스 이득**.
 
-| 데이터셋 | 클래스 | 🥇 최우수 | **lwce** | **plwce** | wce |
-|---------|-------|----------|----------|-----------|-----|
-| credit_card_fraud | 2 (극심) | plwce 0.9097 | 0.9075 (3/8) | **0.9097 (1/8) 🥇** | 0.7634 (8/8) |
-| aps_failure | 2 | pwce 0.9076 | 0.9062 (4/8) | 0.9063 (3/8) | 0.8887 (8/8) |
-| bank_marketing | 2 | pwce 0.7778 | 0.7753 (3/8) | 0.7767 (2/8) | 0.7442 (8/8) |
-| telco_churn | 2 | focal 0.7264 | 0.7246 (2/8) | 0.7187 (5/8) | 0.6997 (8/8) |
-| german_credit | 2 | lwce 0.6994 | **0.6994 (1/8) 🥇** | 0.6875 (6/8) | 0.6834 (8/8) |
-| secom | 2 | cb 0.5867 | 0.5676 (5/8) | 0.5567 (6/8) | 0.5780 (2/8) |
-| credit_card_default | 2 | cb 0.7027 | 0.6829 (5/8) | 0.7017 (3/8) | 0.6811 (6/8) |
-| glass | 6 | pwce 0.6794 | 0.6775 (2/8) | 0.6227 (4/8) | 0.6050 (7/8) |
-| steel_faults | 7 | lwce 0.7684 | **0.7684 (1/8) 🥇** | 0.7556 (5/8) | 0.7233 (8/8) |
-| yeast | 10 | focal 0.5174 | 0.5031 (3/8) | 0.5006 (4/8) | 0.4503 (8/8) |
-| page_blocks | 5 | lwce 0.8142 | **0.8142 (1/8) 🥇** | 0.7860 (4/8) | 0.7028 (8/8) |
+| 데이터셋 | 클래스 | IR | 🥇 최우수 | lwce | plwce | eslwce | combined |
+|---------|-------|-----|----------|------|-------|--------|----------|
+| credit_card_fraud | 2 | 578 | ce 0.9096 | 0.9086(3) | 0.9081(4) | 0.9094(2) | 0.9080(5) |
+| aps_failure | 2 | 59 | pwce 0.9105 | 0.9083(2) | 0.9060(6) | 0.9073(4) | 0.9030(9) |
+| bank_marketing | 2 | 7.5 | logitadj 0.7771 | 0.7768(2) | 0.7762(4) | 0.7754(6) | 0.7761(5) |
+| telco_churn | 2 | 2.8 | focal 0.7266 | 0.7252(2) | 0.7158(9) | 0.7250(3) | 0.7177(7) |
+| german_credit | 2 | 2.3 | **lwce 0.6994** 🥇 | **0.6994(1)** | 0.6869(8) | 0.6979(3) | 0.6881(6) |
+| secom | 2 | 14 | cb 0.5804 | 0.5693(6) | 0.5536(9) | 0.5667(7) | 0.5585(8) |
+| credit_card_default | 2 | 3.5 | pwce 0.7029 | 0.6828(8) | 0.7001(4) | 0.6833(7) | 0.6998(5) |
+| glass | 6 | 8.8 | pwce 0.6794 | 0.6775(2) | 0.6227(5) | 0.6101(9) | 0.6115(8) |
+| steel_faults | 7 | 12 | **lwce 0.7684** 🥇 | **0.7684(1)** | 0.7556(7) | 0.7657(3) | 0.7604(5) |
+| yeast | 10 | 108 | **eslwce 0.5187** 🥇 | 0.5031(5) | 0.5006(7) | **0.5187(1)** | 0.5014(6) |
+| page_blocks | 5 | 172 | **eslwce 0.8177** 🥇 | 0.8142(2) | 0.7860(7) | **0.8177(1)** | 0.8020(5) |
 
-**제안 손실 소견**
-- **lwce 강세**: 11개 중 **단독 1위 3개**(german_credit, steel_faults, page_blocks) + **2위 3개**(bank_marketing, telco_churn, glass). 특히 **다중 클래스(glass/steel_faults/page_blocks)에서 최상위권**.
-- **plwce**: **극심 불균형 credit_card_fraud(이진 ~580:1)에서 단독 1위**. 이진 저불균형에선 중상위(bank_marketing 2위, credit_card_default 3위)지만 다중 클래스에선 lwce에 밀림.
-- **lwce vs plwce (tabular)**: lwce가 더 일관적으로 상위. plwce는 극단 불균형 1건에서만 우위.
-  → network 결과(극심 >1000:1에서 plwce 강세)와 합쳐 보면 **"plwce는 극단 불균형용, lwce는 중간 불균형·다중 클래스용"** 역할 분담 경향.
-- **저불균형 이진(german_credit, telco_churn 등)**: 전 손실이 노이즈 수준(±0.02~0.03) → 제안 손실의 이점은 **불균형이 클수록·클래스가 많을수록** 뚜렷.
+**제안 손실 소견 (v1 8종 대비 변화 포함)**
+- **lwce 강세 지속**: F1 평균순위 1위. **단독 1위 2개**(german_credit, steel_faults) + 다수 2~3위. 다중 클래스(glass/steel_faults/page_blocks)에서 최상위권.
+- **eslwce가 신규 강자**: 평균순위 2위, **yeast·page_blocks 단독 1위**(둘 다 중~고 IR 다클래스). ES-LWCE가 예상보다 F1에서 선전.
+- **plwce는 tabular에서 중위권**(평균순위 6.36) — v1에서 극심 불균형 ccf 1위였으나, 재실행에선 ccf도 ce가 1위(0.9096). **tabular은 이진·저IR이 많아 aggressive 가중의 이점이 작다.**
+- **combined ≈ plwce 경향**: 대부분 노이즈 내 차이. Optuna가 combined ε를 낮게 골라 PLWCE로 수렴.
+- **저불균형 이진(german_credit/telco_churn/credit_card_default)**: 전 손실 노이즈 수준 → 이점은 **불균형·클래스 수가 클수록** 뚜렷.
+
+> **역할 분담 (재실행 반영)**: lwce·eslwce = **다클래스·중간 불균형 F1** 최상. plwce = tabular에선 상대적 약세이나
+> text(다클래스 트랜스포머)·CIFAR-100에선 강세 → **모달리티 의존**. cf. `network_data/CLAUDE.md`, `text_classification/CLAUDE.md`.
 
 ---
 

@@ -18,10 +18,11 @@ subset, and we introduce a complementary $\varepsilon$-smoothed variant
 explicit, user-controlled cap on the per-class weight and keeping it well defined
 even for vanishing class counts, such as classes absent from a mini-batch. To
 assess generality, we evaluate the
-proposed losses across three
+proposed losses across four
 distinct application domains that together span a wide range of imbalance
-severity: long-tailed image classification, tabular classification benchmarks,
-and network intrusion detection. Across these domains, LWCE and PLWCE improve
+severity and model architectures: long-tailed image classification, tabular
+classification benchmarks, network intrusion detection, and text classification
+with a Transformer encoder. Across these domains, LWCE and PLWCE improve
 over Cross-Entropy as the imbalance grows and, unlike the competing re-weighting
 losses, avoid the severe degradation below plain Cross-Entropy that these
 baselines occasionally exhibit. These

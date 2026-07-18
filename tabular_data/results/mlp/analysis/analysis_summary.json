@@ -1,0 +1,1625 @@
+{
+  "grad_summary": {
+    "credit_card_fraud_ce": {
+      "grad_norm_final": 0.06427575790345612,
+      "grad_ratio_final": 538.1105076748892
+    },
+    "credit_card_fraud_wce": {
+      "grad_norm_final": 0.16340568587827423,
+      "grad_ratio_final": 539.8552588006097
+    },
+    "credit_card_fraud_pwce": {
+      "grad_norm_final": 0.09492811853664421,
+      "grad_ratio_final": 576.7676661452308
+    },
+    "credit_card_fraud_sqce": {
+      "grad_norm_final": 0.10023697652071192,
+      "grad_ratio_final": 585.670412420602
+    },
+    "credit_card_fraud_lwce": {
+      "grad_norm_final": 0.0742331212035914,
+      "grad_ratio_final": 598.4952324146012
+    },
+    "credit_card_fraud_plwce": {
+      "grad_norm_final": 0.07709087428202989,
+      "grad_ratio_final": 578.6895108357256
+    },
+    "credit_card_fraud_eslwce": {
+      "grad_norm_final": 0.06678789373402919,
+      "grad_ratio_final": 564.9110508992827
+    },
+    "credit_card_fraud_combined": {
+      "grad_norm_final": 0.0751540668161594,
+      "grad_ratio_final": 575.673212059052
+    },
+    "credit_card_fraud_cb": {
+      "grad_norm_final": 0.1033575848717915,
+      "grad_ratio_final": 601.0978494606801
+    },
+    "credit_card_fraud_focal": {
+      "grad_norm_final": 0.006644973950877833,
+      "grad_ratio_final": 516.477310577636
+    },
+    "credit_card_fraud_logitadj": {
+      "grad_norm_final": 0.06035942186579,
+      "grad_ratio_final": 549.8610029476952
+    },
+    "aps_failure_ce": {
+      "grad_norm_final": 0.13219887308483474,
+      "grad_ratio_final": 56.9375263467178
+    },
+    "aps_failure_wce": {
+      "grad_norm_final": 0.37709527846717783,
+      "grad_ratio_final": 57.500407089737244
+    },
+    "aps_failure_pwce": {
+      "grad_norm_final": 0.27363913648336047,
+      "grad_ratio_final": 62.128304502565996
+    },
+    "aps_failure_sqce": {
+      "grad_norm_final": 0.27095857732685635,
+      "grad_ratio_final": 58.26390137737225
+    },
+    "aps_failure_lwce": {
+      "grad_norm_final": 0.15641973045367552,
+      "grad_ratio_final": 58.182342342083416
+    },
+    "aps_failure_plwce": {
+      "grad_norm_final": 0.22736487540521458,
+      "grad_ratio_final": 60.126054759860764
+    },
+    "aps_failure_eslwce": {
+      "grad_norm_final": 0.16442548044075395,
+      "grad_ratio_final": 60.26788492071482
+    },
+    "aps_failure_combined": {
+      "grad_norm_final": 0.14602507771642997,
+      "grad_ratio_final": 59.14434819307466
+    },
+    "aps_failure_cb": {
+      "grad_norm_final": 0.33175214536405195,
+      "grad_ratio_final": 59.364209484268954
+    },
+    "aps_failure_focal": {
+      "grad_norm_final": 0.08827764809127125,
+      "grad_ratio_final": 55.43215490044789
+    },
+    "aps_failure_logitadj": {
+      "grad_norm_final": 0.13676518928590084,
+      "grad_ratio_final": 58.98689421463381
+    },
+    "bank_marketing_ce": {
+      "grad_norm_final": 0.3659387070668906,
+      "grad_ratio_final": 7.684846150333934
+    },
+    "bank_marketing_wce": {
+      "grad_norm_final": 0.5814684920807485,
+      "grad_ratio_final": 7.6132236002279825
+    },
+    "bank_marketing_pwce": {
+      "grad_norm_final": 0.4608428628585564,
+      "grad_ratio_final": 7.715778710560235
+    },
+    "bank_marketing_sqce": {
+      "grad_norm_final": 0.5246729558474315,
+      "grad_ratio_final": 7.695254577283632
+    },
+    "bank_marketing_lwce": {
+      "grad_norm_final": 0.4004578653205023,
+      "grad_ratio_final": 7.687281368146996
+    },
+    "bank_marketing_plwce": {
+      "grad_norm_final": 0.47567222052642777,
+      "grad_ratio_final": 7.690330680895345
+    },
+    "bank_marketing_eslwce": {
+      "grad_norm_final": 0.3987695503139489,
+      "grad_ratio_final": 7.715783067297667
+    },
+    "bank_marketing_combined": {
+      "grad_norm_final": 0.4914696421393945,
+      "grad_ratio_final": 7.688135961156076
+    },
+    "bank_marketing_cb": {
+      "grad_norm_final": 0.5322050313843537,
+      "grad_ratio_final": 7.67032412563471
+    },
+    "bank_marketing_focal": {
+      "grad_norm_final": 0.1282414956203216,
+      "grad_ratio_final": 7.66966684746402
+    },
+    "bank_marketing_logitadj": {
+      "grad_norm_final": 0.37697079915813403,
+      "grad_ratio_final": 7.705851294175628
+    },
+    "telco_churn_ce": {
+      "grad_norm_final": 0.37314611858347096,
+      "grad_ratio_final": 2.804990533621188
+    },
+    "telco_churn_wce": {
+      "grad_norm_final": 0.4858262463487556,
+      "grad_ratio_final": 2.7852685448078374
+    },
+    "telco_churn_pwce": {
+      "grad_norm_final": 0.4545343221749786,
+      "grad_ratio_final": 2.7962830792686773
+    },
+    "telco_churn_sqce": {
+      "grad_norm_final": 0.4413630865145657,
+      "grad_ratio_final": 2.795571475218149
+    },
+    "telco_churn_lwce": {
+      "grad_norm_final": 0.39261388256107316,
+      "grad_ratio_final": 2.809354802227763
+    },
+    "telco_churn_plwce": {
+      "grad_norm_final": 0.4622342439603632,
+      "grad_ratio_final": 2.7982631507809055
+    },
+    "telco_churn_eslwce": {
+      "grad_norm_final": 0.39186833830543016,
+      "grad_ratio_final": 2.8107156763693046
+    },
+    "telco_churn_combined": {
+      "grad_norm_final": 0.45044953143007993,
+      "grad_ratio_final": 2.7983559477880475
+    },
+    "telco_churn_cb": {
+      "grad_norm_final": 0.4799534416941621,
+      "grad_ratio_final": 2.803660741348387
+    },
+    "telco_churn_focal": {
+      "grad_norm_final": 0.13088635929331685,
+      "grad_ratio_final": 2.7966964713760083
+    },
+    "telco_churn_logitadj": {
+      "grad_norm_final": 0.3810108124275639,
+      "grad_ratio_final": 2.8030188670146767
+    },
+    "german_credit_ce": {
+      "grad_norm_final": 0.627886840067057,
+      "grad_ratio_final": 2.044393250314804
+    },
+    "german_credit_wce": {
+      "grad_norm_final": 0.7219634523650373,
+      "grad_ratio_final": 1.941999508625886
+    },
+    "german_credit_pwce": {
+      "grad_norm_final": 0.7262682659953936,
+      "grad_ratio_final": 1.9724291539481562
+    },
+    "german_credit_sqce": {
+      "grad_norm_final": 0.7044985664506225,
+      "grad_ratio_final": 2.023464629994969
+    },
+    "german_credit_lwce": {
+      "grad_norm_final": 0.6623573190113115,
+      "grad_ratio_final": 2.0378947972571533
+    },
+    "german_credit_plwce": {
+      "grad_norm_final": 0.7167214921951026,
+      "grad_ratio_final": 1.9993346695191263
+    },
+    "german_credit_eslwce": {
+      "grad_norm_final": 0.6540391999637168,
+      "grad_ratio_final": 2.038806901075655
+    },
+    "german_credit_combined": {
+      "grad_norm_final": 0.7185964019185753,
+      "grad_ratio_final": 1.9897633439238054
+    },
+    "german_credit_cb": {
+      "grad_norm_final": 0.7291867086360927,
+      "grad_ratio_final": 1.9487024080985158
+    },
+    "german_credit_focal": {
+      "grad_norm_final": 0.4067610357127075,
+      "grad_ratio_final": 2.1049748456851907
+    },
+    "german_credit_logitadj": {
+      "grad_norm_final": 0.6585190582381384,
+      "grad_ratio_final": 2.0194357098776914
+    },
+    "secom_ce": {
+      "grad_norm_final": 0.25954262109359744,
+      "grad_ratio_final": 4.367202895786504
+    },
+    "secom_wce": {
+      "grad_norm_final": 0.41267267363832927,
+      "grad_ratio_final": 3.6998515499805604
+    },
+    "secom_pwce": {
+      "grad_norm_final": 0.3267338998206374,
+      "grad_ratio_final": 2.4609579629464067
+    },
+    "secom_sqce": {
+      "grad_norm_final": 0.33892572780483066,
+      "grad_ratio_final": 3.6655774044745018
+    },
+    "secom_lwce": {
+      "grad_norm_final": 0.24544268713487,
+      "grad_ratio_final": 3.6846872612648753
+    },
+    "secom_plwce": {
+      "grad_norm_final": 0.26809567224591657,
+      "grad_ratio_final": 3.796132322453418
+    },
+    "secom_eslwce": {
+      "grad_norm_final": 0.24337464311722817,
+      "grad_ratio_final": 3.6365839862097844
+    },
+    "secom_combined": {
+      "grad_norm_final": 0.26954758577091137,
+      "grad_ratio_final": 3.869034936590032
+    },
+    "secom_cb": {
+      "grad_norm_final": 0.37346035016657764,
+      "grad_ratio_final": 3.503083803254109
+    },
+    "secom_focal": {
+      "grad_norm_final": 0.058266837545301375,
+      "grad_ratio_final": 9.3229149760379
+    },
+    "secom_logitadj": {
+      "grad_norm_final": 0.20078406597324877,
+      "grad_ratio_final": 4.520947965181275
+    },
+    "credit_card_default_ce": {
+      "grad_norm_final": 0.24303155999974035,
+      "grad_ratio_final": 3.5675790141241164
+    },
+    "credit_card_default_wce": {
+      "grad_norm_final": 0.3290310328378226,
+      "grad_ratio_final": 3.5926604211892483
+    },
+    "credit_card_default_pwce": {
+      "grad_norm_final": 0.30858108767933706,
+      "grad_ratio_final": 3.5810543783368614
+    },
+    "credit_card_default_sqce": {
+      "grad_norm_final": 0.30386658701215485,
+      "grad_ratio_final": 3.5732729716384766
+    },
+    "credit_card_default_lwce": {
+      "grad_norm_final": 0.25873781507055976,
+      "grad_ratio_final": 3.5664635330628904
+    },
+    "credit_card_default_plwce": {
+      "grad_norm_final": 0.30320444997170826,
+      "grad_ratio_final": 3.572918540667704
+    },
+    "credit_card_default_eslwce": {
+      "grad_norm_final": 0.2551527442183394,
+      "grad_ratio_final": 3.5656453753958504
+    },
+    "credit_card_default_combined": {
+      "grad_norm_final": 0.2959606333065202,
+      "grad_ratio_final": 3.5748506830990694
+    },
+    "credit_card_default_cb": {
+      "grad_norm_final": 0.31151821578604194,
+      "grad_ratio_final": 3.579939125938908
+    },
+    "credit_card_default_focal": {
+      "grad_norm_final": 0.07567223689865067,
+      "grad_ratio_final": 3.585750106254983
+    },
+    "credit_card_default_logitadj": {
+      "grad_norm_final": 0.24622635120497707,
+      "grad_ratio_final": 3.573257995442615
+    },
+    "glass_ce": {
+      "grad_norm_final": 0.6283282110339361,
+      "grad_ratio_final": 1.1255054206334572
+    },
+    "glass_wce": {
+      "grad_norm_final": 0.7178063055369781,
+      "grad_ratio_final": 1.5589392323356037
+    },
+    "glass_pwce": {
+      "grad_norm_final": 0.6608083949299014,
+      "grad_ratio_final": 1.246073500407181
+    },
+    "glass_sqce": {
+      "grad_norm_final": 0.6857016431539554,
+      "grad_ratio_final": 1.317846801306026
+    },
+    "glass_lwce": {
+      "grad_norm_final": 0.6619858953464341,
+      "grad_ratio_final": 1.2516380003325165
+    },
+    "glass_plwce": {
+      "grad_norm_final": 0.642878830988346,
+      "grad_ratio_final": 1.1992425189605078
+    },
+    "glass_eslwce": {
+      "grad_norm_final": 0.6372162523220701,
+      "grad_ratio_final": 1.1715625357942694
+    },
+    "glass_combined": {
+      "grad_norm_final": 0.6346437301236543,
+      "grad_ratio_final": 1.170334530881213
+    },
+    "glass_cb": {
+      "grad_norm_final": 0.7201036261999482,
+      "grad_ratio_final": 1.5619166144957877
+    },
+    "glass_focal": {
+      "grad_norm_final": 0.5556550023479492,
+      "grad_ratio_final": 1.070445859647243
+    },
+    "glass_logitadj": {
+      "grad_norm_final": 0.6129126866776528,
+      "grad_ratio_final": 1.098623840101672
+    },
+    "steel_faults_ce": {
+      "grad_norm_final": 0.511126542118775,
+      "grad_ratio_final": 1.1163232792076403
+    },
+    "steel_faults_wce": {
+      "grad_norm_final": 0.5332641678752986,
+      "grad_ratio_final": 1.8003480818627096
+    },
+    "steel_faults_pwce": {
+      "grad_norm_final": 0.5440501428958173,
+      "grad_ratio_final": 1.621497961849927
+    },
+    "steel_faults_sqce": {
+      "grad_norm_final": 0.5346395205618931,
+      "grad_ratio_final": 1.402536076562252
+    },
+    "steel_faults_lwce": {
+      "grad_norm_final": 0.5197970730581327,
+      "grad_ratio_final": 1.208627023038147
+    },
+    "steel_faults_plwce": {
+      "grad_norm_final": 0.5357370604921682,
+      "grad_ratio_final": 1.4578099568078138
+    },
+    "steel_faults_eslwce": {
+      "grad_norm_final": 0.5153645249256694,
+      "grad_ratio_final": 1.1495444724079722
+    },
+    "steel_faults_combined": {
+      "grad_norm_final": 0.5349823046138981,
+      "grad_ratio_final": 1.4098129812858011
+    },
+    "steel_faults_cb": {
+      "grad_norm_final": 0.5368273910801499,
+      "grad_ratio_final": 1.7913519798806419
+    },
+    "steel_faults_focal": {
+      "grad_norm_final": 0.30175938655650214,
+      "grad_ratio_final": 1.2785562977884402
+    },
+    "steel_faults_logitadj": {
+      "grad_norm_final": 0.5266533309988414,
+      "grad_ratio_final": 1.0039933391764435
+    },
+    "yeast_ce": {
+      "grad_norm_final": 1.1603925433964535,
+      "grad_ratio_final": 1.0524539649886955
+    },
+    "yeast_wce": {
+      "grad_norm_final": 2.2557647807169032,
+      "grad_ratio_final": 7.51363238100857
+    },
+    "yeast_pwce": {
+      "grad_norm_final": 1.353439841976424,
+      "grad_ratio_final": 1.9745438694504476
+    },
+    "yeast_sqce": {
+      "grad_norm_final": 1.5009233424531305,
+      "grad_ratio_final": 2.9643576219398384
+    },
+    "yeast_lwce": {
+      "grad_norm_final": 1.2863899083083496,
+      "grad_ratio_final": 1.7158117113433993
+    },
+    "yeast_plwce": {
+      "grad_norm_final": 1.4013374221931807,
+      "grad_ratio_final": 2.1177166259640012
+    },
+    "yeast_eslwce": {
+      "grad_norm_final": 1.2369059261897497,
+      "grad_ratio_final": 1.2373616859326628
+    },
+    "yeast_combined": {
+      "grad_norm_final": 1.3348568757432324,
+      "grad_ratio_final": 2.185242345600635
+    },
+    "yeast_cb": {
+      "grad_norm_final": 2.1670512716773334,
+      "grad_ratio_final": 7.442153632219943
+    },
+    "yeast_focal": {
+      "grad_norm_final": 1.1641983899782669,
+      "grad_ratio_final": 1.1495478786239346
+    },
+    "yeast_logitadj": {
+      "grad_norm_final": 1.1441812889889664,
+      "grad_ratio_final": 1.037430926538201
+    },
+    "page_blocks_ce": {
+      "grad_norm_final": 0.24331648426821756,
+      "grad_ratio_final": 14.665739827686064
+    },
+    "page_blocks_wce": {
+      "grad_norm_final": 1.12763085060785,
+      "grad_ratio_final": 30.864374768970823
+    },
+    "page_blocks_pwce": {
+      "grad_norm_final": 0.42468359731580946,
+      "grad_ratio_final": 17.466005483870873
+    },
+    "page_blocks_sqce": {
+      "grad_norm_final": 0.611893513332512,
+      "grad_ratio_final": 20.01305737269117
+    },
+    "page_blocks_lwce": {
+      "grad_norm_final": 0.3452301462206525,
+      "grad_ratio_final": 16.412080373329
+    },
+    "page_blocks_plwce": {
+      "grad_norm_final": 0.5232796748924422,
+      "grad_ratio_final": 18.750113176729606
+    },
+    "page_blocks_eslwce": {
+      "grad_norm_final": 0.2794662034360144,
+      "grad_ratio_final": 15.292468467439676
+    },
+    "page_blocks_combined": {
+      "grad_norm_final": 0.43497751252825434,
+      "grad_ratio_final": 17.588588752452576
+    },
+    "page_blocks_cb": {
+      "grad_norm_final": 1.0313482934015303,
+      "grad_ratio_final": 29.355539206274102
+    },
+    "page_blocks_focal": {
+      "grad_norm_final": 0.11566647247568648,
+      "grad_ratio_final": 16.27548038657408
+    },
+    "page_blocks_logitadj": {
+      "grad_norm_final": 0.24340713212586484,
+      "grad_ratio_final": 14.85656054229705
+    }
+  },
+  "ablation": [
+    {
+      "Dataset": "credit_card_fraud",
+      "Method": "wce",
+      "LogCompression": "X",
+      "Power_alpha": "X",
+      "Smoothing_eps": "X",
+      "F1_Macro_mean": 0.7606053583039857,
+      "F1_Macro_std": 0.010374805144412497,
+      "Worst_Acc": 0.8283783783783782,
+      "G_Mean": 0.9090805833288634
+    },
+    {
+      "Dataset": "credit_card_fraud",
+      "Method": "lwce",
+      "LogCompression": "O",
+      "Power_alpha": "X",
+      "Smoothing_eps": "X",
+      "F1_Macro_mean": 0.9086399826248062,
+      "F1_Macro_std": 0.004366212408041536,
+      "Worst_Acc": 0.768918918918919,
+      "G_Mean": 0.8767901722300696
+    },
+    {
+      "Dataset": "credit_card_fraud",
+      "Method": "plwce",
+      "LogCompression": "O",
+      "Power_alpha": "O",
+      "Smoothing_eps": "X",
+      "F1_Macro_mean": 0.9081072286020448,
+      "F1_Macro_std": 0.0030214855955797183,
+      "Worst_Acc": 0.7756756756756756,
+      "G_Mean": 0.8806248514387143
+    },
+    {
+      "Dataset": "credit_card_fraud",
+      "Method": "eslwce",
+      "LogCompression": "O",
+      "Power_alpha": "X",
+      "Smoothing_eps": "O",
+      "F1_Macro_mean": 0.9094250701926905,
+      "F1_Macro_std": 0.004899038490538957,
+      "Worst_Acc": 0.7621621621621621,
+      "G_Mean": 0.8729082518509902
+    },
+    {
+      "Dataset": "credit_card_fraud",
+      "Method": "combined",
+      "LogCompression": "O",
+      "Power_alpha": "O",
+      "Smoothing_eps": "O",
+      "F1_Macro_mean": 0.9079649101577492,
+      "F1_Macro_std": 0.0022238300978584423,
+      "Worst_Acc": 0.7743243243243243,
+      "G_Mean": 0.8798543883681079
+    },
+    {
+      "Dataset": "aps_failure",
+      "Method": "wce",
+      "LogCompression": "X",
+      "Power_alpha": "X",
+      "Smoothing_eps": "X",
+      "F1_Macro_mean": 0.8896541755782159,
+      "F1_Macro_std": 0.006130919309434114,
+      "Worst_Acc": 0.8848,
+      "G_Mean": 0.9364427313093909
+    },
+    {
+      "Dataset": "aps_failure",
+      "Method": "lwce",
+      "LogCompression": "O",
+      "Power_alpha": "X",
+      "Smoothing_eps": "X",
+      "F1_Macro_mean": 0.9083104428254305,
+      "F1_Macro_std": 0.0023058180489185956,
+      "Worst_Acc": 0.7525333333333333,
+      "G_Mean": 0.8666177391001202
+    },
+    {
+      "Dataset": "aps_failure",
+      "Method": "plwce",
+      "LogCompression": "O",
+      "Power_alpha": "O",
+      "Smoothing_eps": "X",
+      "F1_Macro_mean": 0.9060365801231594,
+      "F1_Macro_std": 0.002703480484101621,
+      "Worst_Acc": 0.7674666666666667,
+      "G_Mean": 0.8748520839828474
+    },
+    {
+      "Dataset": "aps_failure",
+      "Method": "eslwce",
+      "LogCompression": "O",
+      "Power_alpha": "X",
+      "Smoothing_eps": "O",
+      "F1_Macro_mean": 0.907268839060307,
+      "F1_Macro_std": 0.005274341638114421,
+      "Worst_Acc": 0.7482666666666666,
+      "G_Mean": 0.8641620579650962
+    },
+    {
+      "Dataset": "aps_failure",
+      "Method": "combined",
+      "LogCompression": "O",
+      "Power_alpha": "O",
+      "Smoothing_eps": "O",
+      "F1_Macro_mean": 0.9029821694832287,
+      "F1_Macro_std": 0.0022738258286550115,
+      "Worst_Acc": 0.7359999999999999,
+      "G_Mean": 0.8570638194425797
+    },
+    {
+      "Dataset": "bank_marketing",
+      "Method": "wce",
+      "LogCompression": "X",
+      "Power_alpha": "X",
+      "Smoothing_eps": "X",
+      "F1_Macro_mean": 0.7428006440631556,
+      "F1_Macro_std": 0.0033941819836322607,
+      "Worst_Acc": 0.8477203550030439,
+      "G_Mean": 0.8570963059925211
+    },
+    {
+      "Dataset": "bank_marketing",
+      "Method": "lwce",
+      "LogCompression": "O",
+      "Power_alpha": "X",
+      "Smoothing_eps": "X",
+      "F1_Macro_mean": 0.7767688679496947,
+      "F1_Macro_std": 0.0011730166473200778,
+      "Worst_Acc": 0.6441083805923126,
+      "G_Mean": 0.7770436030355334
+    },
+    {
+      "Dataset": "bank_marketing",
+      "Method": "plwce",
+      "LogCompression": "O",
+      "Power_alpha": "O",
+      "Smoothing_eps": "X",
+      "F1_Macro_mean": 0.7762300399379258,
+      "F1_Macro_std": 0.0021644618157411442,
+      "Worst_Acc": 0.7315689981096408,
+      "G_Mean": 0.817714474517816
+    },
+    {
+      "Dataset": "bank_marketing",
+      "Method": "eslwce",
+      "LogCompression": "O",
+      "Power_alpha": "X",
+      "Smoothing_eps": "O",
+      "F1_Macro_mean": 0.7753966946562191,
+      "F1_Macro_std": 0.0010967869268715055,
+      "Worst_Acc": 0.6422180214240706,
+      "G_Mean": 0.7756932923313608
+    },
+    {
+      "Dataset": "bank_marketing",
+      "Method": "combined",
+      "LogCompression": "O",
+      "Power_alpha": "O",
+      "Smoothing_eps": "O",
+      "F1_Macro_mean": 0.7760685883979329,
+      "F1_Macro_std": 0.002293454882047218,
+      "Worst_Acc": 0.7529930686830498,
+      "G_Mean": 0.8270321262379478
+    },
+    {
+      "Dataset": "telco_churn",
+      "Method": "wce",
+      "LogCompression": "X",
+      "Power_alpha": "X",
+      "Smoothing_eps": "X",
+      "F1_Macro_mean": 0.7024047874664465,
+      "F1_Macro_std": 0.004076721692414756,
+      "Worst_Acc": 0.706958762886598,
+      "G_Mean": 0.7501622111352809
+    },
+    {
+      "Dataset": "telco_churn",
+      "Method": "lwce",
+      "LogCompression": "O",
+      "Power_alpha": "X",
+      "Smoothing_eps": "X",
+      "F1_Macro_mean": 0.7251737112793021,
+      "F1_Macro_std": 0.00151509182259523,
+      "Worst_Acc": 0.6467023172905526,
+      "G_Mean": 0.7298816316033558
+    },
+    {
+      "Dataset": "telco_churn",
+      "Method": "plwce",
+      "LogCompression": "O",
+      "Power_alpha": "O",
+      "Smoothing_eps": "X",
+      "F1_Macro_mean": 0.7158402064401905,
+      "F1_Macro_std": 0.0007275652078897229,
+      "Worst_Acc": 0.7455220794972159,
+      "G_Mean": 0.7514934855005435
+    },
+    {
+      "Dataset": "telco_churn",
+      "Method": "eslwce",
+      "LogCompression": "O",
+      "Power_alpha": "X",
+      "Smoothing_eps": "O",
+      "F1_Macro_mean": 0.7250056249223553,
+      "F1_Macro_std": 0.0013642285704248067,
+      "Worst_Acc": 0.6456327985739752,
+      "G_Mean": 0.7294489238620449
+    },
+    {
+      "Dataset": "telco_churn",
+      "Method": "combined",
+      "LogCompression": "O",
+      "Power_alpha": "O",
+      "Smoothing_eps": "O",
+      "F1_Macro_mean": 0.7177391644764561,
+      "F1_Macro_std": 0.0040196253034259785,
+      "Worst_Acc": 0.7393939393939394,
+      "G_Mean": 0.7497578049929897
+    },
+    {
+      "Dataset": "german_credit",
+      "Method": "wce",
+      "LogCompression": "X",
+      "Power_alpha": "X",
+      "Smoothing_eps": "X",
+      "F1_Macro_mean": 0.6834004977522009,
+      "F1_Macro_std": 0.013947395309278002,
+      "Worst_Acc": 0.6841269841269841,
+      "G_Mean": 0.7059649109217458
+    },
+    {
+      "Dataset": "german_credit",
+      "Method": "lwce",
+      "LogCompression": "O",
+      "Power_alpha": "X",
+      "Smoothing_eps": "X",
+      "F1_Macro_mean": 0.6993818880732652,
+      "F1_Macro_std": 0.02575764957979968,
+      "Worst_Acc": 0.6311111111111111,
+      "G_Mean": 0.7032848469099345
+    },
+    {
+      "Dataset": "german_credit",
+      "Method": "plwce",
+      "LogCompression": "O",
+      "Power_alpha": "O",
+      "Smoothing_eps": "X",
+      "F1_Macro_mean": 0.6869109825451214,
+      "F1_Macro_std": 0.016406203616298312,
+      "Worst_Acc": 0.6711111111111111,
+      "G_Mean": 0.703688552204958
+    },
+    {
+      "Dataset": "german_credit",
+      "Method": "eslwce",
+      "LogCompression": "O",
+      "Power_alpha": "X",
+      "Smoothing_eps": "O",
+      "F1_Macro_mean": 0.6979015219686815,
+      "F1_Macro_std": 0.029141983784716923,
+      "Worst_Acc": 0.6288888888888888,
+      "G_Mean": 0.7016304434495997
+    },
+    {
+      "Dataset": "german_credit",
+      "Method": "combined",
+      "LogCompression": "O",
+      "Power_alpha": "O",
+      "Smoothing_eps": "O",
+      "F1_Macro_mean": 0.6881044412907596,
+      "F1_Macro_std": 0.016758996192115197,
+      "Worst_Acc": 0.6711111111111111,
+      "G_Mean": 0.7045983456106921
+    },
+    {
+      "Dataset": "secom",
+      "Method": "wce",
+      "LogCompression": "X",
+      "Power_alpha": "X",
+      "Smoothing_eps": "X",
+      "F1_Macro_mean": 0.5770098859458477,
+      "F1_Macro_std": 0.012753750842604165,
+      "Worst_Acc": 0.2258064516129032,
+      "G_Mean": 0.45949117265983547
+    },
+    {
+      "Dataset": "secom",
+      "Method": "lwce",
+      "LogCompression": "O",
+      "Power_alpha": "X",
+      "Smoothing_eps": "X",
+      "F1_Macro_mean": 0.5692716916249403,
+      "F1_Macro_std": 0.017199015377927375,
+      "Worst_Acc": 0.16774193548387098,
+      "G_Mean": 0.3982694676616824
+    },
+    {
+      "Dataset": "secom",
+      "Method": "plwce",
+      "LogCompression": "O",
+      "Power_alpha": "O",
+      "Smoothing_eps": "X",
+      "F1_Macro_mean": 0.5536019022430949,
+      "F1_Macro_std": 0.013279876404837528,
+      "Worst_Acc": 0.13548387096774192,
+      "G_Mean": 0.3589351018489864
+    },
+    {
+      "Dataset": "secom",
+      "Method": "eslwce",
+      "LogCompression": "O",
+      "Power_alpha": "X",
+      "Smoothing_eps": "O",
+      "F1_Macro_mean": 0.5666528014035463,
+      "F1_Macro_std": 0.01484580841530989,
+      "Worst_Acc": 0.16129032258064516,
+      "G_Mean": 0.39093688784294767
+    },
+    {
+      "Dataset": "secom",
+      "Method": "combined",
+      "LogCompression": "O",
+      "Power_alpha": "O",
+      "Smoothing_eps": "O",
+      "F1_Macro_mean": 0.5584801388628666,
+      "F1_Macro_std": 0.016763982012287793,
+      "Worst_Acc": 0.14193548387096772,
+      "G_Mean": 0.36677542729765933
+    },
+    {
+      "Dataset": "credit_card_default",
+      "Method": "wce",
+      "LogCompression": "X",
+      "Power_alpha": "X",
+      "Smoothing_eps": "X",
+      "F1_Macro_mean": 0.6803881895947121,
+      "F1_Macro_std": 0.0047225181985620784,
+      "Worst_Acc": 0.612054244098443,
+      "G_Mean": 0.6980231847428384
+    },
+    {
+      "Dataset": "credit_card_default",
+      "Method": "lwce",
+      "LogCompression": "O",
+      "Power_alpha": "X",
+      "Smoothing_eps": "X",
+      "F1_Macro_mean": 0.6827851774750233,
+      "F1_Macro_std": 0.004504367731482889,
+      "Worst_Acc": 0.37910597689603215,
+      "G_Mean": 0.5969595509500208
+    },
+    {
+      "Dataset": "credit_card_default",
+      "Method": "plwce",
+      "LogCompression": "O",
+      "Power_alpha": "O",
+      "Smoothing_eps": "X",
+      "F1_Macro_mean": 0.7000778900568051,
+      "F1_Macro_std": 0.0016445133922424174,
+      "Worst_Acc": 0.4702159718734305,
+      "G_Mean": 0.6519105451711608
+    },
+    {
+      "Dataset": "credit_card_default",
+      "Method": "eslwce",
+      "LogCompression": "O",
+      "Power_alpha": "X",
+      "Smoothing_eps": "O",
+      "F1_Macro_mean": 0.6832892494357182,
+      "F1_Macro_std": 0.003914098517266379,
+      "Worst_Acc": 0.3793068809643395,
+      "G_Mean": 0.5972892782786834
+    },
+    {
+      "Dataset": "credit_card_default",
+      "Method": "combined",
+      "LogCompression": "O",
+      "Power_alpha": "O",
+      "Smoothing_eps": "O",
+      "F1_Macro_mean": 0.6998344640704529,
+      "F1_Macro_std": 0.0013372141586417024,
+      "Worst_Acc": 0.46670015067805126,
+      "G_Mean": 0.6501191156739756
+    },
+    {
+      "Dataset": "glass",
+      "Method": "wce",
+      "LogCompression": "X",
+      "Power_alpha": "X",
+      "Smoothing_eps": "X",
+      "F1_Macro_mean": 0.605044245036505,
+      "F1_Macro_std": 0.008951273798964255,
+      "Worst_Acc": 0.29739130434782607,
+      "G_Mean": 0.6087132037937271
+    },
+    {
+      "Dataset": "glass",
+      "Method": "lwce",
+      "LogCompression": "O",
+      "Power_alpha": "X",
+      "Smoothing_eps": "X",
+      "F1_Macro_mean": 0.6775498194885136,
+      "F1_Macro_std": 0.026465642223404265,
+      "Worst_Acc": 0.2,
+      "G_Mean": 0.6052941215618733
+    },
+    {
+      "Dataset": "glass",
+      "Method": "plwce",
+      "LogCompression": "O",
+      "Power_alpha": "O",
+      "Smoothing_eps": "X",
+      "F1_Macro_mean": 0.6227462810166446,
+      "F1_Macro_std": 0.03493128832975557,
+      "Worst_Acc": 0.08,
+      "G_Mean": 0.22672434606245662
+    },
+    {
+      "Dataset": "glass",
+      "Method": "eslwce",
+      "LogCompression": "O",
+      "Power_alpha": "X",
+      "Smoothing_eps": "O",
+      "F1_Macro_mean": 0.6100713624950442,
+      "F1_Macro_std": 0.04126402916262882,
+      "Worst_Acc": 0.08,
+      "G_Mean": 0.22646717696186683
+    },
+    {
+      "Dataset": "glass",
+      "Method": "combined",
+      "LogCompression": "O",
+      "Power_alpha": "O",
+      "Smoothing_eps": "O",
+      "F1_Macro_mean": 0.6115053913435042,
+      "F1_Macro_std": 0.0411274441920477,
+      "Worst_Acc": 0.08,
+      "G_Mean": 0.22648112493090844
+    },
+    {
+      "Dataset": "steel_faults",
+      "Method": "wce",
+      "LogCompression": "X",
+      "Power_alpha": "X",
+      "Smoothing_eps": "X",
+      "F1_Macro_mean": 0.7232924899082637,
+      "F1_Macro_std": 0.0059767062979364715,
+      "Worst_Acc": 0.45247524752475254,
+      "G_Mean": 0.779600369322282
+    },
+    {
+      "Dataset": "steel_faults",
+      "Method": "lwce",
+      "LogCompression": "O",
+      "Power_alpha": "X",
+      "Smoothing_eps": "X",
+      "F1_Macro_mean": 0.7684282020303547,
+      "F1_Macro_std": 0.005600889097457675,
+      "Worst_Acc": 0.6138613861386139,
+      "G_Mean": 0.7853203337661815
+    },
+    {
+      "Dataset": "steel_faults",
+      "Method": "plwce",
+      "LogCompression": "O",
+      "Power_alpha": "O",
+      "Smoothing_eps": "X",
+      "F1_Macro_mean": 0.7555838341571827,
+      "F1_Macro_std": 0.0037751090853230984,
+      "Worst_Acc": 0.5475247524752476,
+      "G_Mean": 0.7917437164955634
+    },
+    {
+      "Dataset": "steel_faults",
+      "Method": "eslwce",
+      "LogCompression": "O",
+      "Power_alpha": "X",
+      "Smoothing_eps": "O",
+      "F1_Macro_mean": 0.7656540485597917,
+      "F1_Macro_std": 0.007449014758997519,
+      "Worst_Acc": 0.6034362259755388,
+      "G_Mean": 0.7683351674990886
+    },
+    {
+      "Dataset": "steel_faults",
+      "Method": "combined",
+      "LogCompression": "O",
+      "Power_alpha": "O",
+      "Smoothing_eps": "O",
+      "F1_Macro_mean": 0.7603741936822896,
+      "F1_Macro_std": 0.004066324837612756,
+      "Worst_Acc": 0.5613861386138614,
+      "G_Mean": 0.7931780723269088
+    },
+    {
+      "Dataset": "yeast",
+      "Method": "wce",
+      "LogCompression": "X",
+      "Power_alpha": "X",
+      "Smoothing_eps": "X",
+      "F1_Macro_mean": 0.4502830553382342,
+      "F1_Macro_std": 0.007130290958020368,
+      "Worst_Acc": 0.0,
+      "G_Mean": 0.03921674810409027
+    },
+    {
+      "Dataset": "yeast",
+      "Method": "lwce",
+      "LogCompression": "O",
+      "Power_alpha": "X",
+      "Smoothing_eps": "X",
+      "F1_Macro_mean": 0.5030723527827553,
+      "F1_Macro_std": 0.006287803707079583,
+      "Worst_Acc": 0.0,
+      "G_Mean": 0.04035685887102035
+    },
+    {
+      "Dataset": "yeast",
+      "Method": "plwce",
+      "LogCompression": "O",
+      "Power_alpha": "O",
+      "Smoothing_eps": "X",
+      "F1_Macro_mean": 0.5005585743428832,
+      "F1_Macro_std": 0.004984601570296211,
+      "Worst_Acc": 0.0,
+      "G_Mean": 0.04060228436082434
+    },
+    {
+      "Dataset": "yeast",
+      "Method": "eslwce",
+      "LogCompression": "O",
+      "Power_alpha": "X",
+      "Smoothing_eps": "O",
+      "F1_Macro_mean": 0.5187124271320145,
+      "F1_Macro_std": 0.03510872867254432,
+      "Worst_Acc": 0.0,
+      "G_Mean": 0.03092236352178628
+    },
+    {
+      "Dataset": "yeast",
+      "Method": "combined",
+      "LogCompression": "O",
+      "Power_alpha": "O",
+      "Smoothing_eps": "O",
+      "F1_Macro_mean": 0.5013573653028903,
+      "F1_Macro_std": 0.007099574080193237,
+      "Worst_Acc": 0.0,
+      "G_Mean": 0.04082929939702318
+    },
+    {
+      "Dataset": "page_blocks",
+      "Method": "wce",
+      "LogCompression": "X",
+      "Power_alpha": "X",
+      "Smoothing_eps": "X",
+      "F1_Macro_mean": 0.7027637466601673,
+      "F1_Macro_std": 0.012979911823445498,
+      "Worst_Acc": 0.8777777777777779,
+      "G_Mean": 0.9027760272455818
+    },
+    {
+      "Dataset": "page_blocks",
+      "Method": "lwce",
+      "LogCompression": "O",
+      "Power_alpha": "X",
+      "Smoothing_eps": "X",
+      "F1_Macro_mean": 0.8142309961364729,
+      "F1_Macro_std": 0.006369432603100511,
+      "Worst_Acc": 0.6957142857142857,
+      "G_Mean": 0.8133582175836193
+    },
+    {
+      "Dataset": "page_blocks",
+      "Method": "plwce",
+      "LogCompression": "O",
+      "Power_alpha": "O",
+      "Smoothing_eps": "X",
+      "F1_Macro_mean": 0.7859658778030088,
+      "F1_Macro_std": 0.011169427988849671,
+      "Worst_Acc": 0.7313131313131314,
+      "G_Mean": 0.847075437751087
+    },
+    {
+      "Dataset": "page_blocks",
+      "Method": "eslwce",
+      "LogCompression": "O",
+      "Power_alpha": "X",
+      "Smoothing_eps": "O",
+      "F1_Macro_mean": 0.8176747296460476,
+      "F1_Macro_std": 0.017627853103288627,
+      "Worst_Acc": 0.5985714285714285,
+      "G_Mean": 0.7846943856555804
+    },
+    {
+      "Dataset": "page_blocks",
+      "Method": "combined",
+      "LogCompression": "O",
+      "Power_alpha": "O",
+      "Smoothing_eps": "O",
+      "F1_Macro_mean": 0.8020463220672843,
+      "F1_Macro_std": 0.015698411989752203,
+      "Worst_Acc": 0.7357142857142857,
+      "G_Mean": 0.8462273178772458
+    }
+  ],
+  "weight_ratios": [
+    {
+      "Dataset": "credit_card_fraud",
+      "IR": 578.546511627907,
+      "Loss": "wce",
+      "w_rare_over_w_freq": 578.5465087890625
+    },
+    {
+      "Dataset": "credit_card_fraud",
+      "IR": 578.546511627907,
+      "Loss": "pwce",
+      "w_rare_over_w_freq": 18.89691162109375
+    },
+    {
+      "Dataset": "credit_card_fraud",
+      "IR": 578.546511627907,
+      "Loss": "sqce",
+      "w_rare_over_w_freq": 24.052995681762695
+    },
+    {
+      "Dataset": "credit_card_fraud",
+      "IR": 578.546511627907,
+      "Loss": "lwce",
+      "w_rare_over_w_freq": 2.0879733562469482
+    },
+    {
+      "Dataset": "credit_card_fraud",
+      "IR": 578.546511627907,
+      "Loss": "plwce",
+      "w_rare_over_w_freq": 2.52587890625
+    },
+    {
+      "Dataset": "credit_card_fraud",
+      "IR": 578.546511627907,
+      "Loss": "eslwce",
+      "w_rare_over_w_freq": 1.4422625303268433
+    },
+    {
+      "Dataset": "credit_card_fraud",
+      "IR": 578.546511627907,
+      "Loss": "combined",
+      "w_rare_over_w_freq": 2.211944341659546
+    },
+    {
+      "Dataset": "credit_card_fraud",
+      "IR": 578.546511627907,
+      "Loss": "cb",
+      "w_rare_over_w_freq": 29.565502166748047
+    },
+    {
+      "Dataset": "aps_failure",
+      "IR": 59.0,
+      "Loss": "wce",
+      "w_rare_over_w_freq": 58.999996185302734
+    },
+    {
+      "Dataset": "aps_failure",
+      "IR": 59.0,
+      "Loss": "pwce",
+      "w_rare_over_w_freq": 6.580452919006348
+    },
+    {
+      "Dataset": "aps_failure",
+      "IR": 59.0,
+      "Loss": "sqce",
+      "w_rare_over_w_freq": 7.681146144866943
+    },
+    {
+      "Dataset": "aps_failure",
+      "IR": 59.0,
+      "Loss": "lwce",
+      "w_rare_over_w_freq": 1.5900564193725586
+    },
+    {
+      "Dataset": "aps_failure",
+      "IR": 59.0,
+      "Loss": "plwce",
+      "w_rare_over_w_freq": 3.623208999633789
+    },
+    {
+      "Dataset": "aps_failure",
+      "IR": 59.0,
+      "Loss": "eslwce",
+      "w_rare_over_w_freq": 1.574365258216858
+    },
+    {
+      "Dataset": "aps_failure",
+      "IR": 59.0,
+      "Loss": "combined",
+      "w_rare_over_w_freq": 1.2576316595077515
+    },
+    {
+      "Dataset": "aps_failure",
+      "IR": 59.0,
+      "Loss": "cb",
+      "w_rare_over_w_freq": 10.47733211517334
+    },
+    {
+      "Dataset": "bank_marketing",
+      "IR": 7.548622366288493,
+      "Loss": "wce",
+      "w_rare_over_w_freq": 7.548622131347656
+    },
+    {
+      "Dataset": "bank_marketing",
+      "IR": 7.548622366288493,
+      "Loss": "pwce",
+      "w_rare_over_w_freq": 1.833835244178772
+    },
+    {
+      "Dataset": "bank_marketing",
+      "IR": 7.548622366288493,
+      "Loss": "sqce",
+      "w_rare_over_w_freq": 2.7474753856658936
+    },
+    {
+      "Dataset": "bank_marketing",
+      "IR": 7.548622366288493,
+      "Loss": "lwce",
+      "w_rare_over_w_freq": 1.2459723949432373
+    },
+    {
+      "Dataset": "bank_marketing",
+      "IR": 7.548622366288493,
+      "Loss": "plwce",
+      "w_rare_over_w_freq": 2.0014536380767822
+    },
+    {
+      "Dataset": "bank_marketing",
+      "IR": 7.548622366288493,
+      "Loss": "eslwce",
+      "w_rare_over_w_freq": 1.2371991872787476
+    },
+    {
+      "Dataset": "bank_marketing",
+      "IR": 7.548622366288493,
+      "Loss": "combined",
+      "w_rare_over_w_freq": 2.284634828567505
+    },
+    {
+      "Dataset": "bank_marketing",
+      "IR": 7.548622366288493,
+      "Loss": "cb",
+      "w_rare_over_w_freq": 3.0339701175689697
+    },
+    {
+      "Dataset": "telco_churn",
+      "IR": 2.7691131498470947,
+      "Loss": "wce",
+      "w_rare_over_w_freq": 2.769113063812256
+    },
+    {
+      "Dataset": "telco_churn",
+      "IR": 2.7691131498470947,
+      "Loss": "pwce",
+      "w_rare_over_w_freq": 1.8883461952209473
+    },
+    {
+      "Dataset": "telco_churn",
+      "IR": 2.7691131498470947,
+      "Loss": "sqce",
+      "w_rare_over_w_freq": 1.6640653610229492
+    },
+    {
+      "Dataset": "telco_churn",
+      "IR": 2.7691131498470947,
+      "Loss": "lwce",
+      "w_rare_over_w_freq": 1.141847014427185
+    },
+    {
+      "Dataset": "telco_churn",
+      "IR": 2.7691131498470947,
+      "Loss": "plwce",
+      "w_rare_over_w_freq": 1.9544271230697632
+    },
+    {
+      "Dataset": "telco_churn",
+      "IR": 2.7691131498470947,
+      "Loss": "eslwce",
+      "w_rare_over_w_freq": 1.1391828060150146
+    },
+    {
+      "Dataset": "telco_churn",
+      "IR": 2.7691131498470947,
+      "Loss": "combined",
+      "w_rare_over_w_freq": 1.8082307577133179
+    },
+    {
+      "Dataset": "telco_churn",
+      "IR": 2.7691131498470947,
+      "Loss": "cb",
+      "w_rare_over_w_freq": 2.4782354831695557
+    },
+    {
+      "Dataset": "german_credit",
+      "IR": 2.3333333333333335,
+      "Loss": "wce",
+      "w_rare_over_w_freq": 2.3333332538604736
+    },
+    {
+      "Dataset": "german_credit",
+      "IR": 2.3333333333333335,
+      "Loss": "pwce",
+      "w_rare_over_w_freq": 1.9467304944992065
+    },
+    {
+      "Dataset": "german_credit",
+      "IR": 2.3333333333333335,
+      "Loss": "sqce",
+      "w_rare_over_w_freq": 1.5275253057479858
+    },
+    {
+      "Dataset": "german_credit",
+      "IR": 2.3333333333333335,
+      "Loss": "lwce",
+      "w_rare_over_w_freq": 1.1578116416931152
+    },
+    {
+      "Dataset": "german_credit",
+      "IR": 2.3333333333333335,
+      "Loss": "plwce",
+      "w_rare_over_w_freq": 1.7744581699371338
+    },
+    {
+      "Dataset": "german_credit",
+      "IR": 2.3333333333333335,
+      "Loss": "eslwce",
+      "w_rare_over_w_freq": 1.1538622379302979
+    },
+    {
+      "Dataset": "german_credit",
+      "IR": 2.3333333333333335,
+      "Loss": "combined",
+      "w_rare_over_w_freq": 1.7950096130371094
+    },
+    {
+      "Dataset": "german_credit",
+      "IR": 2.3333333333333335,
+      "Loss": "cb",
+      "w_rare_over_w_freq": 2.3010072708129883
+    },
+    {
+      "Dataset": "secom",
+      "IR": 14.013698630136986,
+      "Loss": "wce",
+      "w_rare_over_w_freq": 14.01369857788086
+    },
+    {
+      "Dataset": "secom",
+      "IR": 14.013698630136986,
+      "Loss": "pwce",
+      "w_rare_over_w_freq": 67.69098663330078
+    },
+    {
+      "Dataset": "secom",
+      "IR": 14.013698630136986,
+      "Loss": "sqce",
+      "w_rare_over_w_freq": 3.743487596511841
+    },
+    {
+      "Dataset": "secom",
+      "IR": 14.013698630136986,
+      "Loss": "lwce",
+      "w_rare_over_w_freq": 1.610447645187378
+    },
+    {
+      "Dataset": "secom",
+      "IR": 14.013698630136986,
+      "Loss": "plwce",
+      "w_rare_over_w_freq": 1.5204435586929321
+    },
+    {
+      "Dataset": "secom",
+      "IR": 14.013698630136986,
+      "Loss": "eslwce",
+      "w_rare_over_w_freq": 1.5915653705596924
+    },
+    {
+      "Dataset": "secom",
+      "IR": 14.013698630136986,
+      "Loss": "combined",
+      "w_rare_over_w_freq": 1.206069827079773
+    },
+    {
+      "Dataset": "secom",
+      "IR": 14.013698630136986,
+      "Loss": "cb",
+      "w_rare_over_w_freq": 13.367570877075195
+    },
+    {
+      "Dataset": "credit_card_default",
+      "IR": 3.5209903121636166,
+      "Loss": "wce",
+      "w_rare_over_w_freq": 3.5209903717041016
+    },
+    {
+      "Dataset": "credit_card_default",
+      "IR": 3.5209903121636166,
+      "Loss": "pwce",
+      "w_rare_over_w_freq": 2.1937859058380127
+    },
+    {
+      "Dataset": "credit_card_default",
+      "IR": 3.5209903121636166,
+      "Loss": "sqce",
+      "w_rare_over_w_freq": 1.8764299154281616
+    },
+    {
+      "Dataset": "credit_card_default",
+      "IR": 3.5209903121636166,
+      "Loss": "lwce",
+      "w_rare_over_w_freq": 1.1490554809570312
+    },
+    {
+      "Dataset": "credit_card_default",
+      "IR": 3.5209903121636166,
+      "Loss": "plwce",
+      "w_rare_over_w_freq": 1.7685037851333618
+    },
+    {
+      "Dataset": "credit_card_default",
+      "IR": 3.5209903121636166,
+      "Loss": "eslwce",
+      "w_rare_over_w_freq": 1.1420321464538574
+    },
+    {
+      "Dataset": "credit_card_default",
+      "IR": 3.5209903121636166,
+      "Loss": "combined",
+      "w_rare_over_w_freq": 1.7564126253128052
+    },
+    {
+      "Dataset": "credit_card_default",
+      "IR": 3.5209903121636166,
+      "Loss": "cb",
+      "w_rare_over_w_freq": 2.166799783706665
+    },
+    {
+      "Dataset": "glass",
+      "IR": 8.833333333333334,
+      "Loss": "wce",
+      "w_rare_over_w_freq": 8.833332061767578
+    },
+    {
+      "Dataset": "glass",
+      "IR": 8.833333333333334,
+      "Loss": "pwce",
+      "w_rare_over_w_freq": 1.9223718643188477
+    },
+    {
+      "Dataset": "glass",
+      "IR": 8.833333333333334,
+      "Loss": "sqce",
+      "w_rare_over_w_freq": 2.9720919132232666
+    },
+    {
+      "Dataset": "glass",
+      "IR": 8.833333333333334,
+      "Loss": "lwce",
+      "w_rare_over_w_freq": 2.0499322414398193
+    },
+    {
+      "Dataset": "glass",
+      "IR": 8.833333333333334,
+      "Loss": "plwce",
+      "w_rare_over_w_freq": 1.4317584037780762
+    },
+    {
+      "Dataset": "glass",
+      "IR": 8.833333333333334,
+      "Loss": "eslwce",
+      "w_rare_over_w_freq": 1.1949946880340576
+    },
+    {
+      "Dataset": "glass",
+      "IR": 8.833333333333334,
+      "Loss": "combined",
+      "w_rare_over_w_freq": 1.1917508840560913
+    },
+    {
+      "Dataset": "glass",
+      "IR": 8.833333333333334,
+      "Loss": "cb",
+      "w_rare_over_w_freq": 8.799140930175781
+    },
+    {
+      "Dataset": "steel_faults",
+      "IR": 12.394736842105264,
+      "Loss": "wce",
+      "w_rare_over_w_freq": 12.39473819732666
+    },
+    {
+      "Dataset": "steel_faults",
+      "IR": 12.394736842105264,
+      "Loss": "pwce",
+      "w_rare_over_w_freq": 7.236203193664551
+    },
+    {
+      "Dataset": "steel_faults",
+      "IR": 12.394736842105264,
+      "Loss": "sqce",
+      "w_rare_over_w_freq": 3.520616054534912
+    },
+    {
+      "Dataset": "steel_faults",
+      "IR": 12.394736842105264,
+      "Loss": "lwce",
+      "w_rare_over_w_freq": 1.6805994510650635
+    },
+    {
+      "Dataset": "steel_faults",
+      "IR": 12.394736842105264,
+      "Loss": "plwce",
+      "w_rare_over_w_freq": 4.662490367889404
+    },
+    {
+      "Dataset": "steel_faults",
+      "IR": 12.394736842105264,
+      "Loss": "eslwce",
+      "w_rare_over_w_freq": 1.204458236694336
+    },
+    {
+      "Dataset": "steel_faults",
+      "IR": 12.394736842105264,
+      "Loss": "combined",
+      "w_rare_over_w_freq": 3.8496737480163574
+    },
+    {
+      "Dataset": "steel_faults",
+      "IR": 12.394736842105264,
+      "Loss": "cb",
+      "w_rare_over_w_freq": 12.12742805480957
+    },
+    {
+      "Dataset": "yeast",
+      "IR": 108.0,
+      "Loss": "wce",
+      "w_rare_over_w_freq": 107.99996948242188
+    },
+    {
+      "Dataset": "yeast",
+      "IR": 108.0,
+      "Loss": "pwce",
+      "w_rare_over_w_freq": 4.074056625366211
+    },
+    {
+      "Dataset": "yeast",
+      "IR": 108.0,
+      "Loss": "sqce",
+      "w_rare_over_w_freq": 10.392302513122559
+    },
+    {
+      "Dataset": "yeast",
+      "IR": 108.0,
+      "Loss": "lwce",
+      "w_rare_over_w_freq": 4.172147274017334
+    },
+    {
+      "Dataset": "yeast",
+      "IR": 108.0,
+      "Loss": "plwce",
+      "w_rare_over_w_freq": 7.9150166511535645
+    },
+    {
+      "Dataset": "yeast",
+      "IR": 108.0,
+      "Loss": "eslwce",
+      "w_rare_over_w_freq": 1.4433902502059937
+    },
+    {
+      "Dataset": "yeast",
+      "IR": 108.0,
+      "Loss": "combined",
+      "w_rare_over_w_freq": 5.824787616729736
+    },
+    {
+      "Dataset": "yeast",
+      "IR": 108.0,
+      "Loss": "cb",
+      "w_rare_over_w_freq": 105.9244384765625
+    },
+    {
+      "Dataset": "page_blocks",
+      "IR": 171.95,
+      "Loss": "wce",
+      "w_rare_over_w_freq": 171.9499969482422
+    },
+    {
+      "Dataset": "page_blocks",
+      "IR": 171.95,
+      "Loss": "pwce",
+      "w_rare_over_w_freq": 4.684040546417236
+    },
+    {
+      "Dataset": "page_blocks",
+      "IR": 171.95,
+      "Loss": "sqce",
+      "w_rare_over_w_freq": 13.112969398498535
+    },
+    {
+      "Dataset": "page_blocks",
+      "IR": 171.95,
+      "Loss": "lwce",
+      "w_rare_over_w_freq": 2.6747138500213623
+    },
+    {
+      "Dataset": "page_blocks",
+      "IR": 171.95,
+      "Loss": "plwce",
+      "w_rare_over_w_freq": 10.567983627319336
+    },
+    {
+      "Dataset": "page_blocks",
+      "IR": 171.95,
+      "Loss": "eslwce",
+      "w_rare_over_w_freq": 1.4404470920562744
+    },
+    {
+      "Dataset": "page_blocks",
+      "IR": 171.95,
+      "Loss": "combined",
+      "w_rare_over_w_freq": 5.655960559844971
+    },
+    {
+      "Dataset": "page_blocks",
+      "IR": 171.95,
+      "Loss": "cb",
+      "w_rare_over_w_freq": 145.56878662109375
+    }
+  ]
+}

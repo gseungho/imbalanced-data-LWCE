@@ -1,0 +1,90 @@
+{
+  "grad_summary": {
+    "ce": {
+      "grad_norm_final": 0.62787533963987,
+      "grad_ratio_final": 2.1397963740272035
+    },
+    "wce": {
+      "grad_norm_final": 0.5328016408458007,
+      "grad_ratio_final": 5.20708166689585
+    },
+    "pwce": {
+      "grad_norm_final": 0.6519448692383225,
+      "grad_ratio_final": 3.3529428223316247
+    },
+    "sqce": {
+      "grad_norm_final": 0.6334350203951774,
+      "grad_ratio_final": 3.6369040723272676
+    },
+    "lwce": {
+      "grad_norm_final": 0.6409647059602692,
+      "grad_ratio_final": 2.405406890647204
+    },
+    "plwce": {
+      "grad_norm_final": 0.602428372344781,
+      "grad_ratio_final": 3.7532078996888543
+    },
+    "eslwce": {
+      "grad_norm_final": 0.6756137749704065,
+      "grad_ratio_final": 2.1974905824424575
+    },
+    "combined": {
+      "grad_norm_final": 0.6279625457306933,
+      "grad_ratio_final": 3.7759378399112924
+    },
+    "cb": {
+      "grad_norm_final": 0.54963982603525,
+      "grad_ratio_final": 4.735566113722769
+    },
+    "focal": {
+      "grad_norm_final": 0.2436683684060638,
+      "grad_ratio_final": 1.9388866040861785
+    },
+    "logitadj": {
+      "grad_norm_final": 0.652560951408289,
+      "grad_ratio_final": 2.1455966674244005
+    }
+  },
+  "ablation": [
+    {
+      "Method": "wce",
+      "LogCompression": "X",
+      "Power_alpha": "X",
+      "Smoothing_eps": "X",
+      "F1_Macro": "0.3735\u00b10.0088",
+      "Worst_Acc": "0.0270"
+    },
+    {
+      "Method": "lwce",
+      "LogCompression": "O",
+      "Power_alpha": "X",
+      "Smoothing_eps": "X",
+      "F1_Macro": "0.4190\u00b10.0060",
+      "Worst_Acc": "0.0000"
+    },
+    {
+      "Method": "plwce",
+      "LogCompression": "O",
+      "Power_alpha": "O",
+      "Smoothing_eps": "X",
+      "F1_Macro": "0.4343\u00b10.0123",
+      "Worst_Acc": "0.0488"
+    },
+    {
+      "Method": "eslwce",
+      "LogCompression": "O",
+      "Power_alpha": "X",
+      "Smoothing_eps": "O",
+      "F1_Macro": "0.4192\u00b10.0065",
+      "Worst_Acc": "0.0000"
+    },
+    {
+      "Method": "combined",
+      "LogCompression": "O",
+      "Power_alpha": "O",
+      "Smoothing_eps": "O",
+      "F1_Macro": "0.4342\u00b10.0122",
+      "Worst_Acc": "0.0488"
+    }
+  ]
+}

@@ -240,30 +240,37 @@ PyTorch MLP 기반.
 - **wce 강세**: Bot-IoT(4-class 단순 구조)에서 wce가 압도적 우위 (+0.090)
 - **불균형 ≤ 중간(RT-IoT2022)**: 모든 손실 함수가 0.93+ F1-Macro로 차이 미미
 
-## 실험 결과 요약 — 통합 노트북 트랙 (ASC 논문용, 2026-06, N=5)
+## 실험 결과 요약 — 통합 노트북 트랙 (ASC 논문용, 11종, 2026-07 재실행, N=5)
 
-수치 출처: `_checkpoint_network.json` (**8 losses, wce 포함**, sqce 포함, 2026-06 재실행). **lwce/plwce가 proposed.**
-F1-Macro 기준 8종 중 순위(`n/8`)로 표기. 통합 IR: NSL-KDD 1295:1, UNSW 841:1, CICIDS2017 8750:1, CICIDS2018 17,500:1, CIC-DDoS2019 1957:1, Bot-IoT 1366:1, TON_IoT 48:1, RT-IoT2022 3313:1.
+수치 출처: `results/mlp/network_mlp_all_results.json` (**11 losses**, gradient/per-class 포함). 440 run 전부 완성.
+**proposed = lwce/plwce/eslwce**, combined는 §4.5 ablation, logitadj는 §4.2 baseline.
+IR: NSL-KDD 1295, UNSW 841, CICIDS2017 8750, CICIDS2018 17,500, CIC-DDoS2019 1957, Bot-IoT 1366, TON_IoT 48, RT-IoT2022 3313.
 
-**🔑 wce(역빈도) = 8종 중 최악** — 평균순위 F1 **6.12/8**, Tail **7.00/8(사실상 꼴찌)**. 극심 불균형일수록 붕괴: CICIDS2018(17,500:1)·CICIDS2017(8750:1)·RT-IoT2022(3313:1)·Bot-IoT(1366:1)에서 **F1·Tail 모두 단독 8/8**. Tail-F1이 NSL 0.1445(vs lwce 0.5256)·RT22 0.6415(vs lwce 0.8742)로 붕괴. **weight explosion을 실증** — bounded reweighting(lwce/plwce/sqce/pwce)이 unbounded wce를 일관 상회. 유일 예외 CIC-DDoS2019(wce F1 1위 0.4753, but Tail 5/8). 8종 평균순위: pwce 3.00 / plwce 3.25 / lwce 3.75 / sqce 4.25 / focal 4.75 / ce 5.00 / cb 5.75 / **wce 6.12**.
+**F1-Macro 평균순위 (11종, 낮을수록 좋음)**: combined 4.12 / pwce 4.00 / eslwce 4.75 / sqce 5.00 /
+lwce 5.38 / plwce 5.38 / focal 5.38 / logitadj 6.88 / **wce 7.50** / ce 8.25 / **cb 9.38**.
+평균 F1: combined 0.670 > eslwce 0.669 > pwce 0.667 > plwce 0.666 > lwce 0.665 > focal 0.663 > sqce 0.660 > ce 0.642 > logitadj 0.631 > cb 0.629 > **wce 0.622**.
 
-| 데이터셋 | 🥇 최우수 (F1) | **lwce** | **plwce** | wce | 소수클래스(Tail) |
-|---------|---------------|----------|-----------|-----|------------------|
-| NSL-KDD | lwce 0.6349 | **0.6349 (1/8) 🥇** | 0.6343 (2/8) | 0.5778 (6/8) | **plwce Tail 0.5457 최우수** |
-| UNSW-NB15 | pwce 0.4624 | 0.4439 (4/8) | 0.4594 (2/8) | 0.4399 (5/8) | pwce Tail 0.2498 최상 |
-| CICIDS2017 | plwce 0.7866 | 0.7829 (2/8) | **0.7866 (1/8) 🥇** | 0.6482 (8/8) | pwce Tail 0.4888 최상 |
-| CICIDS2018 | pwce 0.8046 | 0.8042 (2/8) | 0.8031 (3/8) | 0.6741 (8/8) | **lwce·plwce Tail 0.6760 공동 최상** |
-| CIC-DDoS2019 | **wce 0.4753** | 0.4471 (7/8) | 0.4626 (5/8) | **0.4753 (1/8)** | **plwce Tail 0.1869 최우수** |
-| Bot-IoT | pwce/sqce 0.9182 | 0.9147 (5/8) | 0.9106 (6/8) | 0.9070 (8/8) | 전부 노이즈 내(±0.01) |
-| TON_IoT | ce 0.3933 | 0.3590 (6/8) | 0.3887 (2/8) | 0.3593 (5/8) | plwce Tail 0.5508 최상(고분산) |
-| RT-IoT2022 | ce 0.9544 | 0.9512 (3/8) | 0.9292 (5/8) | 0.8696 (8/8) | ce Tail 0.8838 최상 |
+**🔑 wce = 여전히 하위권**(F1 평균순위 7.50/11, 평균 F1 최하). 극심 불균형서 붕괴.
+단, **G-Mean은 wce 0.545·cb 0.508로 최고** — 소수 클래스 recall만 극대화하고 head를 희생한 결과(F1 최하와 공존).
+**→ 논문: "wce/cb가 G-Mean 높지만 F1 최하 = head 붕괴로 산 소수 클래스 이득"으로 서술.**
 
-**제안 손실 소견 (lwce/plwce)**
-- **상위권 다수**: 단독 1위 2/8(NSL-KDD lwce, CICIDS2017 plwce), **top-2 진입 4/8**(+UNSW-NB15 plwce, CICIDS2018 lwce). CICIDS2018은 pwce/lwce/plwce가 0.803~0.805로 사실상 동률.
-- **Tail(소수 클래스)이 핵심 강점**: plwce가 NSL-KDD(0.5457)·CIC-DDoS2019(0.1869) Tail 최우수, lwce·plwce가 CICIDS2018 Tail 공동 최상(0.6760). F1-Macro에서 안 보여도 소수 클래스 회복은 제안 손실이 자주 1위.
-- **lwce vs plwce 상보적**: plwce는 Tail·중간 불균형(UNSW/TON_IoT 2위)에서, lwce는 다클래스 균형 F1(NSL-KDD 1위)에서 우위.
-- **약세 케이스**: 극단 few-class 불균형(CIC-DDoS2019는 wce, Bot-IoT는 pwce/sqce)에 밀림 / ce가 이미 강한 TON_IoT·RT-IoT2022는 ce 우위.
+| 데이터셋 | IR | 🥇 최우수(F1) | lwce | plwce | eslwce | combined |
+|---------|-----|--------------|------|-------|--------|----------|
+| Bot-IoT | 1366 | pwce 0.9182 | 0.9147(7) | 0.9106(9) | 0.9132(8) | 0.9156(6) |
+| CIC-DDoS2019 | 1957 | sqce 0.4734 | 0.4471(9) | 0.4631(5) | 0.4393(10) | 0.4683(3) |
+| CICIDS2017 | 8750 | **lwce 0.7895** 🥇 | **0.7895(1)** | 0.7544(8) | 0.7839(3) | 0.7645(6) |
+| CICIDS2018 | 17500 | pwce 0.8082 | 0.8044(3) | 0.7904(6) | 0.8042(4) | 0.8055(2) |
+| NSL-KDD | 1295 | logitadj 0.6436 | 0.6303(4) | 0.6279(5) | 0.6340(2) | 0.6336(3) |
+| RT-IoT2022 | 3313 | ce 0.9525 | 0.9513(4) | 0.9343(5) | 0.9521(2) | 0.9313(6) |
+| TON_IoT | 48 | focal 0.3955 | 0.3375(9) | 0.3820(3) | 0.3863(2) | 0.3780(4) |
+| UNSW-NB15 | 841 | pwce 0.4633 | 0.4440(6) | **plwce 0.4633(2)** | 0.4403(7) | 0.4614(3) |
 
-> **세 도메인 통합 narrative**: 제안 손실(특히 plwce)의 강점은 **소수 클래스 Tail 회복**과 **다클래스·중간 불균형**.
-> 파라미터 없는 √-CE(sqce)는 **few-class 극단 불균형**(CIC-DDoS2019, CIFAR-10 고IR)에서 빛남 → 역할 구분.
-> CB는 다수 도메인에서 변동성·최하위 빈번. cf. `image_classification/CLAUDE.md`, `tabular_data/CLAUDE.md` 동일 결론.
+**소견 (v1 8종 대비 변화 포함)**
+- **network은 손실 간 F1 격차가 작다**(상위 7종이 0.660~0.670). CICIDS2017만 lwce 단독 1위, 나머지는 pwce/sqce/ce/focal/logitadj가 데이터셋마다 교대.
+- **combined·eslwce가 예상 외 선전**: 평균 F1 1·2위. 단 **combined의 F1은 대부분 plwce/eslwce와 노이즈 내 차이** — orthogonality라기보다 "결합해도 손해 없음" 수준.
+- **제안 손실의 진짜 강점은 F1보다 gradient 안정성**: CICIDS2018(IR 17,500)에서 grad_ratio wce **98.6** vs lwce 2.0·plwce 1.8·eslwce 1.9 → Proposition 4 실증(§4.7 그림).
+- **ce가 이미 강한 도메인(RT-IoT2022 다수 클래스 76.9% 지배, TON_IoT)**엔 reweighting 이점 미미.
+
+> **세 도메인 통합 narrative(잠정)**: 제안 손실은 **다클래스·중간 불균형 F1**과 **gradient 안정성**에서 강함.
+> wce/cb는 G-Mean은 높지만 F1 붕괴(head 희생). image 결과 합류 후 통합 통계검정 필요.
+> cf. `image_classification/CLAUDE.md`, `tabular_data/CLAUDE.md`.
