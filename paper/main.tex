@@ -50,14 +50,14 @@ Classification}
 \begin{abstract}
 Class imbalance is a pervasive obstacle in machine learning, arising whenever a
 few majority categories dominate the training data while critically important
-minority categories remain severely underrepresented. Among algorithm-level
+minority categories remain severely underrepresented. Among loss-level
 remedies, Weighted Cross-Entropy (WCE) is the most direct: it scales the loss of
-each class by the inverse of its frequency. However, these inverse-frequency
-weights grow without bound as the imbalance becomes more severe, producing
-unstable optimization. More elaborate alternatives such as Class-Balanced (CB)
-Loss and Focal Loss introduce additional hyperparameters and, in our experiments,
-behave inconsistently across datasets---occasionally falling below ordinary
-Cross-Entropy (CE). We propose Log-Weighted Cross-Entropy (LWCE), which
+each class by the inverse of its frequency. However, as the imbalance becomes more severe, these
+inverse-frequency weights induce an increasingly large rare-to-frequent weight
+ratio, so that minority samples can dominate the class-dependent component of the
+gradient scale and destabilize optimization. More elaborate alternatives such as
+Class-Balanced (CB) Loss and Focal Loss introduce additional hyperparameters and
+can be sensitive to their selection and to dataset characteristics. We propose Log-Weighted Cross-Entropy (LWCE), which
 replaces the inverse-frequency weight with a logarithmically compressed
 counterpart that keeps a meaningful boost for rare classes while bounding weight
 growth, and which introduces no additional hyperparameters. We further generalize
@@ -82,11 +82,11 @@ class-imbalanced classification.
 \end{abstract}
 
 \begin{highlights}
-\item A logarithmic re-weighting loss that bounds the weight explosion of WCE.
+\item A logarithmic loss that compresses the rare-to-frequent weight ratio of WCE.
 \item A single-parameter generalization tuned automatically on a small proxy subset.
 \item An $\varepsilon$-smoothed variant keeps per-class weights bounded even for the rarest classes.
 \item Evaluation spans image, text, tabular, and network-intrusion domains.
-\item The proposed losses improve as imbalance grows and avoid collapse of rival losses.
+\item The proposed losses improve as imbalance grows across four evaluation domains.
 \end{highlights}
 
 \begin{keywords}
@@ -128,7 +128,7 @@ Minority Over-sampling Technique (SMOTE) synthesize new minority
 instances~\citep{chawla2002}, while undersampling discards majority examples to
 restore balance. Both directions carry well-known risks---oversampling can
 introduce synthetic artifacts and encourage overfitting, whereas undersampling
-discards potentially informative majority data~\citep{drummond2003}. Algorithm-level
+discards potentially informative majority data~\citep{drummond2003}. Loss-level
 methods instead modify the training objective. These include margin-based losses
 that enlarge the decision boundary around minority
 classes~\citep{cao2019}, logit-adjustment techniques that calibrate class priors,
@@ -150,20 +150,19 @@ weight inversely proportional to its frequency,
 \begin{equation}
 w_c^{\mathrm{WCE}} \propto \frac{1}{n_c}.
 \end{equation}
-As a minority class becomes rarer and $n_c$ shrinks, this inverse-frequency weight
-grows without bound relative to the majority, so the corresponding gradients
-become disproportionately large and destabilize optimization under extreme
-imbalance. More sophisticated alternatives were designed to soften
-this behavior but bring their own drawbacks. Focal Loss reduces the influence of
-easy, typically majority, examples through a tunable focusing term, but it
-operates on per-sample confidence rather than class frequency and therefore
-behaves inconsistently across imbalance levels. Class-Balanced (CB) Loss
-re-weights by an effective number of samples governed by an additional
-hyperparameter, yet that hyperparameter is sensitive and, in our experiments, CB
-Loss degrades below plain Cross-Entropy under severe imbalance. Existing methods thus
-attempt to alleviate this instability through additional mechanisms, yet none
-directly addresses the uncontrolled growth of the inverse-frequency weight while
-preserving the simplicity of WCE. In short, the
+As the minority count decreases relative to the majority count, inverse-frequency
+weighting induces an increasingly large rare-to-frequent weight ratio, which can
+cause minority samples to dominate the class-dependent component of the gradient
+scale and destabilize optimization under extreme imbalance. More sophisticated
+alternatives were designed to soften this behavior but bring their own drawbacks.
+Focal Loss reduces the influence of easy, typically majority, examples through a
+tunable focusing term, but it operates on per-sample confidence rather than class
+frequency, and its behavior can be sensitive to the focusing parameter and the
+imbalance level. Class-Balanced (CB) Loss re-weights by an effective number of
+samples governed by an additional hyperparameter whose effect can be sensitive to
+the dataset. These methods are effective in many settings, but they alleviate the
+instability through additional mechanisms rather than by directly controlling the
+rare-to-frequent weight ratio while preserving the simplicity of WCE. In short, the
 field still lacks a re-weighting loss that is simultaneously simple,
 hyperparameter-light, numerically stable, and dependable across both the level of
 imbalance and the application domain.
@@ -216,9 +215,9 @@ The main contributions of this paper are as follows.
 \begin{enumerate}
   \item We propose Log-Weighted Cross-Entropy (LWCE), a parameter-free drop-in
         replacement for Weighted Cross-Entropy that substitutes the
-        inverse-frequency weight with a logarithmically compressed one, removing
-        the weight-explosion failure mode while retaining a meaningful emphasis on
-        rare classes.
+        inverse-frequency weight with a logarithmically compressed one, reducing
+        the dynamic range of the class weights and the resulting optimization
+        instability while retaining a meaningful emphasis on rare classes.
   \item We develop two complementary extensions of LWCE: Power-Log Weighted
         Cross-Entropy (PLWCE), whose single exponent---tuned automatically on a
         small proxy subset---controls the focusing strength, and
@@ -227,15 +226,15 @@ The main contributions of this paper are as follows.
         and keeps it well defined even for vanishing or mini-batch-level class
         counts.
   \item We analyze the theoretical properties of the proposed weighting functions,
-        showing that their rare-to-frequent weight ratio grows only logarithmically
-        with the imbalance ratio---in contrast to the linear growth of WCE---and
-        that the resulting weights remain bounded and numerically stable even for
-        the rarest classes.
+        showing that the weights are bounded for positive class counts, that ES-LWCE
+        remains well defined even at vanishing counts, and that their rare-to-frequent
+        weight ratios grow logarithmically (LWCE) or polylogarithmically (PLWCE)
+        rather than linearly with the imbalance ratio.
   \item We provide a controlled cross-domain evaluation spanning image, tabular,
-        and network intrusion detection data, showing that the proposed losses
-        improve over Cross-Entropy as imbalance grows and, unlike Class-Balanced
-        Loss and Focal Loss, avoid the severe degradation below plain Cross-Entropy
-        that these baselines occasionally exhibit.
+        network-intrusion, and text classification data, showing that the proposed
+        losses improve over Cross-Entropy as imbalance grows and, unlike
+        Class-Balanced Loss and Focal Loss, avoid the severe degradation below plain
+        Cross-Entropy that these baselines occasionally exhibit.
 \end{enumerate}
 
 The remainder of this paper is organized as follows.
@@ -295,8 +294,9 @@ difficulty-based, and margin- or logit-based methods.
 \emph{Frequency-based} methods scale each class loss by a function of its count.
 The most direct instance is Weighted Cross-Entropy, which sets $w_c \propto 1/n_c$
 so that the weight is inversely proportional to class count~\citep{wang2019};
-these weights, however, grow without bound under extreme imbalance and
-destabilize optimization, and the benefit of such importance weighting is known to
+these weights, however, produce a rare-to-frequent ratio that grows linearly with
+the imbalance ratio and can destabilize optimization, and the benefit of such
+importance weighting is known to
 diminish for over-parameterized networks driven to low training
 error~\citep{byrd2019}. Class-Balanced Loss softens this by weighting with an
 effective number of samples, $w_c \propto (1-\beta)/(1-\beta^{n_c})$, but this
@@ -354,45 +354,46 @@ applied within each branch or expert rather than replacing the architecture.
 
 \subsection{Positioning of the proposed losses}
 Within the re-weighting family, existing schemes face a dilemma: inverse-frequency
-weighting is parameter-free but explodes, whereas more stable variants regain
-control only by adding sensitive hyperparameters~\citep{lin2017,cui2019}.
-Logarithmic compression offers a middle ground that, to our knowledge, has not
-been systematically studied as a re-weighting principle across application
-domains. LWCE realizes it without any additional hyperparameter, PLWCE adds a
-single exponent that tunes the focusing strength, and ES-LWCE adds an
-$\varepsilon$ term that keeps the weight bounded and well defined for the rarest
-classes. Table~\ref{tab:positioning} contrasts these properties with the main
-cost-sensitive baselines: WCE is parameter-free but its weights are unbounded,
-Focal and CB Loss regain stability only at the cost of an extra hyperparameter,
-whereas LWCE is a frequency-based, parameter-free scheme whose weights stay
-bounded. We evaluate this family against the representative cost-sensitive losses
-above under a unified protocol spanning image, tabular, and network-intrusion
-domains---each of which sustains its own active line of imbalance research, from
-dedicated tabular benchmarks~\citep{climb2025} to intrusion detection under
-severe class skew~\citep{abdelkhalek2023}.
+weighting is parameter-free but its rare-to-frequent weight ratio grows without
+control, whereas more stable variants regain control only by adding sensitive
+hyperparameters~\citep{lin2017,cui2019}. Logarithmic compression offers a middle
+ground that, to our knowledge, has not been systematically studied as a
+re-weighting principle across application domains. LWCE realizes it without any
+additional hyperparameter, PLWCE adds a single exponent that tunes the focusing
+strength, and ES-LWCE adds an $\varepsilon$ term that keeps the weight bounded and
+well defined for the rarest classes. Table~\ref{tab:positioning} contrasts these
+properties with the main cost-sensitive baselines: WCE is parameter-free but its
+rare-to-frequent weight ratio is uncontrolled, Focal and CB Loss regain stability
+only at the cost of an extra hyperparameter, whereas LWCE is a frequency-based,
+parameter-free scheme whose weight ratio stays within a controlled range. We
+evaluate this family against the representative cost-sensitive losses above under a
+unified protocol spanning image, tabular, network-intrusion, and text
+classification domains---each of which sustains its own active line of imbalance
+research, from dedicated tabular benchmarks~\citep{climb2025} to intrusion
+detection under severe class skew~\citep{abdelkhalek2023}.
 
 \begin{table}[pos=h]
 \centering
 \caption{Positioning of LWCE against representative cost-sensitive losses.
-``Frequency''/``Difficulty'' denote the re-weighting signal; ``Param.-free''
-means no loss hyperparameter is required; ``Bounded weight'' refers to whether the
-multiplicative weighting factor is prevented from unbounded growth under extreme
-class imbalance. For Focal Loss this factor is the per-sample difficulty modulation
-$(1-p_t)^{\gamma}$, which is inherently confined to $[0,1]$ rather than a
-class-frequency weight; LWCE instead compresses the class-frequency weight itself.
-Logit Adjustment uses the class prior but applies it as an \emph{additive} shift to
-the logits rather than a multiplicative weight, so the bounded-weight criterion does
-not directly apply (n/a).}
+``Signal'' is the quantity that drives the re-weighting; ``Extra parameter''
+indicates whether the loss needs a tuned hyperparameter; ``Frequency weight''
+states how the class frequency enters the loss (a multiplicative class weight, an
+additive logit shift, or not at all); and ``Controlled range'' indicates whether
+the class-frequency weight is kept within a controlled range under extreme
+imbalance. For Focal Loss the only bounded factor is the per-sample difficulty
+modulation $(1-p_t)^{\gamma}\!\in[0,1]$, not a class-frequency weight; Logit
+Adjustment applies the class prior additively to the logits, so the criterion does
+not apply (n/a). LWCE compresses the class-frequency weight itself.}
 \label{tab:positioning}
 \begin{tabular}{lcccc}
 \toprule
-Loss & Frequency & Difficulty & Param.-free & Bounded weight \\
+Method & Signal & Extra parameter & Frequency weight & Controlled range \\
 \midrule
-WCE                  & \checkmark & --         & \checkmark & -- \\
-Focal Loss           & --         & \checkmark & --         & \checkmark \\
-CB Loss              & \checkmark & --         & --         & \checkmark \\
-Logit Adjustment     & \checkmark & --         & --         & n/a \\
-\textbf{LWCE (ours)} & \checkmark & --         & \checkmark & \checkmark \\
+WCE                  & Frequency  & No  & Multiplicative & No \\
+Focal Loss           & Difficulty & Yes & No             & Difficulty factor only \\
+CB Loss              & Frequency  & Yes & Multiplicative & Yes \\
+Logit Adjustment     & Prior      & Yes & Additive       & n/a \\
+\textbf{LWCE (ours)} & Frequency  & No  & Multiplicative & Yes \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -477,13 +478,18 @@ preserves the qualitative behaviour of inverse-frequency weighting.
 \emph{Proof.} $\log(1+n_c)$ is strictly increasing in $n_c$, so its reciprocal,
 any positive power of its reciprocal, and the reciprocal of its $\varepsilon$-shift
 are all strictly decreasing in $n_c$. $\hfill\square$
+Because mean normalization (Eq.~\eqref{eq:normalization}) multiplies every class
+weight by the same positive constant, it preserves this ordering, so the normalized
+weights $\widetilde{w}_c$ are also strictly decreasing in $n_c$.
 
 \paragraph{Proposition 2 (Boundedness).}
-For $n_c \ge 1$ the individual weights are bounded:
-$0 < w_c^{\mathrm{LWCE}} \le 1/\log 2$ and
+For $n_c \ge 1$ the individual raw weights are bounded:
+$0 < w_c^{\mathrm{LWCE}} \le 1/\log 2$ and, for any fixed $\alpha > 0$,
 $0 < w_c^{\mathrm{PLWCE}} \le 1/(\log 2)^{\alpha}$. The ES-LWCE weight is bounded
 even without this assumption: $0 < w_c^{\mathrm{ES\text{-}LWCE}} \le 1/\varepsilon$
-for every $n_c \ge 0$.
+for every $n_c \ge 0$. These bounds concern the raw weights $w_c$; the normalized
+weights $\widetilde{w}_c$ of Eq.~\eqref{eq:normalization} depend on the class
+composition and are not claimed to satisfy the same fixed bound.
 \emph{Proof.} Each weight is maximized at its smallest admissible count by
 Proposition~1. For LWCE and PLWCE this is $n_c = 1$, giving $1/\log 2$ and
 $1/(\log 2)^{\alpha}$. For ES-LWCE the denominator is at least $\varepsilon$,
@@ -500,8 +506,8 @@ explicit, user-controlled cap of $1/\varepsilon$.
 \paragraph{Proposition 3 (Dynamic-range compression).}
 Fix the minority count $n_{\min} \ge 1$ and let $\rho = n_{\max}/n_{\min} \to \infty$
 through growth of $n_{\max}$. The rare-to-frequent weight ratio then grows
-\emph{linearly} in $\rho$ under WCE but only \emph{logarithmically} under the
-proposed family. Under WCE,
+\emph{linearly} in $\rho$ under WCE but only \emph{logarithmically} for LWCE and
+\emph{polylogarithmically} for PLWCE. Under WCE,
 \begin{equation}\label{eq:ratio-wce}
 \frac{w_{\min}^{\mathrm{WCE}}}{w_{\max}^{\mathrm{WCE}}}
    = \frac{n_{\max}}{n_{\min}} = \rho,
@@ -515,12 +521,18 @@ whereas under LWCE and PLWCE,
    = \left(\frac{\log(1+n_{\max})}{\log(1+n_{\min})}\right)^{\!\alpha}
    = O\big((\log \rho)^{\alpha}\big).
 \end{equation}
-Comparing Eqs.~\eqref{eq:ratio-wce} and~\eqref{eq:ratio-lwce}, the compression
-reduces the dynamic range of the weights from linear to logarithmic in $\rho$
-while preserving the ordering that favours rare classes. Note that this is a
-statement about the \emph{ratio}: unlike the individual weights of
-Proposition~2, the ratio is not constant-bounded but grows without limit as
-$\rho \to \infty$---only much more slowly than the linear growth of WCE.
+Here $O(\cdot)$ denotes the asymptotic growth order in the imbalance ratio: for
+positive functions $f$ and $g$, $f = O(g)$ means that $f$ grows no faster than a
+constant multiple of $g$ as $\rho \to \infty$. Comparing
+Eqs.~\eqref{eq:ratio-wce} and~\eqref{eq:ratio-lwce}, the compression reduces the
+dynamic range of the weights from linear in $\rho$ (WCE) to \emph{logarithmic} for
+LWCE and \emph{polylogarithmic}, $O((\log\rho)^{\alpha})$, for PLWCE, while
+preserving the ordering that favours rare classes. Note that this is a statement
+about the \emph{ratio}: unlike the individual weights of Proposition~2, the ratio
+is not constant-bounded but grows without limit as $\rho \to \infty$---only much
+more slowly than the linear growth of WCE. For PLWCE with a large exponent
+$\alpha$ the polylogarithmic ratio can itself become sizeable, so the compression
+is strongest for LWCE and is moderated as $\alpha$ increases.
 Figure~\ref{fig:weight-compression} makes this compression concrete: with the
 majority count fixed at $n_{\max}=10^4$, the rarest class receives a weight
 $\rho = 10^4$ times larger than the majority under WCE, but only about $13$ times
@@ -528,7 +540,7 @@ larger under LWCE, with PLWCE and ES-LWCE interpolating between these regimes.
 
 \begin{figure}[pos=h]
 \centering
-\includegraphics[width=\linewidth]{figures/weight_compression.pdf}
+\includegraphics[width=0.72\linewidth]{figures/weight_compression.pdf}
 \caption{Dynamic-range compression (Proposition~3). The vertical axis is the
 rare-to-frequent weight ratio $w_{\min}/w_{\max}$ as a function of the minority
 count $n_c$, with the majority count fixed at $n_{\max}=10^4$; this ratio equals
@@ -589,15 +601,18 @@ the two coincide as $\varepsilon \to 0$. Its value appears when the class counts
 used to form the weights can \emph{vanish or drift}. When frequencies are
 estimated per mini-batch, or maintained online for streaming or continually
 growing label sets, a class may be momentarily absent ($n_c = 0$); the LWCE weight
-then diverges, whereas ES-LWCE remains well defined with weight at most
-$1/\varepsilon$. The constant $\varepsilon$ trades off two effects:
+then diverges, whereas ES-LWCE remains well defined with raw weight at most
+$1/\varepsilon$ \emph{before} the mean normalization of
+Eq.~\eqref{eq:normalization}. The constant $\varepsilon$ trades off two effects:
 \begin{itemize}
 \item small $\varepsilon$: stronger minority emphasis, closer to LWCE;
 \item large $\varepsilon$: more conservative gradient scaling, closer to uniform.
 \end{itemize}
-Because $\varepsilon$ shifts the weights monotonically from the LWCE limit toward
-the uniform (Cross-Entropy) limit and never past LWCE, it acts purely as a
-smoothing/robustness control. We therefore position ES-LWCE as an extension for
+As $\varepsilon \to \infty$ the raw weights all vanish, but after mean
+normalization they converge to the uniform (Cross-Entropy) weighting; thus, on the
+normalized weights actually used in training, $\varepsilon$ shifts the emphasis
+monotonically from the LWCE limit toward the uniform limit and never past LWCE, so
+it acts purely as a smoothing/robustness control. We therefore position ES-LWCE as an extension for
 vanishing- or batch-adaptive-count settings rather than as a method that is
 required at the dataset level.
 
@@ -624,6 +639,82 @@ To probe architecture- and modality-independence, we evaluate the same loss fami
 across image classification (CIFAR-10/100-LT with a ResNet-32 backbone), tabular
 classification and network-intrusion detection (multilayer perceptrons), and text
 classification (a compact Transformer encoder on a long-tailed emotion benchmark).
+
+\subsection{Datasets and imbalance construction}\label{sec:datasets}
+We evaluate on four domains spanning a wide range of imbalance severity, from mildly
+skewed tabular benchmarks ($\rho\!\approx\!2$) to extreme network-intrusion data
+($\rho$ up to $1.7\times10^{4}$); Table~\ref{tab:datasets} lists all datasets. For
+the two image benchmarks we construct long-tailed (LT) versions of CIFAR-10 and
+CIFAR-100 by subsampling each class to an exponential profile,
+\begin{equation}\label{eq:lt-profile}
+n_c = n_{\max}\,\rho^{-\frac{c-1}{C-1}}, \qquad c = 1,\ldots,C,
+\end{equation}
+with $n_{\max}=5000$ (CIFAR-10) and $500$ (CIFAR-100), and sweep the imbalance ratio
+$\rho\in\{10,50,100\}$; the standard test sets are left balanced. The tabular,
+network-intrusion, and text datasets are used with their \emph{natural} class
+imbalance and their official or standard train/test splits. GoEmotions is filtered
+to single-label examples, giving a $28$-class long-tailed text benchmark.
+
+\begin{table}[pos=h]
+\centering
+\caption{Datasets, grouped by domain. $C$ is the number of classes and $\rho$ the
+imbalance ratio (ratio of the largest to smallest class count). For the image
+benchmarks $\rho$ is imposed by Eq.~\eqref{eq:lt-profile}; the other domains use
+their natural imbalance. Train sizes for the CIFAR-LT rows are the constructed
+totals (split $80/20$ into train/validation) at $\rho=100$.}
+\label{tab:datasets}
+\begin{tabular}{llrrr}
+\toprule
+Dataset & Domain & $C$ & \# Train & $\rho$ \\
+\midrule
+CIFAR-10-LT          & Image   & 10  & 12{,}406 & 10/50/100 \\
+CIFAR-100-LT         & Image   & 100 & 10{,}847 & 10/50/100 \\
+\midrule
+credit\_card\_fraud   & Tabular & 2   & 199{,}364 & 578.5 \\
+aps\_failure          & Tabular & 2   & 60{,}000  & 59.0 \\
+bank\_marketing       & Tabular & 2   & 31{,}647  & 7.5 \\
+telco\_churn          & Tabular & 2   & 4{,}930   & 2.8 \\
+german\_credit        & Tabular & 2   & 700       & 2.3 \\
+secom                 & Tabular & 2   & 1{,}096   & 14.0 \\
+credit\_card\_default & Tabular & 2   & 21{,}000  & 3.5 \\
+glass                 & Tabular & 6   & 149       & 8.8 \\
+steel\_faults         & Tabular & 7   & 1{,}358   & 12.4 \\
+yeast                 & Tabular & 10  & 1{,}038   & 108.0 \\
+page\_blocks          & Tabular & 5   & 3{,}831   & 171.9 \\
+\midrule
+NSL-KDD               & Network & 5   & 125{,}973 & 1{,}295 \\
+UNSW-NB15             & Network & 10  & 82{,}332  & 841 \\
+CICIDS2017            & Network & 15  & 210{,}026 & 8{,}750 \\
+CICIDS2018            & Network & 15  & 166{,}261 & 17{,}500 \\
+CIC-DDoS2019          & Network & 18  & 208{,}502 & 1{,}957 \\
+Bot-IoT               & Network & 4   & 140{,}053 & 1{,}366 \\
+TON\_IoT              & Network & 10  & 147{,}730 & 47.9 \\
+RT-IoT2022            & Network & 12  & 86{,}181  & 3{,}313 \\
+\midrule
+GoEmotions            & Text    & 28  & 36{,}308  & 328.8 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Models and training protocol}\label{sec:protocol}
+Because the study compares losses rather than architectures, within each domain the
+backbone and the full training protocol are held identical across all losses; only
+the loss function changes. \emph{Image}: a ResNet-32 backbone trained from scratch
+with SGD (learning rate $0.1$, momentum $0.9$, weight decay $2\times10^{-4}$), a
+multi-step schedule decaying by $0.01$ at epochs $160$ and $180$, batch size $128$,
+and standard CIFAR augmentation (random crop with $4$-pixel padding and horizontal
+flip) for $200$ epochs. \emph{Tabular} and \emph{network intrusion}: a multilayer
+perceptron ($256$--$128$--$64$ with batch normalization, ReLU, and dropout $0.3$)
+trained with Adam (learning rate $10^{-3}$, weight decay $10^{-4}$) and cosine
+annealing to $10^{-5}$, batch size $512$, for $100$ epochs (tabular) and $50$ epochs
+(network). \emph{Text}: a compact Transformer encoder ($d_{\mathrm{model}}=128$,
+$4$ heads, $4$ layers, feed-forward width $256$, masked mean pooling) trained from
+scratch with AdamW (learning rate $5\times10^{-4}$, weight decay $10^{-2}$), a
+linear warmup over three epochs followed by cosine decay, gradient-norm clipping at
+$1.0$, and batch size $64$, for $50$ epochs. Every configuration is run with five
+random seeds ($42$--$46$), and we report the mean and standard deviation. All losses
+use the mean-normalized weights of Eq.~\eqref{eq:normalization}, including the WCE
+and Class-Balanced baselines, so that every method shares one scale convention.
 
 \subsection{Baselines and evaluation}\label{sec:setup}
 We compare the three proposed losses (LWCE, PLWCE, ES-LWCE) against Cross-Entropy,
@@ -654,14 +745,111 @@ is searched on a logarithmic grid because its effect on the weights is
 multiplicative. LWCE therefore competes with no tuning against baselines that each
 receive a full search.
 
-% TODO(results): 아래 3개 subsection은 4개 도메인(image 포함) 결과가 모두 모인 뒤 채운다.
-%   결과 수치를 지어내지 말 것. 표/그림은 results/ 집계에서 생성.
 \subsection{Main results}\label{sec:results}
-% TODO: per-domain 표 (Macro-F1 / Worst-class / G-Mean, mean±std) + 도메인 통합 mean rank.
+Table~\ref{tab:main} summarizes the primary metric, macro-averaged $F_1$, aggregated
+within each domain, together with the mean rank of each loss over all $26$
+dataset-and-imbalance settings. Two patterns are consistent across domains. First,
+the logarithmic re-weighting family occupies the top of the overall ranking: LWCE
+attains the best mean rank ($4.08$), and the proposed losses together with the
+inverse-power and inverse-square-root variants form a leading cluster well ahead of
+plain Cross-Entropy (mean rank $6.69$). Second, unbounded inverse-frequency
+weighting is the weakest method overall: WCE has the worst mean rank ($8.19$) and
+Class-Balanced loss the second worst ($7.62$), consistent with the weight-explosion
+mechanism of Section~\ref{sec:method}---as the imbalance grows, the uncontrolled
+weight ratio of WCE degrades its accuracy below even Cross-Entropy.
+
+No single loss dominates every domain, which is expected given how differently the
+domains are structured: logit adjustment is strongest on the balanced-test image
+benchmarks, LWCE on the tabular datasets, PLWCE on the long-tailed text data, and
+the combined variant---by a small margin---on network intrusion. The logarithmic
+family is nonetheless consistently near the top in all four, which is the central
+claim of a domain-independent re-weighting principle. On worst-class accuracy and
+the geometric mean of per-class recall the picture is more nuanced. WCE and CB
+often achieve the highest tail recall (for example, the highest geometric mean on
+the tabular datasets), but only by sacrificing head accuracy, so their macro-$F_1$
+falls to the bottom of the table; the proposed losses instead improve tail
+performance while preserving overall accuracy. This trade-off is most visible on the
+$28$-class text benchmark, where PLWCE reaches a geometric mean of $0.240$ against
+$0.073$ for Cross-Entropy while also achieving the best macro-$F_1$, whereas the
+higher tail recall of CB comes with the lowest overall accuracy. Full per-dataset
+tables with all metrics are provided in the supplementary material.
+
+\begin{table}[pos=h]
+\centering
+\caption{Main results. Per-domain macro-$F_1$ (mean over the datasets and imbalance
+settings of each domain, five seeds), and the mean rank of each loss over all $26$
+dataset-and-imbalance settings (lower is better). The three proposed losses are
+grouped at the bottom. Best in each column in \textbf{bold}, second best
+\underline{underlined}.}
+\label{tab:main}
+\begin{tabular}{lccccc}
+\toprule
+Method & Image & Tabular & Network & Text & Mean rank \\
+\midrule
+CE            & 0.403 & 0.714 & 0.642 & 0.412 & 6.69 \\
+WCE           & 0.394 & 0.683 & 0.622 & 0.374 & 8.19 \\
+Inv.-power    & 0.417 & 0.725 & 0.667 & 0.423 & 4.19 \\
+Inv.-sqrt     & 0.417 & 0.723 & 0.660 & 0.429 & 4.65 \\
+CB Loss       & 0.395 & 0.701 & 0.629 & 0.399 & 7.62 \\
+Focal Loss    & 0.401 & 0.715 & 0.663 & 0.405 & 6.15 \\
+Logit Adj.    & \textbf{0.434} & 0.720 & 0.631 & 0.421 & 4.31 \\
+\midrule
+LWCE          & 0.412 & \textbf{0.730} & 0.665 & 0.419 & \textbf{4.08} \\
+PLWCE         & \underline{0.421} & 0.719 & 0.666 & \textbf{0.434} & 4.73 \\
+ES-LWCE       & 0.411 & \underline{0.725} & \underline{0.669} & 0.419 & \underline{4.38} \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 \subsection{Optimization stability and mechanism}\label{sec:stability}
-% TODO: epoch별 (a) training loss, (b) gradient norm, (c) minority/majority gradient
-%       ratio, (d) class-weight distribution. Proposition 3-4의 실증 그림.
+Better macro-$F_1$ alone does not establish that the logarithmic family stabilizes
+optimization. We therefore verify the mechanism of
+Section~\ref{sec:method} directly, using the most severe image setting
+(CIFAR-100-LT at $\rho=100$, $100$ classes) as a representative case and treating
+optimization stability operationally through three quantities: the dynamic range of
+the class weights actually used in training, the minority-to-majority gradient
+ratio, and the smoothness and magnitude of the training-loss and gradient-norm
+curves.
+
+\paragraph{Weight distribution (Proposition~3).}
+On the mean-normalized weights $\widetilde{w}_c$ used in training, the empirical
+dynamic range matches the theory closely. The largest-to-smallest normalized weight
+ratio is $100$ for WCE and $97$ for CB (coefficient of variation $\approx 1.2$),
+$10$ for the inverse-square-root variant and $8.4$ for the inverse-power variant,
+but only $3.5$ for LWCE, $3.0$ for PLWCE, and $2.4$ for ES-LWCE (coefficient of
+variation $0.27$--$0.39$). The logarithmic family thus compresses the weight
+dynamic range by more than an order of magnitude relative to WCE, exactly as
+predicted by Proposition~3.
+
+\paragraph{Gradient dynamics.}
+Figure~\ref{fig:gradient-mechanism} tracks the per-epoch training loss, parameter
+gradient norm, and minority-to-majority gradient ratio $R_G$. The gradient ratio
+(panel~c) is where the mechanism is clearest: at the start of training WCE and CB
+amplify the minority-class gradient by a factor of about $21$ relative to the
+majority, whereas LWCE and PLWCE keep this factor near $2$--$3$ and plain CE near
+$1$. This early amplification is exactly the class-dependent gradient scaling of
+Proposition~4, and it coincides with a slower, noisier decrease of the training
+loss (panel~a) and a higher gradient norm (panel~b, roughly $0.36$ for WCE and CB
+versus $0.16$ for LWCE and PLWCE at the end of training) for the unbounded losses.
+Note that the amplification is a \emph{transient} of the early phase: strong
+re-weighting eventually overfits the few minority training samples, driving their
+gradients toward zero, so the WCE ratio falls below one late in training. It is the
+instability during the critical early epochs---not the converged state---that the
+logarithmic compression removes, and this is consistent with WCE and CB ranking at
+the bottom of Table~\ref{tab:main} despite their re-weighting intent.
+
+\begin{figure}[pos=h]
+\centering
+\includegraphics[width=\linewidth]{figures/gradient_mechanism.pdf}
+\caption{Optimization dynamics on CIFAR-100-LT ($\rho=100$), averaged over five
+seeds. (a)~Training loss, (b)~parameter gradient $\ell_2$-norm
+$\|\nabla_\theta\mathcal{L}\|_2$, and (c)~minority-to-majority per-sample
+logit-gradient ratio $R_G$ (log scale; the dotted line marks $R_G=1$). Unbounded
+inverse-frequency losses (WCE, CB) amplify the minority gradient by $\approx 21\times$
+early in training and converge more slowly and less smoothly, whereas the
+logarithmic losses (LWCE, PLWCE) keep the ratio near $2$--$3$ and train stably.}
+\label{fig:gradient-mechanism}
+\end{figure}
 
 \subsection{Ablation and sensitivity}\label{sec:ablation}
 We isolate the contribution of each ingredient of the logarithmic family---the
@@ -674,13 +862,23 @@ $w_c \propto (\log(1+n_c)+\varepsilon)^{-\alpha}$, and is included---following t
 same design as the other rows---to probe whether the two extensions are worth
 merging into a single loss.
 
-We do not propose the Combined variant as a method. Across all domains it yields no
-improvement over PLWCE alone: the selection procedure of
-Section~\ref{sec:plwce-selection} consistently drives $\varepsilon$ to the lower end
-of its grid, so the Combined weight collapses back onto PLWCE. This is a useful
-negative result rather than a failure---it shows that, on datasets with fixed and
-strictly positive class counts, the smoothing dimension is inactive for accuracy,
-exactly as anticipated in Section~\ref{sec:eslwce-use}: $\varepsilon$ is a
+The ablation shows that almost all of the benefit comes from the logarithmic
+compression itself. Averaged over all $26$ dataset-and-imbalance settings, replacing
+the inverse-frequency weight of WCE with the logarithmic weight of LWCE raises
+macro-$F_1$ from $0.586$ to $0.625$, whereas adding the power exponent (PLWCE,
+$0.623$), the smoothing constant (ES-LWCE, $0.624$), or both (Combined, $0.624$)
+leaves the aggregate essentially unchanged. The exponent $\alpha$ is not
+uniformly helpful: it improves the aggregate on the image and text data but not on
+the tabular datasets, so its effect is dataset-dependent rather than universal, and
+its value is precisely what the selection procedure of
+Section~\ref{sec:plwce-selection} is designed to recover per dataset.
+
+We do not propose the Combined variant as a method. It yields no improvement over
+PLWCE or ES-LWCE alone: the selection procedure consistently drives $\varepsilon$ to
+the lower end of its grid, so the Combined weight collapses back onto PLWCE. This is
+a useful negative result rather than a failure---it shows that, on datasets with
+fixed and strictly positive class counts, the smoothing dimension is inactive for
+accuracy, exactly as anticipated in Section~\ref{sec:eslwce-use}: $\varepsilon$ is a
 robustness control for vanishing or drifting counts, not an accuracy lever. It
 therefore supports treating PLWCE and ES-LWCE as separate tools rather than a single
 combined loss.
@@ -697,20 +895,65 @@ averaged over five seeds; full per-domain numbers in the supplementary material.
 \toprule
 Method & Log compression & Power $\alpha$ & Smoothing $\varepsilon$ & Macro-$F_1$ \\
 \midrule
-WCE                     & --         & --         & --         & \phantom{0.000} \\
-LWCE                    & \checkmark & --         & --         & \phantom{0.000} \\
-PLWCE                   & \checkmark & \checkmark & --         & \phantom{0.000} \\
-ES-LWCE                 & \checkmark & --         & \checkmark & \phantom{0.000} \\
-Combined                & \checkmark & \checkmark & \checkmark & \phantom{0.000} \\
+WCE                     & --         & --         & --         & 0.586 \\
+LWCE                    & \checkmark & --         & --         & \textbf{0.625} \\
+PLWCE                   & \checkmark & \checkmark & --         & 0.623 \\
+ES-LWCE                 & \checkmark & --         & \checkmark & 0.624 \\
+Combined                & \checkmark & \checkmark & \checkmark & 0.624 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-% TODO(results): 위 표의 Macro-F1 열은 4개 도메인(image 포함) 결과 집계 후 채운다.
-%   (분석 셀 analysis_summary.json의 ablation 항목에서 도메인 평균/랭크로.)
-%   추가로: (a) alpha, eps sweep vs Macro-F1 / Worst-class / gradient norm 그림
-%   (CIFAR-10 sweep + cross-domain sweep), (b) Friedman + post-hoc Holm, mean rank,
-%   win/tie/loss (데이터셋을 블록으로 — 전 도메인 결과 필요).
+\subsection{Statistical analysis}\label{sec:stats}
+To test whether the ranking of Section~\ref{sec:results} is statistically
+meaningful, we treat each of the $26$ dataset-and-imbalance settings as a block,
+average over seeds within each block, and compare the ten losses on macro-$F_1$ as
+the primary endpoint. A Friedman test rejects the null hypothesis that the losses
+are equivalent ($\chi^2 = 60.4$, $\mathrm{df}=9$, $p = 1.1\times10^{-9}$). For the
+post-hoc analysis we take the best-ranked loss, LWCE, as the control and compare it
+against each other loss with a Wilcoxon signed-rank test over the $26$ paired
+scores, applying a Holm correction for the nine comparisons;
+Table~\ref{tab:stats} reports the adjusted $p$-values together with the mean ranks
+and the win/tie/loss counts.
+
+LWCE significantly outperforms the four standard baselines---plain Cross-Entropy,
+WCE, Class-Balanced loss, and Focal loss---at the $5\%$ level after correction
+(winning, for example, $24$ of $26$ settings against Cross-Entropy and $20$ of $26$
+against WCE). In particular the method that our theory targets, WCE, is
+significantly beaten, in line with the mechanism of Section~\ref{sec:stability}. The
+remaining strong re-weighting variants (the inverse-power and inverse-square-root
+losses, PLWCE, ES-LWCE, and logit adjustment) form a statistical tie with LWCE, with
+adjusted $p$-values of $1.0$; we therefore do not claim that LWCE is uniformly the
+single best loss, only that the logarithmic family sits firmly in the top tier and
+significantly improves on the commonly used baselines while requiring no tuning.
+
+\begin{table}[pos=h]
+\centering
+\caption{Statistical comparison on macro-$F_1$ over $26$ dataset-and-imbalance
+settings. Mean rank is lower-is-better. The $p$-value is from a Wilcoxon
+signed-rank test of LWCE against each loss, Holm-corrected for nine comparisons;
+win/tie/loss counts are for LWCE versus that loss. Losses that LWCE beats
+significantly ($p<0.05$) are marked $^{\ast}$.}
+\label{tab:stats}
+\begin{tabular}{lccc}
+\toprule
+Method & Mean rank & $p$ (Holm, vs.\ LWCE) & Win/Tie/Loss \\
+\midrule
+\textbf{LWCE} (control) & \textbf{4.08} & --      & -- \\
+Inv.-power              & 4.19 & 1.000            & 12/0/14 \\
+Logit Adj.              & 4.31 & 1.000            & 11/0/15 \\
+ES-LWCE                 & 4.38 & 1.000            & 15/0/11 \\
+Inv.-sqrt               & 4.65 & 1.000            & 16/0/10 \\
+PLWCE                   & 4.73 & 1.000            & 17/0/9 \\
+Focal Loss              & 6.15 & $0.014^{\ast}$   & 19/0/7 \\
+CE                      & 6.69 & $<0.001^{\ast}$  & 24/0/2 \\
+CB Loss                 & 7.62 & $0.010^{\ast}$   & 20/0/6 \\
+WCE                     & 8.19 & $0.003^{\ast}$   & 20/0/6 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% TODO(results): alpha, eps sensitivity 그림 (CIFAR-10 sweep + cross-domain sweep) 만 남음.
 
 \section{Conclusion}\label{sec:conclusion}
 

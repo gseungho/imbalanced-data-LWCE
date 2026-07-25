@@ -32,7 +32,7 @@ w_lwce  = lambda x: 1.0 / np.log1p(x)               # LWCE:   1/log(1+n)
 w_plwce = lambda x, a: 1.0 / np.log1p(x) ** a       # PLWCE:  1/log(1+n)^α
 w_eslw  = lambda x, e: 1.0 / (np.log1p(x) + e)      # ES-LWCE:1/(log(1+n)+ε)
 
-fig, ax = plt.subplots(figsize=(6.6, 3.9))
+fig, ax = plt.subplots(figsize=(5.4, 3.2))
 
 # --- baselines (frequency-based, 비-proposed) ---
 ax.plot(n, ratio(w_wce),  color='#c0392b', lw=2.0, ls='-',

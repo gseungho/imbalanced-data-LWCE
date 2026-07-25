@@ -1,0 +1,303 @@
+{
+  "grad_summary": {
+    "IR10_ce": {
+      "grad_norm_final": 0.18436940607840926,
+      "grad_ratio_final": 2.880079109095841
+    },
+    "IR10_wce": {
+      "grad_norm_final": 0.2640634811635785,
+      "grad_ratio_final": 0.9884478669022178
+    },
+    "IR10_pwce": {
+      "grad_norm_final": 0.04338969912309177,
+      "grad_ratio_final": 2.235275908870257
+    },
+    "IR10_sqce": {
+      "grad_norm_final": 0.17288800057114,
+      "grad_ratio_final": 1.932992270720377
+    },
+    "IR10_lwce": {
+      "grad_norm_final": 0.3259098308085483,
+      "grad_ratio_final": 2.307356251639937
+    },
+    "IR10_plwce": {
+      "grad_norm_final": 0.039817823490461424,
+      "grad_ratio_final": 2.495782689771249
+    },
+    "IR10_eslwce": {
+      "grad_norm_final": 0.21690216665657647,
+      "grad_ratio_final": 2.3131088284388035
+    },
+    "IR10_combined": {
+      "grad_norm_final": 0.13773298561239028,
+      "grad_ratio_final": 2.261581508906353
+    },
+    "IR10_cb": {
+      "grad_norm_final": 1.075284337888532,
+      "grad_ratio_final": 2.3305832396489063
+    },
+    "IR10_focal": {
+      "grad_norm_final": 0.22668512869003815,
+      "grad_ratio_final": 2.304604931451756
+    },
+    "IR10_logitadj": {
+      "grad_norm_final": 0.14948712371661393,
+      "grad_ratio_final": 2.808797602238415
+    },
+    "IR50_ce": {
+      "grad_norm_final": 0.10753141462880726,
+      "grad_ratio_final": 4.91239352495809
+    },
+    "IR50_wce": {
+      "grad_norm_final": 0.32642820333326017,
+      "grad_ratio_final": 0.6913215218308999
+    },
+    "IR50_pwce": {
+      "grad_norm_final": 0.1547486869755011,
+      "grad_ratio_final": 3.5234024953591585
+    },
+    "IR50_sqce": {
+      "grad_norm_final": 0.162756119366367,
+      "grad_ratio_final": 2.5830681392517425
+    },
+    "IR50_lwce": {
+      "grad_norm_final": 0.18705895371685358,
+      "grad_ratio_final": 2.757591634611967
+    },
+    "IR50_plwce": {
+      "grad_norm_final": 0.20720330534537595,
+      "grad_ratio_final": 3.4942959247752854
+    },
+    "IR50_eslwce": {
+      "grad_norm_final": 0.14721686634617595,
+      "grad_ratio_final": 3.402045976009922
+    },
+    "IR50_combined": {
+      "grad_norm_final": 0.23139616469833935,
+      "grad_ratio_final": 3.7312680643456035
+    },
+    "IR50_cb": {
+      "grad_norm_final": 0.14864327707709588,
+      "grad_ratio_final": 0.8264680194164329
+    },
+    "IR50_focal": {
+      "grad_norm_final": 0.172074178369246,
+      "grad_ratio_final": 2.5809359189153165
+    },
+    "IR50_logitadj": {
+      "grad_norm_final": 0.21389313554356626,
+      "grad_ratio_final": 3.812084137442308
+    },
+    "IR100_ce": {
+      "grad_norm_final": 0.2284402957498141,
+      "grad_ratio_final": 4.613001333093081
+    },
+    "IR100_wce": {
+      "grad_norm_final": 0.3551154180595992,
+      "grad_ratio_final": 0.8320978834268912
+    },
+    "IR100_pwce": {
+      "grad_norm_final": 0.2020361839857962,
+      "grad_ratio_final": 1.7082697552511665
+    },
+    "IR100_sqce": {
+      "grad_norm_final": 0.21330651498260966,
+      "grad_ratio_final": 1.741966093302009
+    },
+    "IR100_lwce": {
+      "grad_norm_final": 0.1657798252775082,
+      "grad_ratio_final": 3.383426170820728
+    },
+    "IR100_plwce": {
+      "grad_norm_final": 0.15633486144562728,
+      "grad_ratio_final": 2.9580060944749955
+    },
+    "IR100_eslwce": {
+      "grad_norm_final": 0.16478709507017103,
+      "grad_ratio_final": 3.6029444285812184
+    },
+    "IR100_combined": {
+      "grad_norm_final": 0.12458308501324007,
+      "grad_ratio_final": 4.438698059024364
+    },
+    "IR100_cb": {
+      "grad_norm_final": 0.35909643754517856,
+      "grad_ratio_final": 0.6243048927055458
+    },
+    "IR100_focal": {
+      "grad_norm_final": 0.12189871754757516,
+      "grad_ratio_final": 4.35602272426138
+    },
+    "IR100_logitadj": {
+      "grad_norm_final": 0.13601360928979883,
+      "grad_ratio_final": 5.109232910841907
+    }
+  },
+  "ablation": [
+    {
+      "IR": 10,
+      "Method": "wce",
+      "LogCompression": "X",
+      "Power_alpha": "X",
+      "Smoothing_eps": "X",
+      "F1_Macro_mean": 0.353087791718769,
+      "F1_Macro_std": 0.016746393327645187,
+      "Worst_Acc": 0.01,
+      "G_Mean": 0.2797695128785228
+    },
+    {
+      "IR": 10,
+      "Method": "lwce",
+      "LogCompression": "O",
+      "Power_alpha": "X",
+      "Smoothing_eps": "X",
+      "F1_Macro_mean": 0.3698515350119288,
+      "F1_Macro_std": 0.010911743757611118,
+      "Worst_Acc": 0.026000000000000002,
+      "G_Mean": 0.3142495709479705
+    },
+    {
+      "IR": 10,
+      "Method": "plwce",
+      "LogCompression": "O",
+      "Power_alpha": "O",
+      "Smoothing_eps": "X",
+      "F1_Macro_mean": 0.36157768112568267,
+      "F1_Macro_std": 0.009130805272177715,
+      "Worst_Acc": 0.022,
+      "G_Mean": 0.3047554423359271
+    },
+    {
+      "IR": 10,
+      "Method": "eslwce",
+      "LogCompression": "O",
+      "Power_alpha": "X",
+      "Smoothing_eps": "O",
+      "F1_Macro_mean": 0.35737409186696495,
+      "F1_Macro_std": 0.014887330100248349,
+      "Worst_Acc": 0.02,
+      "G_Mean": 0.2906617980966006
+    },
+    {
+      "IR": 10,
+      "Method": "combined",
+      "LogCompression": "O",
+      "Power_alpha": "O",
+      "Smoothing_eps": "O",
+      "F1_Macro_mean": 0.3678529983372657,
+      "F1_Macro_std": 0.013582564731984017,
+      "Worst_Acc": 0.018,
+      "G_Mean": 0.3125775962991319
+    },
+    {
+      "IR": 50,
+      "Method": "wce",
+      "LogCompression": "X",
+      "Power_alpha": "X",
+      "Smoothing_eps": "X",
+      "F1_Macro_mean": 0.1973585941730637,
+      "F1_Macro_std": 0.008348740634516873,
+      "Worst_Acc": 0.0,
+      "G_Mean": 0.030502307025818253
+    },
+    {
+      "IR": 50,
+      "Method": "lwce",
+      "LogCompression": "O",
+      "Power_alpha": "X",
+      "Smoothing_eps": "X",
+      "F1_Macro_mean": 0.21937187290349502,
+      "F1_Macro_std": 0.008257372138658578,
+      "Worst_Acc": 0.0,
+      "G_Mean": 0.055436877201001475
+    },
+    {
+      "IR": 50,
+      "Method": "plwce",
+      "LogCompression": "O",
+      "Power_alpha": "O",
+      "Smoothing_eps": "X",
+      "F1_Macro_mean": 0.21207765929231243,
+      "F1_Macro_std": 0.007217157383502313,
+      "Worst_Acc": 0.0,
+      "G_Mean": 0.051817610516549206
+    },
+    {
+      "IR": 50,
+      "Method": "eslwce",
+      "LogCompression": "O",
+      "Power_alpha": "X",
+      "Smoothing_eps": "O",
+      "F1_Macro_mean": 0.22319202854162706,
+      "F1_Macro_std": 0.00884741262456864,
+      "Worst_Acc": 0.0,
+      "G_Mean": 0.07119159134385991
+    },
+    {
+      "IR": 50,
+      "Method": "combined",
+      "LogCompression": "O",
+      "Power_alpha": "O",
+      "Smoothing_eps": "O",
+      "F1_Macro_mean": 0.21444470261709508,
+      "F1_Macro_std": 0.009213151558903333,
+      "Worst_Acc": 0.0,
+      "G_Mean": 0.05623301377098368
+    },
+    {
+      "IR": 100,
+      "Method": "wce",
+      "LogCompression": "X",
+      "Power_alpha": "X",
+      "Smoothing_eps": "X",
+      "F1_Macro_mean": 0.1574311858828853,
+      "F1_Macro_std": 0.007547139422594212,
+      "Worst_Acc": 0.0,
+      "G_Mean": 0.00223138883723264
+    },
+    {
+      "IR": 100,
+      "Method": "lwce",
+      "LogCompression": "O",
+      "Power_alpha": "X",
+      "Smoothing_eps": "X",
+      "F1_Macro_mean": 0.18019238302600565,
+      "F1_Macro_std": 0.00726403569158207,
+      "Worst_Acc": 0.0,
+      "G_Mean": 0.009934347163750658
+    },
+    {
+      "IR": 100,
+      "Method": "plwce",
+      "LogCompression": "O",
+      "Power_alpha": "O",
+      "Smoothing_eps": "X",
+      "F1_Macro_mean": 0.18053701189684473,
+      "F1_Macro_std": 0.007216585445931421,
+      "Worst_Acc": 0.0,
+      "G_Mean": 0.014774199842460884
+    },
+    {
+      "IR": 100,
+      "Method": "eslwce",
+      "LogCompression": "O",
+      "Power_alpha": "X",
+      "Smoothing_eps": "O",
+      "F1_Macro_mean": 0.1831099980980068,
+      "F1_Macro_std": 0.008468346944382569,
+      "Worst_Acc": 0.0,
+      "G_Mean": 0.014673671100170019
+    },
+    {
+      "IR": 100,
+      "Method": "combined",
+      "LogCompression": "O",
+      "Power_alpha": "O",
+      "Smoothing_eps": "O",
+      "F1_Macro_mean": 0.176445338464511,
+      "F1_Macro_std": 0.006480694584996643,
+      "Worst_Acc": 0.0,
+      "G_Mean": 0.017890076007023064
+    }
+  ]
+}

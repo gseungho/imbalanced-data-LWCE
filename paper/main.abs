@@ -1,13 +1,13 @@
 Class imbalance is a pervasive obstacle in machine learning, arising whenever a
 few majority categories dominate the training data while critically important
-minority categories remain severely underrepresented. Among algorithm-level
+minority categories remain severely underrepresented. Among loss-level
 remedies, Weighted Cross-Entropy (WCE) is the most direct: it scales the loss of
-each class by the inverse of its frequency. However, these inverse-frequency
-weights grow without bound as the imbalance becomes more severe, producing
-unstable optimization. More elaborate alternatives such as Class-Balanced (CB)
-Loss and Focal Loss introduce additional hyperparameters and, in our experiments,
-behave inconsistently across datasets---occasionally falling below ordinary
-Cross-Entropy (CE). We propose Log-Weighted Cross-Entropy (LWCE), which
+each class by the inverse of its frequency. However, as the imbalance becomes more severe, these
+inverse-frequency weights induce an increasingly large rare-to-frequent weight
+ratio, so that minority samples can dominate the class-dependent component of the
+gradient scale and destabilize optimization. More elaborate alternatives such as
+Class-Balanced (CB) Loss and Focal Loss introduce additional hyperparameters and
+can be sensitive to their selection and to dataset characteristics. We propose Log-Weighted Cross-Entropy (LWCE), which
 replaces the inverse-frequency weight with a logarithmically compressed
 counterpart that keeps a meaningful boost for rare classes while bounding weight
 growth, and which introduces no additional hyperparameters. We further generalize
